@@ -1,0 +1,37 @@
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\Tree.exe.config
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\Tree.exe
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\Tree.pdb
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\OpenTK.dll
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\OpenTK.GLControl.dll
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\OpenTK.xml
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\bin\Debug\OpenTK.GLControl.xml
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.csprojResolveAssemblyReference.cache
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.Form1.resources
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.Properties.Resources.resources
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.csproj.GenerateResource.Cache
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.exe
+C:\Users\Administrator\Documents\CompGraph\Tree\Tree\obj\Debug\Tree.pdb
+D:\Projects\Tree\Tree\bin\Debug\Tree.exe.config
+D:\Projects\Tree\Tree\bin\Debug\Tree.exe
+D:\Projects\Tree\Tree\bin\Debug\Tree.pdb
+D:\Projects\Tree\Tree\bin\Debug\OpenTK.xml
+D:\Projects\Tree\Tree\bin\Debug\OpenTK.GLControl.xml
+D:\Projects\Tree\Tree\obj\Debug\Tree.Form1.resources
+D:\Projects\Tree\Tree\obj\Debug\Tree.Properties.Resources.resources
+D:\Projects\Tree\Tree\obj\Debug\Tree.csproj.GenerateResource.cache
+D:\Projects\Tree\Tree\obj\Debug\Tree.exe
+D:\Projects\Tree\Tree\obj\Debug\Tree.pdb
+D:\Projects\Tree\Tree\obj\Debug\Tree.csprojResolveAssemblyReference.cache
+E:\Downloads\Практика 8\Tree\bin\Debug\Tree.exe.config
+E:\Downloads\Практика 8\Tree\bin\Debug\Tree.exe
+E:\Downloads\Практика 8\Tree\bin\Debug\Tree.pdb
+E:\Downloads\Практика 8\Tree\bin\Debug\OpenTK.xml
+E:\Downloads\Практика 8\Tree\bin\Debug\OpenTK.GLControl.xml
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.csprojAssemblyReference.cache
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.Form1.resources
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.Properties.Resources.resources
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.csproj.GenerateResource.cache
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.csproj.CoreCompileInputs.cache
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.csproj.CopyComplete
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.exe
+E:\Downloads\Практика 8\Tree\obj\Debug\Tree.pdb

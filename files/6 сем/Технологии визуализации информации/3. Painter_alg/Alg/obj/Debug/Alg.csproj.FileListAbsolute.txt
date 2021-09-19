@@ -1,0 +1,10 @@
+E:\Downloads\Практика 3\Alg\bin\Debug\WindowsFormsApplication2.exe.config
+E:\Downloads\Практика 3\Alg\bin\Debug\WindowsFormsApplication2.exe
+E:\Downloads\Практика 3\Alg\bin\Debug\WindowsFormsApplication2.pdb
+E:\Downloads\Практика 3\Alg\obj\Debug\Alg.csprojAssemblyReference.cache
+E:\Downloads\Практика 3\Alg\obj\Debug\WindowsFormsApplication2.Form1.resources
+E:\Downloads\Практика 3\Alg\obj\Debug\WindowsFormsApplication2.Properties.Resources.resources
+E:\Downloads\Практика 3\Alg\obj\Debug\Alg.csproj.GenerateResource.cache
+E:\Downloads\Практика 3\Alg\obj\Debug\Alg.csproj.CoreCompileInputs.cache
+E:\Downloads\Практика 3\Alg\obj\Debug\WindowsFormsApplication2.exe
+E:\Downloads\Практика 3\Alg\obj\Debug\WindowsFormsApplication2.pdb

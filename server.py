@@ -78,14 +78,11 @@ async def homepage():
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 
-@app.get("/files/")
-async def root_dir():
-    return handler("", "")
-
-
 @app.get("/{path}")
 async def other_page(path: str):
-    with open("index.html", "r") as home_page:
+    if path == "files":
+        return handler("", "")
+    with open("404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 

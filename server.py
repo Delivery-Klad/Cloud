@@ -133,26 +133,29 @@ async def tenth_level_dir(path: str, path_1: str, path_2: str, path_3: str, path
     return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}/{path_7}/{path_8}", path_8)
 
 
-"""@app.get("/auth/")
+@app.get("/auth/")
 async def authorization(key: str, Authorize: AuthJWT = Depends()):
     if key == root_key:
         return Authorize.create_access_token(subject=key)
-    return HTMLResponse(status_code=404)"""
+    return HTMLResponse(status_code=404)
 
 
 @app.post("/upload/")
-async def upload_file(password: Optional[str] = None, path: Optional[str] = Query(None), data: UploadFile = File(...)):
-    if password == root_key:
-        return HTMLResponse(status_code=403)
-    with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
-        uploaded_file.write(await data.read())
-    from git import Repo
-    repo = Repo("temp/.git")
-    repo.git.add(update=True)
-    repo.index.commit("test")
-    origin = repo.remote(name='origin')
-    origin.push()
-    return True
+async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
+                      Authorize: AuthJWT = Depends(), auth: HTTPAuthorizationCredentials = Security(security)):
+    Authorize.jwt_required()
+    try:
+        with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
+            uploaded_file.write(await data.read())
+        from git import Repo
+        repo = Repo("temp/.git")
+        repo.git.add(update=True)
+        repo.index.commit("test")
+        origin = repo.remote(name='origin')
+        origin.push()
+        return True
+    except Exception as er:
+        print(er)
 
 
 @app.on_event("startup")

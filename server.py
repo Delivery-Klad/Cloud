@@ -11,6 +11,7 @@ from typing import Optional
 
 app = FastAPI()
 security = HTTPBearer()
+clients = []
 root_key = "root"
 secret = "secret"
 token = "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"
@@ -50,10 +51,18 @@ def listdir(directory: str):
 
 
 def builder(index_of: str, files: str):
-    html_content = f"""<html><head><title>{"Cloud"}</title>{style}</head><body><main>
-                        <header><h1><i>Index of /{index_of}/</i></h1></header>
+    html_content = f"""<html>
+                        <head>
+                            <title>{"Cloud"}</title>{style}
+                        </head>
+                        <body><main>
+                            <header><h1><i>Index of /{index_of}/</i></h1>
+                            <h1><i><a href="auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
+                            height="25" alt="Пример"></a></i></h1>
+                            <h1><i><a href="upload"><img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
+                            height="25" alt="Пример"></a></i></h1></header>
                         <ul id="files">{files}</ul>
-                    </main></body></html>"""
+                        </main></body></html>"""
     return HTMLResponse(content=html_content, status_code=200)
 
 
@@ -82,80 +91,46 @@ async def homepage():
 async def other_page(path: str):
     if path == "files":
         return handler("", "")
+    elif path == "auth":
+        return True
+    elif path == "upload":
+        return True
     with open("temp/cloud/404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 
-@app.get("/files/{path}")
-async def second_level_dir(path: str):
-    return handler(f"/{path}", path)
-
-
-@app.get("/files/{path}/{path_1}")
-async def third_level_dir(path: str, path_1: str):
-    return handler(f"/{path}/{path_1}", path_1)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}")
-async def fourth_level_dir(path: str, path_1: str, path_2: str):
-    return handler(f"/{path}/{path_1}/{path_2}", path_2)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}")
-async def fifth_level_dir(path: str, path_1: str, path_2: str, path_3: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}", path_3)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}/{path_4}")
-async def sixth_level_dir(path: str, path_1: str, path_2: str, path_3: str, path_4: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}", path_4)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}")
-async def seventh_level_dir(path: str, path_1: str, path_2: str, path_3: str, path_4: str, path_5: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}", path_5)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}")
-async def eighth_level_dir(path: str, path_1: str, path_2: str, path_3: str, path_4: str, path_5: str, path_6: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}", path_6)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}/{path_7}")
-async def ninth_level_dir(path: str, path_1: str, path_2: str, path_3: str, path_4: str, path_5: str, path_6: str,
-                          path_7: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}/{path_7}", path_7)
-
-
-@app.get("/files/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}/{path_7}/{path_8}")
-async def tenth_level_dir(path: str, path_1: str, path_2: str, path_3: str, path_4: str, path_5: str, path_6: str,
-                          path_7: str, path_8: str):
-    return handler(f"/{path}/{path_1}/{path_2}/{path_3}/{path_4}/{path_5}/{path_6}/{path_7}/{path_8}", path_8)
-
-
-@app.get("/auth/")
-async def authorization(key: str, Authorize: AuthJWT = Depends()):
+@app.post("/auth/")
+async def authorization(key: str, request: Request):
     if key == root_key:
-        return Authorize.create_access_token(subject=key)
-    return HTMLResponse(status_code=404)
+        clients.append(request.client.host)
+        return True
+    return HTMLResponse(status_code=403)
 
 
 @app.post("/upload/")
-async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
-                      Authorize: AuthJWT = Depends(), auth: HTTPAuthorizationCredentials = Security(security)):
-    Authorize.jwt_required()
+async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...)):
     try:
+        if request.client.host not in clients:
+            return HTMLResponse(status_code=403)
+        path = "files"
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        from git import Repo
+        """from git import Repo
         repo = Repo("temp/.git")
         repo.git.add(f"{path}/{data.filename}")
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
-        origin.push()
+        origin.push()"""
         return True
     except Exception as er:
         print(er)
+
+
+@app.get("/files/{catchall:path}")
+def read_index(request: Request):
+    path = request.path_params["catchall"]
+    name = path.split("/")
+    return handler(f"/{path}", name[len(name) - 1])
 
 
 @app.on_event("startup")

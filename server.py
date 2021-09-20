@@ -1,10 +1,10 @@
 import os
 
-from fastapi import FastAPI, File, UploadFile, Depends, Request, Security, Query
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, File, UploadFile, Request, Query
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from starlette.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -15,6 +15,7 @@ clients = []
 root_key = "root"
 secret = "secret"
 token = "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"
+url = "http://localhost:8000/"
 with open("scripts/style.css", "r") as file:
     style = file.read()
 
@@ -57,9 +58,9 @@ def builder(index_of: str, files: str):
                         </head>
                         <body><main>
                             <header><h1><i>Index of /{index_of}/</i></h1>
-                            <h1><i><a href="auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
+                            <h1><i><a href="{url}auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
                             height="25" alt="Пример"></a></i></h1>
-                            <h1><i><a href="upload"><img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
+                            <h1><i><a href="{url}upload"><img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
                             height="25" alt="Пример"></a></i></h1></header>
                         <ul id="files">{files}</ul>
                         </main></body></html>"""
@@ -88,23 +89,26 @@ async def homepage():
 
 
 @app.get("/{path}")
-async def other_page(path: str):
+async def other_page(path: str, request: Request, arg: Optional[str] = None):
     if path == "files":
         return handler("", "")
     elif path == "auth":
-        return True
+        if arg is None:
+            with open("temp/cloud/auth.html", "r") as home_page:
+                with open("temp/cloud/main.css", "r") as local_style:
+                    return HTMLResponse(content=home_page.read().format(local_style.read()), status_code=200)
+        else:
+            if arg == root_key:
+                clients.append(request.client.host)
+                return RedirectResponse("files")
+            return HTMLResponse(status_code=403)
     elif path == "upload":
-        return True
+        if request.client.host not in clients:
+            return HTMLResponse(status_code=403)
+        else:
+            return True
     with open("temp/cloud/404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
-
-
-@app.post("/auth/")
-async def authorization(key: str, request: Request):
-    if key == root_key:
-        clients.append(request.client.host)
-        return True
-    return HTMLResponse(status_code=403)
 
 
 @app.post("/upload/")

@@ -1,12 +1,9 @@
 import os
 
 from fastapi import FastAPI, File, UploadFile, Request, Query
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBearer
 from starlette.responses import FileResponse
-from pydantic import BaseModel
 from typing import Optional
 
 app = FastAPI()
@@ -18,23 +15,6 @@ token = "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"
 url = "https://c1oud.herokuapp.com/"
 with open("scripts/style.css", "r") as file:
     style = file.read()
-
-
-class JWTSettings(BaseModel):
-    authjwt_secret_key: str = secret
-
-
-@AuthJWT.load_config
-def get_config():
-    return JWTSettings()
-
-
-@app.exception_handler(AuthJWTException)
-def authjwt_exception_handler(request: Request, exc: AuthJWTException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.message}
-    )
 
 
 def listdir(directory: str):
@@ -52,6 +32,7 @@ def listdir(directory: str):
 
 
 def builder(index_of: str, files: str):
+    upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     html_content = f"""<html>
                         <head>
                             <title>{"Cloud"}</title>{style}
@@ -60,7 +41,8 @@ def builder(index_of: str, files: str):
                             <header><h1><i>Index of /{index_of}/</i></h1>
                             <h1><i><a href="{url}auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
                             height="25" alt="Пример"></a></i></h1>
-                            <h1><i><a href="{url}upload"><img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
+                            <h1><i><a href="{url}upload?arg=files{upload_path}">
+                            <img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
                             height="25" alt="Пример"></a></i></h1></header>
                         <ul id="files">{files}</ul>
                         </main></body></html>"""
@@ -90,8 +72,9 @@ def show_auth_page():
 
 @app.get("/")
 async def homepage():
-    with open("index.html", "r") as home_page:
-        return HTMLResponse(content=home_page.read(), status_code=200)
+    """with open("index.html", "r") as home_page:
+            return HTMLResponse(content=home_page.read(), status_code=200)"""
+    return RedirectResponse(url + "files")
 
 
 @app.get("/{path}")
@@ -110,7 +93,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
         if request.client.host not in clients:
             return show_auth_page()
         else:
-            return True
+            with open("upload.html", "r") as upload_page:
+                return HTMLResponse(content=upload_page.read().format(arg), status_code=200)
     with open("404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
@@ -120,7 +104,6 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
     try:
         if request.client.host not in clients:
             return HTMLResponse(status_code=403)
-        path = "files"
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
         from git import Repo
@@ -129,7 +112,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
-        return True
+        return RedirectResponse(f"{url}{path}", status_code=302)
     except Exception as er:
         print(er)
 

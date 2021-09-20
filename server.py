@@ -123,12 +123,12 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         path = "files"
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        """from git import Repo
+        from git import Repo
         repo = Repo("temp/.git")
         repo.git.add(f"{path}/{data.filename}")
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
-        origin.push()"""
+        origin.push()
         return True
     except Exception as er:
         print(er)

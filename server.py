@@ -14,7 +14,7 @@ security = HTTPBearer()
 root_key = "root"
 secret = "secret"
 token = "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"
-with open("Style/style.css", "r") as file:
+with open("scripts/style.css", "r") as file:
     style = file.read()
 
 
@@ -39,7 +39,7 @@ def listdir(directory: str):
     local_files = ""
     f"""<li><a href="/docs#/default/upload_file_upload__post" title="Add file" class="file"> + Add file</a></li>"""
     try:
-        for i in os.listdir(f'files{directory}'):
+        for i in os.listdir(f'temp/files{directory}'):
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
@@ -61,20 +61,20 @@ def handler(path: str, filename: str):
     try:
         files = listdir(path)
         if type(files) != str:
-            with open("404.html", "r") as html:
+            with open("temp/cloud/404.html", "r") as html:
                 return HTMLResponse(content=html.read(), status_code=404)
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:
         if filename.split(".")[1] == "html":
-            with open(f"files{path}", "r") as html:
+            with open(f"temp/files{path}", "r") as html:
                 return HTMLResponse(content=html.read(), status_code=200)
-        return FileResponse(path=f"files{path}", filename=filename, media_type='application/octet-stream')
+        return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
 @app.get("/")
 async def homepage():
-    with open("index.html", "r") as home_page:
+    with open("temp/cloud/index.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 
@@ -82,7 +82,7 @@ async def homepage():
 async def other_page(path: str):
     if path == "files":
         return handler("", "")
-    with open("404.html", "r") as home_page:
+    with open("temp/cloud/404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 
@@ -149,8 +149,8 @@ async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File
             uploaded_file.write(await data.read())
         from git import Repo
         repo = Repo("temp/.git")
-        repo.git.add(update=True)
-        repo.index.commit("test")
+        repo.git.add(f"{path}/{data.filename}")
+        repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
         return True
@@ -163,6 +163,6 @@ async def create_files():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo
-        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/Cloud", "temp")
+        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files_folder", "temp")
     except FileExistsError:
         pass

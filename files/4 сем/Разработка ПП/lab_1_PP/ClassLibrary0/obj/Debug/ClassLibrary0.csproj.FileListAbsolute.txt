@@ -1,4 +1,0 @@
-E:\lab1\WindowsFormsApplication1\ClassLibrary0\bin\Debug\ClassLibrary0.dll
-E:\lab1\WindowsFormsApplication1\ClassLibrary0\bin\Debug\ClassLibrary0.pdb
-E:\lab1\WindowsFormsApplication1\ClassLibrary0\obj\Debug\ClassLibrary0.dll
-E:\lab1\WindowsFormsApplication1\ClassLibrary0\obj\Debug\ClassLibrary0.pdb

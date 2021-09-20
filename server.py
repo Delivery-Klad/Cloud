@@ -15,7 +15,7 @@ clients = []
 root_key = "root"
 secret = "secret"
 token = "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"
-url = "https://c1oud.herokuapp.com/"
+url = "http://localhost:8000/"
 with open("scripts/style.css", "r") as file:
     style = file.read()
 
@@ -71,7 +71,7 @@ def handler(path: str, filename: str):
     try:
         files = listdir(path)
         if type(files) != str:
-            with open("temp/cloud/404.html", "r") as html:
+            with open("404.html", "r") as html:
                 return HTMLResponse(content=html.read(), status_code=404)
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
@@ -82,9 +82,15 @@ def handler(path: str, filename: str):
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
+def show_auth_page():
+    with open("auth.html", "r") as home_page:
+        with open("scripts/main.css", "r") as local_style:
+            return HTMLResponse(content=home_page.read().format(local_style.read()), status_code=200)
+
+
 @app.get("/")
 async def homepage():
-    with open("temp/cloud/index.html", "r") as home_page:
+    with open("index.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 
@@ -94,9 +100,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
         return handler("", "")
     elif path == "auth":
         if arg is None:
-            with open("temp/cloud/auth.html", "r") as home_page:
-                with open("temp/cloud/main.css", "r") as local_style:
-                    return HTMLResponse(content=home_page.read().format(local_style.read()), status_code=200)
+            return show_auth_page()
         else:
             if arg == root_key:
                 clients.append(request.client.host)
@@ -104,10 +108,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
             return HTMLResponse(status_code=403)
     elif path == "upload":
         if request.client.host not in clients:
-            return HTMLResponse(status_code=403)
+            return show_auth_page()
         else:
             return True
-    with open("temp/cloud/404.html", "r") as home_page:
+    with open("404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
 
 

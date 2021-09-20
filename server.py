@@ -15,7 +15,7 @@ clients = []
 root_key = "root"
 secret = "secret"
 token = "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"
-url = "http://localhost:8000/"
+url = "https://c1oud.herokuapp.com/"
 with open("scripts/style.css", "r") as file:
     style = file.read()
 

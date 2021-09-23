@@ -35,6 +35,7 @@ def builder(index_of: str, files: str):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     html_content = f"""<html>
                         <head>
+                            <meta name="viewport" content="width=device-width,initial-scale=1">
                             <title>{"Cloud"}</title>{style}
                         </head>
                         <body><main>

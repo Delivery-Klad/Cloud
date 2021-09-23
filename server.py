@@ -119,14 +119,14 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 
 
 @app.get("/files/{catchall:path}")
-def read_index(request: Request):
+async def read_index(request: Request):
     path = request.path_params["catchall"]
     name = path.split("/")
     return handler(f"/{path}", name[len(name) - 1])
 
 
 @app.on_event("startup")
-async def create_files():
+def create_files():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo

@@ -66,8 +66,13 @@ def handler(path: str, filename: str):
 
 
 def show_auth_page():
-    with open("auth.html", "r") as home_page:
-        return HTMLResponse(content=home_page.read(), status_code=200)
+    with open("templates/auth.html", "r") as page:
+        return HTMLResponse(content=page.read(), status_code=200)
+
+
+def show_forbidden_page():
+    with open("templates/403.html", "r") as page:
+        return HTMLResponse(content=page.read(), status_code=403)
 
 
 @app.get("/")
@@ -88,12 +93,12 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
             if arg == root_key:
                 clients.append(request.client.host)
                 return RedirectResponse("files")
-            return HTMLResponse(status_code=403)
+            return show_forbidden_page()
     elif path == "upload":
         if request.client.host not in clients:
             return show_auth_page()
         else:
-            with open("upload.html", "r") as upload_page:
+            with open("templates/upload.html", "r") as upload_page:
                 return HTMLResponse(content=upload_page.read().format(arg), status_code=200)
     with open("404.html", "r") as home_page:
         return HTMLResponse(content=home_page.read(), status_code=200)
@@ -103,7 +108,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
 async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...)):
     try:
         if request.client.host not in clients:
-            return HTMLResponse(status_code=403)
+            return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
         from git import Repo

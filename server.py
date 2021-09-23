@@ -66,8 +66,7 @@ def handler(path: str, filename: str):
 
 def show_auth_page():
     with open("auth.html", "r") as home_page:
-        with open("scripts/main.css", "r") as local_style:
-            return HTMLResponse(content=home_page.read().format(local_style.read()), status_code=200)
+        return HTMLResponse(content=home_page.read(), status_code=200)
 
 
 @app.get("/")

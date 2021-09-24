@@ -10,7 +10,6 @@ app = FastAPI()
 security = HTTPBearer()
 clients = []
 root_key = "root"
-secret = "secret"
 token = "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"
 url = "https://c1oud.herokuapp.com/"
 with open("scripts/style.css", "r") as file:
@@ -19,9 +18,9 @@ with open("scripts/style.css", "r") as file:
 
 def listdir(directory: str):
     local_files = ""
-    f"""<li><a href="/docs#/default/upload_file_upload__post" title="Add file" class="file"> + Add file</a></li>"""
     try:
-        for i in os.listdir(f'temp/files{directory}'):
+        files = sorted(os.listdir(f'temp/files{directory}'))
+        for i in files:
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
@@ -39,7 +38,7 @@ def builder(index_of: str, files: str):
                             <title>{"Cloud"}</title>{style}
                         </head>
                         <body><main>
-                            <header><h1><i>Index of /{index_of}/</i></h1>
+                            <header><h1><i>Index of /{index_of}</i></h1>
                             <h1><i><a href="{url}auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
                             height="25" alt="Пример"></a></i></h1>
                             <h1><i><a href="{url}upload?arg=files{upload_path}">
@@ -54,14 +53,14 @@ def handler(path: str, filename: str):
     try:
         files = listdir(path)
         if type(files) != str:
-            with open("404.html", "r") as html:
-                return HTMLResponse(content=html.read(), status_code=404)
+            with open("404.html", "r") as page:
+                return HTMLResponse(content=page.read(), status_code=404)
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:
         if filename.split(".")[1] == "html":
-            with open(f"temp/files{path}", "r") as html:
-                return HTMLResponse(content=html.read(), status_code=200)
+            with open(f"temp/files{path}", "r") as page:
+                return HTMLResponse(content=page.read(), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
@@ -77,8 +76,6 @@ def show_forbidden_page():
 
 @app.get("/")
 async def homepage():
-    """with open("index.html", "r") as home_page:
-            return HTMLResponse(content=home_page.read(), status_code=200)"""
     return RedirectResponse(url + "files")
 
 
@@ -98,10 +95,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
         if request.client.host not in clients:
             return show_auth_page()
         else:
-            with open("templates/upload.html", "r") as upload_page:
-                return HTMLResponse(content=upload_page.read().format(arg), status_code=200)
-    with open("404.html", "r") as home_page:
-        return HTMLResponse(content=home_page.read(), status_code=200)
+            with open("templates/upload.html", "r") as page:
+                return HTMLResponse(content=page.read().format(arg), status_code=200)
+    with open("404.html", "r") as page:
+        return HTMLResponse(content=page.read(), status_code=404)
 
 
 @app.post("/upload/")

@@ -16,11 +16,16 @@ with open("scripts/style.css", "r") as file:
     style = file.read()
 
 
-def listdir(directory: str):
+def listdir(directory: str, req: Request):
     local_files = ""
     try:
         files = sorted(os.listdir(f'temp/files{directory}'))
+        if "hidden" in files:
+            if req.client.host not in clients:
+                return "<li>Access denied</li>"
         for i in files:
+            if i == "hidden":
+                continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 

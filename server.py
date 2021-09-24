@@ -16,12 +16,12 @@ with open("scripts/style.css", "r") as file:
     style = file.read()
 
 
-def listdir(directory: str, req: Request):
+def listdir(directory: str, request: Request):
     local_files = ""
     try:
         files = sorted(os.listdir(f'temp/files{directory}'))
         if "hidden" in files:
-            if req.client.host not in clients:
+            if request.client.host not in clients:
                 return "<li>Access denied</li>"
         for i in files:
             if i == "hidden":
@@ -54,9 +54,9 @@ def builder(index_of: str, files: str):
     return HTMLResponse(content=html_content, status_code=200)
 
 
-def handler(path: str, filename: str):
+def handler(path: str, filename: str, request: Request):
     try:
-        files = listdir(path)
+        files = listdir(path, request)
         if type(files) != str:
             with open("404.html", "r") as page:
                 return HTMLResponse(content=page.read(), status_code=404)
@@ -87,7 +87,7 @@ async def homepage():
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None):
     if path == "files":
-        return handler("", "")
+        return handler("", "", request)
     elif path == "auth":
         if arg is None:
             return show_auth_page()
@@ -128,7 +128,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 async def read_index(request: Request):
     path = request.path_params["catchall"]
     name = path.split("/")
-    return handler(f"/{path}", name[len(name) - 1])
+    return handler(f"/{path}", name[len(name) - 1], request)
 
 
 @app.on_event("startup")

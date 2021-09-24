@@ -20,6 +20,8 @@ def listdir(directory: str, request: Request):
     local_files = ""
     try:
         files = sorted(os.listdir(f'temp/files{directory}'))
+        print("hidden" in files)
+        print(request.client.host in clients)
         if "hidden" in files:
             if request.client.host not in clients:
                 return "<li>Access denied</li>"

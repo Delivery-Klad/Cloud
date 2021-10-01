@@ -47,10 +47,10 @@ def builder(index_of: str, files: str):
                         </head>
                         <body><main>
                             <header><h1><i>Index of /{index_of}</i></h1>
-                            <h1><i><a href="{url}auth"><img src="https://i.ibb.co/tpQDd1P/pngegg.png" width="30" 
+                            <h1><i><a href="{url}auth"><img src="https://svgshare.com/i/ajG.svg" width="30" 
                             height="25" alt="Пример"></a></i></h1>
                             <h1><i><a href="{url}upload?arg=files{upload_path}">
-                            <img src="https://i.ibb.co/Sm35j4B/upload.png" width="30" 
+                            <img src="https://svgshare.com/i/amV.svg" width="30" 
                             height="25" alt="Пример"></a></i></h1></header>
                         <ul id="files">{files}</ul>
                         </main></body></html>"""
@@ -61,7 +61,7 @@ def handler(path: str, filename: str, request: Request):
     try:
         files = listdir(path, request)
         if type(files) != str:
-            time.sleep(5)
+            time.sleep(7)
             files = listdir(path, request)
             if type(files) != str:
                 with open("404.html", "r") as page:

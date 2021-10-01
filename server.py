@@ -1,4 +1,5 @@
 import os
+import time
 
 from fastapi import FastAPI, File, UploadFile, Request, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -60,8 +61,11 @@ def handler(path: str, filename: str, request: Request):
     try:
         files = listdir(path, request)
         if type(files) != str:
-            with open("404.html", "r") as page:
-                return HTMLResponse(content=page.read(), status_code=404)
+            time.sleep(5)
+            files = listdir(path, request)
+            if type(files) != str:
+                with open("404.html", "r") as page:
+                    return HTMLResponse(content=page.read(), status_code=404)
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:

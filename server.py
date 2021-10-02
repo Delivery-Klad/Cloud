@@ -1,5 +1,4 @@
 import os
-import time
 
 from fastapi import FastAPI, File, UploadFile, Request, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -13,7 +12,7 @@ clients = []
 root_key = "root"
 token = "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"
 url = "https://c1oud.herokuapp.com/"
-with open("scripts/style.css", "r") as file:
+with open("source/style.css", "r") as file:
     style = file.read()
 
 
@@ -131,10 +130,18 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 
 
 @app.get("/files/{catchall:path}")
-async def read_index(request: Request):
+async def get_files(request: Request):
     path = request.path_params["catchall"]
     name = path.split("/")
     return handler(f"/{path}", name[len(name) - 1], request)
+
+
+@app.get("/source/{name}")
+async def get_source(name: str, request: Request):
+    try:
+        return FileResponse(f"source/{name}")
+    except FileNotFoundError:
+        show_not_found_page()
 
 
 @app.on_event("startup")

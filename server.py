@@ -61,11 +61,7 @@ def handler(path: str, filename: str, request: Request):
     try:
         files = listdir(path, request)
         if type(files) != str:
-            time.sleep(7)
-            files = listdir(path, request)
-            if type(files) != str:
-                with open("404.html", "r") as page:
-                    return HTMLResponse(content=page.read(), status_code=404)
+            return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:
@@ -83,6 +79,11 @@ def show_auth_page():
 def show_forbidden_page():
     with open("templates/403.html", "r") as page:
         return HTMLResponse(content=page.read(), status_code=403)
+
+
+def show_not_found_page():
+    with open("404.html", "r") as page:
+        return HTMLResponse(content=page.read(), status_code=404)
 
 
 @app.get("/")
@@ -108,8 +109,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
         else:
             with open("templates/upload.html", "r") as page:
                 return HTMLResponse(content=page.read().format(arg), status_code=200)
-    with open("404.html", "r") as page:
-        return HTMLResponse(content=page.read(), status_code=404)
+    return show_not_found_page()
 
 
 @app.post("/upload/")

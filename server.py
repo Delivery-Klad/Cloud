@@ -1,4 +1,5 @@
 import os
+import time
 
 from fastapi import FastAPI, File, UploadFile, Request, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -9,6 +10,7 @@ from typing import Optional
 app = FastAPI()
 security = HTTPBearer()
 clients = []
+max_retries = 10
 root_key = "root"
 token = "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"
 url = "https://c1oud.herokuapp.com/"
@@ -60,7 +62,13 @@ def handler(path: str, filename: str, request: Request):
     try:
         files = listdir(path, request)
         if type(files) != str:
-            return show_not_found_page()
+            if path == "":
+                time.sleep(4)
+                files = listdir(path, request)
+                if type(files) != str:
+                    return show_not_found_page()
+            else:
+                return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:
@@ -81,7 +89,7 @@ def show_forbidden_page():
 
 
 def show_not_found_page():
-    with open("404.html", "r") as page:
+    with open("templates/404.html", "r") as page:
         return HTMLResponse(content=page.read(), status_code=404)
 
 
@@ -145,7 +153,7 @@ async def get_source(name: str, request: Request):
 
 
 @app.on_event("startup")
-def create_files():
+async def clone_remote_repo():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo

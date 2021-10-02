@@ -46,11 +46,11 @@ def builder(index_of: str, files: str):
                         </head>
                         <body><main>
                             <header><h1><i>Index of /{index_of}</i></h1>
-                            <h1><i><a href="{url}auth"><img src="https://svgshare.com/i/ajG.svg" width="30" 
-                            height="25" alt="Пример"></a></i></h1>
+                            <h1><i><a href="{url}auth"><img src="{url + "source/lock.svg"}" width="30" 
+                            height="25" alt="auth"></a></i></h1>
                             <h1><i><a href="{url}upload?arg=files{upload_path}">
-                            <img src="https://svgshare.com/i/amV.svg" width="30" 
-                            height="25" alt="Пример"></a></i></h1></header>
+                            <img src="{url + "source/upload.svg"}" width="30" 
+                            height="25" alt="upload"></a></i></h1></header>
                         <ul id="files">{files}</ul>
                         </main></body></html>"""
     return HTMLResponse(content=html_content, status_code=200)

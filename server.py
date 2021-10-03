@@ -78,10 +78,10 @@ def handler(path: str, filename: str, request: Request):
         if file_extension == "html" or file_extension == "txt":
             with open(f"temp/files{path}", "r") as page:
                 return HTMLResponse(content=page.read(), status_code=200)
-        elif file_extension == "docx":
+        """elif file_extension == "docx":
             with open(f"temp/files{path}", "rb") as page:
                 res = mammoth.convert_to_html(page)
-                return HTMLResponse(content=res.value, status_code=200)
+                return HTMLResponse(content=res.value, status_code=200)"""
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 

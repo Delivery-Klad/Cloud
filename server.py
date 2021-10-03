@@ -67,7 +67,8 @@ def handler(path: str, filename: str, request: Request):
                 time.sleep(4)
                 files = listdir(path, request)
                 if type(files) != str:
-                    return show_not_found_page()
+                    time.sleep(3)
+                    files = listdir(path, request)
             else:
                 return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"

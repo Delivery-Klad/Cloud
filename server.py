@@ -11,7 +11,8 @@ import mammoth
 app = FastAPI()
 security = HTTPBearer()
 max_retries = 10
-root_key = "root"
+root_key = os.environ.get("root_psw")
+viewer_key = os.environ.get("viewer_key")
 token = "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"
 url = "https://c1oud.herokuapp.com/"
 # url = "http://localhost:8000/"
@@ -22,12 +23,17 @@ with open("source/style.css", "r") as file:
 def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
-        files = sorted(os.listdir(f'temp/files{directory}'))
+        files = sorted(os.listdir(f"temp/files{directory}"))
         print("hidden" in files)
         print(auth_psw)
         if "hidden" in files:
-            if auth_psw != root_key:
-                return "<li>Access denied</li>"
+            with open(f"temp/files{directory}/hidden", "r") as hidden:
+                if hidden.read() == "root only":
+                    if auth_psw != root_key:
+                        return "<li>Access denied</li>"
+                else:
+                    if auth_psw != root_key or auth_psw != viewer_key:
+                        return "<li>Access denied</li>"
         for i in files:
             if i == "hidden":
                 continue
@@ -121,7 +127,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
         if arg is None:
             return show_auth_page()
         else:
-            if arg == root_key:
+            if arg == root_key or arg == viewer_key:
                 response = RedirectResponse("files")
                 response.set_cookie(key="auth_psw", value="root")
                 return response

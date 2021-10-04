@@ -4,9 +4,10 @@ import time
 from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBearer
+import mammoth
 from starlette.responses import FileResponse
 from typing import Optional
-import mammoth
+
 
 app = FastAPI()
 security = HTTPBearer()
@@ -65,7 +66,8 @@ def builder(index_of: str, files: str):
                             <img src="{url + "source/upload.svg"}" width="30" 
                             height="25" alt="upload"></a></i></h1></header>
                         <ul id="files">{files}</ul>
-                        </main></body></html>"""
+                        </main></body><footer><a style="color:#000" href="github.com/Delivery-Klad">
+                        @Delivery-Klad</a></footer></html>"""
     return HTMLResponse(content=html_content, status_code=200)
 
 

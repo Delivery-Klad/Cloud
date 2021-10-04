@@ -51,18 +51,25 @@ def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth" title="Authorization"><img src="{"/source/lock.svg"}" width="30" 
                             height="25" alt="auth"></a></i></h1>"""
+    back_button = ""
     if auth_psw == root_key:
         icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                     <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
                     <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
                     <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
+    if index_of != "root":
+        back_url = index_of.replace("root", "files", 1).split("/")
+        back_url.pop(len(back_url) - 1)
+        back_url = "/".join(back_url)
+        back_button = f"""<h1><i><a href="/{back_url}" title="Go back">
+                    <img src="{"/source/back_arrow.svg"}" width="30" height="25" alt="back"></a></i></h1>"""
     html_content = f"""<html>
                         <head>
                             <meta name="viewport" content="width=device-width,initial-scale=1">
                             <title>{"Cloud"}</title>{style}
                         </head>
                         <body><main>
-                            <header><h1><i>Index of /{index_of}</i></h1>
+                            <header>{back_button}<h1><i>Index of /{index_of}</i></h1>
                             {icons}</header>
                         <ul id="files">{files}</ul>
                         </main></body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">

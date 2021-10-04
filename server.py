@@ -115,7 +115,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
         else:
             if arg == root_key:
                 response = RedirectResponse("files")
-                response.set_cookie(key="auth_password", value="root")
+                response.set_cookie(key="auth_psw", value="root")
                 return response
             return show_forbidden_page()
     elif path == "upload":

@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Create folder</title>
+ </head>
+ <body>
+
+ <form method="get" action="/create/">
+  <input type="hidden" name="path" value="{0}">
+  <p><b>Folder name:</b><br>
+   <input type="text" name="arg" size="40">
+  </p>
+  <p><b>Access:</b><Br>
+   <input type="radio" name="access" value="root"> Root only<Br>
+   <input type="radio" name="access" value="auth"> Authorized users<Br>
+   <input type="radio" name="access" value="all"> All users<Br>
+  </p>
+  <p><input type="submit" value="Create folder"></p>
+ </form>
+ </body>
+</html>

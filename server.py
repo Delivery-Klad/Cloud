@@ -7,6 +7,7 @@ from fastapi.security import HTTPBearer
 import mammoth
 from starlette.responses import FileResponse
 from typing import Optional
+from git import Repo
 
 
 app = FastAPI()
@@ -15,8 +16,8 @@ max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-url = "https://c1oud.herokuapp.com/"
-# url = "http://localhost:8000/"
+# url = "https://c1oud.herokuapp.com/"
+url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -25,22 +26,17 @@ def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
         files = sorted(os.listdir(f"temp/files{directory}"))
-        print("hidden" in files)
-        print(auth_psw)
         if "hidden" in files:
             with open(f"temp/files{directory}/hidden", "r") as hidden:
+                print(hidden.read())
                 if hidden.read() == "root only":
-                    print(1)
                     if auth_psw != root_key:
                         return "<li>Access denied</li>"
                 else:
-                    print(2)
-                    print(root_key)
-                    print(viewer_key)
                     if auth_psw != root_key and auth_psw != viewer_key:
                         return "<li>Access denied</li>"
         for i in files:
-            if i == "hidden":
+            if i == "hidden" or i == "init":
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
@@ -51,8 +47,15 @@ def listdir(directory: str, request: Request, auth_psw):
         return HTMLResponse(status_code=404)
 
 
-def builder(index_of: str, files: str):
+def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
+    icons = f"""<h1><i><a href="{url}auth" title="Authorization"><img src="{"/source/lock.svg"}" width="30" 
+                            height="25" alt="auth"></a></i></h1>"""
+    if auth_psw == root_key:
+        icons += f"""<h1><i><a href="{url}upload?arg=files{upload_path}" title="Upload file">
+                    <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
+                    <h1><i><a href="{url}create?arg=files{upload_path}" title="Create folder">
+                    <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
     html_content = f"""<html>
                         <head>
                             <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -60,11 +63,7 @@ def builder(index_of: str, files: str):
                         </head>
                         <body><main>
                             <header><h1><i>Index of /{index_of}</i></h1>
-                            <h1><i><a href="{url}auth"><img src="{url + "source/lock.svg"}" width="30" 
-                            height="25" alt="auth"></a></i></h1>
-                            <h1><i><a href="{url}upload?arg=files{upload_path}">
-                            <img src="{url + "source/upload.svg"}" width="30" 
-                            height="25" alt="upload"></a></i></h1></header>
+                            {icons}</header>
                         <ul id="files">{files}</ul>
                         </main></body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">
                         @Delivery-Klad</a></footer></html>"""
@@ -84,7 +83,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
             else:
                 return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
-        return builder(index_of, files)
+        return builder(index_of, files, auth_psw)
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         print(file_extension)
@@ -144,26 +143,62 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
         else:
             with open("templates/upload.html", "r") as page:
                 return HTMLResponse(content=page.read().format(arg), status_code=200)
+    elif path == "create":
+        if auth_psw != root_key:
+            return show_auth_page()
+        else:
+            with open("templates/create.html", "r") as page:
+                return HTMLResponse(content=page.read().format(arg), status_code=200)
     return show_not_found_page()
 
 
 @app.post("/upload/")
-async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...),
+async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         if auth_psw != root_key:
             return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        from git import Repo
         repo = Repo("temp/.git")
         repo.git.add(f"{path}/{data.filename}")
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
-        return RedirectResponse(f"{url}{path}", status_code=302)
+        return RedirectResponse(f"/{path}", status_code=302)
     except Exception as er:
         print(er)
+
+
+@app.get("/create/")
+async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
+    try:
+        print(path)
+        print(access)
+        if auth_psw != root_key:
+            return show_forbidden_page()
+        os.mkdir(f"temp/{path}/{arg}")
+        repo = Repo("temp/.git")
+        if access == "root":
+            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
+                hidden.write("root only")
+                repo.git.add(f"{path}/{arg}/hidden")
+        elif access == "auth":
+            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
+                hidden.write("true")
+                repo.git.add(f"{path}/{arg}/hidden")
+        else:
+            with open(f"temp/{path}/{arg}/init", "w") as init:
+                init.write("init")
+                repo.git.add(f"{path}/{arg}/init")
+        repo.index.commit("commit from cloud")
+        origin = repo.remote(name='origin')
+        origin.push()
+        if path[len(path) - 1] == "/":
+            path = path[:-1]
+        return RedirectResponse(f"/{path}", status_code=302)
+    except FileNotFoundError:
+        show_not_found_page()
 
 
 @app.get("/files/{catchall:path}")

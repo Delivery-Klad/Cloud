@@ -1,7 +1,7 @@
 import os
 import time
 
-from fastapi import FastAPI, File, UploadFile, Request, Query
+from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPBearer
 from starlette.responses import FileResponse
@@ -10,7 +10,6 @@ import mammoth
 
 app = FastAPI()
 security = HTTPBearer()
-clients = []
 max_retries = 10
 root_key = "root"
 token = "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"
@@ -19,14 +18,14 @@ with open("source/style.css", "r") as file:
     style = file.read()
 
 
-def listdir(directory: str, request: Request):
+def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
         files = sorted(os.listdir(f'temp/files{directory}'))
         print("hidden" in files)
-        print(request.client.host in clients)
+        print(auth_psw)
         if "hidden" in files:
-            if request.client.host not in clients:
+            if auth_psw != root_key:
                 return "<li>Access denied</li>"
         for i in files:
             if i == "hidden":
@@ -59,16 +58,16 @@ def builder(index_of: str, files: str):
     return HTMLResponse(content=html_content, status_code=200)
 
 
-def handler(path: str, filename: str, request: Request):
+def handler(path: str, filename: str, request: Request, auth_psw):
     try:
-        files = listdir(path, request)
+        files = listdir(path, request, auth_psw)
         if type(files) != str:
             if path == "":
                 time.sleep(4)
-                files = listdir(path, request)
+                files = listdir(path, request, auth_psw)
                 if type(files) != str:
                     time.sleep(3)
-                    files = listdir(path, request)
+                    files = listdir(path, request, auth_psw)
             else:
                 return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
@@ -107,19 +106,20 @@ async def homepage():
 
 
 @app.get("/{path}")
-async def other_page(path: str, request: Request, arg: Optional[str] = None):
+async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None)):
     if path == "files":
-        return handler("", "", request)
+        return handler("", "", request, auth_psw)
     elif path == "auth":
         if arg is None:
             return show_auth_page()
         else:
             if arg == root_key:
-                clients.append(request.client.host)
-                return RedirectResponse("files")
+                response = RedirectResponse("files")
+                response.set_cookie(key="auth_password", value="root")
+                return response
             return show_forbidden_page()
     elif path == "upload":
-        if request.client.host not in clients:
+        if auth_psw != root_key:
             return show_auth_page()
         else:
             with open("templates/upload.html", "r") as page:
@@ -128,9 +128,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None):
 
 
 @app.post("/upload/")
-async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...)):
+async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...),
+                      auth_psw: Optional[str] = Cookie(None)):
     try:
-        if request.client.host not in clients:
+        if auth_psw != root_key:
             return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
@@ -146,10 +147,10 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 
 
 @app.get("/files/{catchall:path}")
-async def get_files(request: Request):
+async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None)):
     path = request.path_params["catchall"]
     name = path.split("/")
-    return handler(f"/{path}", name[len(name) - 1], request)
+    return handler(f"/{path}", name[len(name) - 1], request, auth_psw)
 
 
 @app.get("/source/{name}")

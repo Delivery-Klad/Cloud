@@ -14,6 +14,7 @@ max_retries = 10
 root_key = "root"
 token = "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"
 url = "https://c1oud.herokuapp.com/"
+# url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -58,7 +59,7 @@ def builder(index_of: str, files: str):
     return HTMLResponse(content=html_content, status_code=200)
 
 
-def handler(path: str, filename: str, request: Request, auth_psw):
+def handler(path: str, filename: str, request: Request, auth_psw, download):
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
@@ -73,15 +74,21 @@ def handler(path: str, filename: str, request: Request, auth_psw):
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files)
     except NotADirectoryError:
-        file_extension = filename.split(".")[1]
+        file_extension = filename.split(".")[len(filename.split(".")) - 1]
         print(file_extension)
-        if file_extension == "html" or file_extension == "txt":
-            with open(f"temp/files{path}", "r") as page:
-                return HTMLResponse(content=page.read(), status_code=200)
-        """elif file_extension == "docx":
-            with open(f"temp/files{path}", "rb") as page:
-                res = mammoth.convert_to_html(page)
-                return HTMLResponse(content=res.value, status_code=200)"""
+        if not download:
+            if file_extension == "html" or file_extension == "txt":
+                with open(f"temp/files{path}", "r") as page:
+                    return HTMLResponse(content=page.read(), status_code=200)
+            elif file_extension == "docx":
+                with open(f"temp/files{path}", "rb") as page:
+                    res = mammoth.convert_to_html(page)
+                    html_page = f"""<head><title>{filename}</title></head>
+                    <form>
+                    <input type="button" value="Download" onClick='location.href="{url}files{path}?download=true"'>
+                    </form>
+                    """
+                    return HTMLResponse(content=html_page + res.value, status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
@@ -106,9 +113,10 @@ async def homepage():
 
 
 @app.get("/{path}")
-async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None)):
+async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
+                     download: Optional[bool] = None):
     if path == "files":
-        return handler("", "", request, auth_psw)
+        return handler("", "", request, auth_psw, download)
     elif path == "auth":
         if arg is None:
             return show_auth_page()
@@ -147,10 +155,10 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 
 
 @app.get("/files/{catchall:path}")
-async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None)):
+async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
     name = path.split("/")
-    return handler(f"/{path}", name[len(name) - 1], request, auth_psw)
+    return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
 
 
 @app.get("/source/{name}")

@@ -16,8 +16,8 @@ max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-# url = "https://c1oud.herokuapp.com/"
-url = "http://localhost:8000/"
+url = "https://c1oud.herokuapp.com/"
+# url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -49,12 +49,12 @@ def listdir(directory: str, request: Request, auth_psw):
 
 def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
-    icons = f"""<h1><i><a href="{url}auth" title="Authorization"><img src="{"/source/lock.svg"}" width="30" 
+    icons = f"""<h1><i><a href="/auth" title="Authorization"><img src="{"/source/lock.svg"}" width="30" 
                             height="25" alt="auth"></a></i></h1>"""
     if auth_psw == root_key:
-        icons += f"""<h1><i><a href="{url}upload?arg=files{upload_path}" title="Upload file">
+        icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                     <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
-                    <h1><i><a href="{url}create?arg=files{upload_path}" title="Create folder">
+                    <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
                     <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
     html_content = f"""<html>
                         <head>

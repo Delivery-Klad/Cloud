@@ -66,7 +66,7 @@ def builder(index_of: str, files: str):
                             <img src="{url + "source/upload.svg"}" width="30" 
                             height="25" alt="upload"></a></i></h1></header>
                         <ul id="files">{files}</ul>
-                        </main></body><footer><a style="color:#000" href="github.com/Delivery-Klad">
+                        </main></body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">
                         @Delivery-Klad</a></footer></html>"""
     return HTMLResponse(content=html_content, status_code=200)
 

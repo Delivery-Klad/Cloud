@@ -14,8 +14,8 @@ max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-url = "https://c1oud.herokuapp.com/"
-# url = "http://localhost:8000/"
+# url = "https://c1oud.herokuapp.com/"
+url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -29,10 +29,14 @@ def listdir(directory: str, request: Request, auth_psw):
         if "hidden" in files:
             with open(f"temp/files{directory}/hidden", "r") as hidden:
                 if hidden.read() == "root only":
+                    print(1)
                     if auth_psw != root_key:
                         return "<li>Access denied</li>"
                 else:
-                    if auth_psw != root_key or auth_psw != viewer_key:
+                    print(2)
+                    print(root_key)
+                    print(viewer_key)
+                    if auth_psw != root_key and auth_psw != viewer_key:
                         return "<li>Access denied</li>"
         for i in files:
             if i == "hidden":

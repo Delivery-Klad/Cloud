@@ -16,8 +16,8 @@ max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-url = "https://c1oud.herokuapp.com/"
-# url = "http://localhost:8000/"
+# url = "https://c1oud.herokuapp.com/"
+url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -82,10 +82,10 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         files = listdir(path, request, auth_psw)
         if type(files) != str:
             if path == "":
-                time.sleep(4)
+                time.sleep(5)
                 files = listdir(path, request, auth_psw)
                 if type(files) != str:
-                    time.sleep(3)
+                    time.sleep(4)
                     files = listdir(path, request, auth_psw)
             else:
                 return show_not_found_page()
@@ -101,12 +101,9 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
             elif file_extension == "docx":
                 with open(f"temp/files{path}", "rb") as page:
                     res = mammoth.convert_to_html(page)
-                    html_page = f"""<head><title>{filename}</title></head>
-                    <form>
-                    <input type="button" value="Download" onClick='location.href="{url}files{path}?download=true"'>
-                    </form>
-                    """
-                    return HTMLResponse(content=html_page + res.value, status_code=200)
+                with open("templates/doc_reader.html", "r") as html_page:
+                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}") + res.value,
+                                        status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 

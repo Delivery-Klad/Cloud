@@ -16,8 +16,8 @@ max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-# url = "https://c1oud.herokuapp.com/"
-url = "http://localhost:8000/"
+url = "https://c1oud.herokuapp.com/"
+# url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 

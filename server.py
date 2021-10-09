@@ -9,7 +9,6 @@ from starlette.responses import FileResponse
 from typing import Optional
 from git import Repo
 
-
 app = FastAPI()
 security = HTTPBearer()
 max_retries = 10
@@ -47,8 +46,8 @@ def listdir(directory: str, request: Request, auth_psw):
 
 def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
-    icons = f"""<h1><i><a href="/auth" title="Authorization"><img src="{"/source/lock.svg"}" width="30" 
-                            height="25" alt="auth"></a></i></h1>"""
+    icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
+            title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
     back_button = ""
     if auth_psw == root_key:
         icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
@@ -105,9 +104,10 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
-def show_auth_page():
+def show_auth_page(redirect: Optional[str] = "None"):
     with open("templates/auth.html", "r") as page:
-        return HTMLResponse(content=page.read(), status_code=200)
+        with open("source/auth.css", "r") as auth_style:
+            return HTMLResponse(content=page.read().format(redirect, auth_style.read()), status_code=200)
 
 
 def show_forbidden_page():
@@ -127,15 +127,18 @@ async def homepage():
 
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
-                     download: Optional[bool] = None):
+                     download: Optional[bool] = None, redirect: Optional[str] = None):
     if path == "files":
         return handler("", "", request, auth_psw, download)
     elif path == "auth":
         if arg is None:
-            return show_auth_page()
+            return show_auth_page(redirect)
         else:
             if arg == root_key or arg == viewer_key:
-                response = RedirectResponse("files")
+                if redirect is None:
+                    response = RedirectResponse("files")
+                else:
+                    response = RedirectResponse(redirect)
                 response.set_cookie(key="auth_psw", value=arg)
                 return response
             return show_forbidden_page()

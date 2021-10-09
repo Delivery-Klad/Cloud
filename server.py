@@ -14,6 +14,7 @@ app = FastAPI()
 security = HTTPBearer()
 max_retries = 10
 root_key = os.environ.get("root_psw")
+# root_key = "root"
 viewer_key = os.environ.get("viewer_key")
 token = "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"
 url = "https://c1oud.herokuapp.com/"
@@ -27,16 +28,13 @@ def listdir(directory: str, request: Request, auth_psw):
     try:
         files = sorted(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
-            with open(f"temp/files{directory}/hidden", "r") as hidden:
-                print(hidden.read())
-                if hidden.read() == "root only":
-                    if auth_psw != root_key:
-                        return "<li>Access denied</li>"
-                else:
-                    if auth_psw != root_key and auth_psw != viewer_key:
-                        return "<li>Access denied</li>"
+            if auth_psw != root_key:
+                return "<li>Access denied</li>"
+        elif "viewer" in files:
+            if auth_psw != root_key and auth_psw != viewer_key:
+                return "<li>Access denied</li>"
         for i in files:
-            if i == "hidden" or i == "init":
+            if i == "hidden" or i == "init" or i == "viewer":
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
@@ -185,12 +183,12 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
         repo = Repo("temp/.git")
         if access == "root":
             with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
-                hidden.write("root only")
+                hidden.write("init")
                 repo.git.add(f"{path}/{arg}/hidden")
         elif access == "auth":
-            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
-                hidden.write("true")
-                repo.git.add(f"{path}/{arg}/hidden")
+            with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
+                viewer.write("init")
+                repo.git.add(f"{path}/{arg}/viewer")
         else:
             with open(f"temp/{path}/{arg}/init", "w") as init:
                 init.write("init")

@@ -16,8 +16,8 @@ root_key = os.environ.get("root_psw")
 # root_key = "root"
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-url = "https://c1oud.herokuapp.com/"
-# url = "http://localhost:8000/"
+# url = "https://c1oud.herokuapp.com/"
+url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -153,7 +153,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_auth_page()
         else:
             with open("templates/create.html", "r") as page:
-                return HTMLResponse(content=page.read().format(arg), status_code=200)
+                with open("source/create.css", "r") as create_style:
+                    return HTMLResponse(content=page.read().format(arg, create_style.read()), status_code=200)
     return show_not_found_page()
 
 
@@ -183,6 +184,8 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
         if auth_psw != root_key:
             return show_forbidden_page()
         os.mkdir(f"temp/{path}/{arg}")
+        if path == "files/":
+            path = path[:-1]
         repo = Repo("temp/.git")
         if access == "root":
             with open(f"temp/{path}/{arg}/hidden", "w") as hidden:

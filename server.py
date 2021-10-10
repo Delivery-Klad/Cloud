@@ -92,10 +92,10 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         print(file_extension)
         if not download:
-            if file_extension == "html" or file_extension == "txt":
+            if file_extension in ["html", "txt", "py", "cs", "java"]:
                 with open(f"temp/files{path}", "r") as page:
                     return HTMLResponse(content=page.read(), status_code=200)
-            elif file_extension == "png" or file_extension == "jpg":
+            elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension == "docx":

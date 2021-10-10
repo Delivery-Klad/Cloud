@@ -16,8 +16,8 @@ root_key = os.environ.get("root_psw")
 # root_key = "root"
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-# url = "https://c1oud.herokuapp.com/"
-url = "http://localhost:8000/"
+url = "https://c1oud.herokuapp.com/"
+# url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
 
@@ -95,6 +95,9 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
             if file_extension == "html" or file_extension == "txt":
                 with open(f"temp/files{path}", "r") as page:
                     return HTMLResponse(content=page.read(), status_code=200)
+            elif file_extension == "png" or file_extension == "jpg":
+                with open("templates/img_viewer.html", "r") as html_page:
+                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension == "docx":
                 with open(f"temp/files{path}", "rb") as page:
                     res = mammoth.convert_to_html(page)
@@ -147,7 +150,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_auth_page()
         else:
             with open("templates/upload.html", "r") as page:
-                return HTMLResponse(content=page.read().format(arg), status_code=200)
+                with open("source/upload.css", "r") as upload_style:
+                    return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
     elif path == "create":
         if auth_psw != root_key:
             return show_auth_page()

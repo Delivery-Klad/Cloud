@@ -38,7 +38,7 @@ def listdir(directory: str, request: Request, auth_psw):
                         bcrypt.checkpw(viewer_key.encode("utf-8"), auth_psw.encode("utf-8")):
                     return "<li>Access denied</li>"
             except AttributeError:
-                pass
+                return "<li>Access denied</li>"
         for i in files:
             if i == "hidden" or i == "init" or i == "viewer":
                 continue
@@ -100,7 +100,6 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         return builder(index_of, files, auth_psw)
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
-        print(file_extension)
         if not download:
             if file_extension in ["html", "txt", "py", "cs", "java"]:
                 with open(f"temp/files{path}", "r") as page:
@@ -157,22 +156,25 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                 return response
             return show_forbidden_page()
     elif path == "upload":
-        if bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_auth_page()
+            else:
+                with open("templates/upload.html", "r") as page:
+                    with open("source/upload.css", "r") as upload_style:
+                        return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
+        except AttributeError:
             return show_auth_page()
-        else:
-            with open("templates/upload.html", "r") as page:
-                with open("source/upload.css", "r") as upload_style:
-                    return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
     elif path == "create":
         try:
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_auth_page()
+            else:
+                with open("templates/create.html", "r") as page:
+                    with open("source/create.css", "r") as create_style:
+                        return HTMLResponse(content=page.read().format(arg, create_style.read()), status_code=200)
         except AttributeError:
             return show_auth_page()
-        else:
-            with open("templates/create.html", "r") as page:
-                with open("source/create.css", "r") as create_style:
-                    return HTMLResponse(content=page.read().format(arg, create_style.read()), status_code=200)
     return show_not_found_page()
 
 
@@ -202,7 +204,10 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
     try:
         print(path)
         print(access)
-        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_forbidden_page()
+        except AttributeError:
             return show_forbidden_page()
         os.mkdir(f"temp/{path}/{arg}")
         if path == "files/":

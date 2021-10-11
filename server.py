@@ -1,5 +1,6 @@
 import os
 import time
+import bcrypt
 
 from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -13,7 +14,6 @@ app = FastAPI()
 security = HTTPBearer()
 max_retries = 10
 root_key = os.environ.get("root_psw")
-# root_key = "root"
 viewer_key = os.environ.get("viewer_key")
 token = "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"
 url = "https://c1oud.herokuapp.com/"
@@ -27,11 +27,18 @@ def listdir(directory: str, request: Request, auth_psw):
     try:
         files = sorted(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
-            if auth_psw != root_key:
+            try:
+                if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                    return "<li>Access denied</li>"
+            except AttributeError:
                 return "<li>Access denied</li>"
         elif "viewer" in files:
-            if auth_psw != root_key and auth_psw != viewer_key:
-                return "<li>Access denied</li>"
+            try:
+                if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")) and not \
+                        bcrypt.checkpw(viewer_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                    return "<li>Access denied</li>"
+            except AttributeError:
+                pass
         for i in files:
             if i == "hidden" or i == "init" or i == "viewer":
                 continue
@@ -49,11 +56,14 @@ def builder(index_of: str, files: str, auth_psw):
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
             title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
     back_button = ""
-    if auth_psw == root_key:
-        icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
-                    <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
-                    <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
-                    <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
+    try:
+        if bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
+                        <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
+                        <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
+                        <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
+    except AttributeError:
+        pass
     if index_of != "root":
         back_url = index_of.replace("root", "files", 1).split("/")
         back_url.pop(len(back_url) - 1)
@@ -142,18 +152,22 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                     response = RedirectResponse("files")
                 else:
                     response = RedirectResponse(redirect)
-                response.set_cookie(key="auth_psw", value=arg)
+                response.set_cookie(key="auth_psw", value=str(bcrypt.hashpw(arg.encode("utf-8"),
+                                                                            bcrypt.gensalt()))[2:-1])
                 return response
             return show_forbidden_page()
     elif path == "upload":
-        if auth_psw != root_key:
+        if bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
             return show_auth_page()
         else:
             with open("templates/upload.html", "r") as page:
                 with open("source/upload.css", "r") as upload_style:
                     return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
     elif path == "create":
-        if auth_psw != root_key:
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_auth_page()
+        except AttributeError:
             return show_auth_page()
         else:
             with open("templates/create.html", "r") as page:
@@ -166,7 +180,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
-        if auth_psw != root_key:
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_forbidden_page()
+        except AttributeError:
             return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
@@ -185,7 +202,7 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
     try:
         print(path)
         print(access)
-        if auth_psw != root_key:
+        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
             return show_forbidden_page()
         os.mkdir(f"temp/{path}/{arg}")
         if path == "files/":
@@ -229,10 +246,15 @@ async def get_source(name: str, request: Request):
 
 
 @app.on_event("startup")
-async def clone_remote_repo():
+async def startup():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo
         Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files_folder", "temp")
     except FileExistsError:
         pass
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    print("shutdown")

@@ -1,17 +1,15 @@
 import os
 import time
-import bcrypt
 
+import bcrypt
+import mammoth
 from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.security import HTTPBearer
-import mammoth
 from starlette.responses import FileResponse
 from typing import Optional
 from git import Repo
 
 app = FastAPI()
-security = HTTPBearer()
 max_retries = 10
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
@@ -20,6 +18,8 @@ url = "https://c1oud.herokuapp.com/"
 # url = "http://localhost:8000/"
 with open("source/style.css", "r") as file:
     style = file.read()
+with open("source/aboba.js", "r") as jaba:
+    jaba_script = jaba.read()
 
 
 def listdir(directory: str, request: Request, auth_psw):
@@ -62,8 +62,18 @@ def builder(index_of: str, files: str, auth_psw):
                         <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
                         <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
                         <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
+            menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
+                          <form action="/delete" method="get">
+                            <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
+                            <input type="hidden" id="del_name" name="del_name" value="empty">
+                            <input type="submit" value="Delete" class="button button2">
+                          </form>
+                      </ul>{jaba_script}"""
     except AttributeError:
-        pass
+        menu = ""
+    if index_of[len(index_of) - 1] == "/":
+        index_of = index_of[:-1]
+    index_of = index_of.replace("//", "/")
     if index_of != "root":
         back_url = index_of.replace("root", "files", 1).split("/")
         back_url.pop(len(back_url) - 1)
@@ -75,11 +85,15 @@ def builder(index_of: str, files: str, auth_psw):
                             <meta name="viewport" content="width=device-width,initial-scale=1">
                             <title>{"Cloud"}</title>{style}
                         </head>
-                        <body><main>
+                        <body>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+                        <main>
                             <header>{back_button}<h1><i>Index of /{index_of}</i></h1>
                             {icons}</header>
                         <ul id="files">{files}</ul>
-                        </main></body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">
+                        {menu}
+                        </main>
+                        </body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">
                         @Delivery-Klad</a></footer></html>"""
     return HTMLResponse(content=html_content, status_code=200)
 
@@ -137,6 +151,19 @@ async def homepage():
     return RedirectResponse(url + "files")
 
 
+@app.get("/delete")
+async def delete(del_name: Optional[str], path: Optional[str], auth_psw: Optional[str] = Cookie(None)):
+    try:
+        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            return show_forbidden_page()
+    except AttributeError:
+        return show_forbidden_page()
+    file_path = f"temp/{path}/{del_name}"
+    print(file_path)
+    os.remove(file_path)
+    return RedirectResponse(path)
+
+
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None):
@@ -158,23 +185,23 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
     elif path == "upload":
         try:
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                return show_auth_page()
+                return show_forbidden_page()
             else:
                 with open("templates/upload.html", "r") as page:
                     with open("source/upload.css", "r") as upload_style:
                         return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
         except AttributeError:
-            return show_auth_page()
+            return show_forbidden_page()
     elif path == "create":
         try:
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                return show_auth_page()
+                return show_forbidden_page()
             else:
                 with open("templates/create.html", "r") as page:
                     with open("source/create.css", "r") as create_style:
                         return HTMLResponse(content=page.read().format(arg, create_style.read()), status_code=200)
         except AttributeError:
-            return show_auth_page()
+            return show_forbidden_page()
     return show_not_found_page()
 
 
@@ -189,11 +216,6 @@ async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File
             return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        repo = Repo("temp/.git")
-        repo.git.add(f"{path}/{data.filename}")
-        repo.index.commit("commit from cloud")
-        origin = repo.remote(name='origin')
-        origin.push()
         return RedirectResponse(f"/{path}", status_code=302)
     except Exception as er:
         print(er)
@@ -212,22 +234,15 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
         os.mkdir(f"temp/{path}/{arg}")
         if path == "files/":
             path = path[:-1]
-        repo = Repo("temp/.git")
         if access == "root":
             with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
                 hidden.write("init")
-                repo.git.add(f"{path}/{arg}/hidden")
         elif access == "auth":
             with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
                 viewer.write("init")
-                repo.git.add(f"{path}/{arg}/viewer")
         else:
             with open(f"temp/{path}/{arg}/init", "w") as init:
                 init.write("init")
-                repo.git.add(f"{path}/{arg}/init")
-        repo.index.commit("commit from cloud")
-        origin = repo.remote(name='origin')
-        origin.push()
         if path[len(path) - 1] == "/":
             path = path[:-1]
         return RedirectResponse(f"/{path}", status_code=302)
@@ -262,4 +277,17 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
+    result = []
+    repo = Repo("temp/.git")
+    for item in repo.untracked_files:
+        result.append(item)
+    for item in repo.index.diff(None):
+        result.append(item)
+    if result:
+        print("Untracked files detected")
+        repo.git.add(all=True)
+        repo.index.commit("commit from cloud")
+        origin = repo.remote(name='origin')
+        origin.push()
+        print("Push success")
     print("shutdown")

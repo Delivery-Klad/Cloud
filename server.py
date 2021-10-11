@@ -55,7 +55,7 @@ def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
             title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
-    back_button = ""
+    back_button, menu = "", ""
     try:
         if bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
             icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
@@ -70,7 +70,7 @@ def builder(index_of: str, files: str, auth_psw):
                           </form>
                       </ul>{jaba_script}"""
     except AttributeError:
-        menu = ""
+        pass
     if index_of[len(index_of) - 1] == "/":
         index_of = index_of[:-1]
     index_of = index_of.replace("//", "/")

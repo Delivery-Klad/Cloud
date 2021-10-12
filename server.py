@@ -61,7 +61,9 @@ def builder(index_of: str, files: str, auth_psw):
             icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                         <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
                         <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
-                        <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>"""
+                        <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>
+                        <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
+                        <img src="{"/source/gear.svg"}" width="30" height="25" alt="settings"></a></i></h1>"""
             menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
                           <form action="/delete" method="get">
                             <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
@@ -164,9 +166,87 @@ async def delete(del_name: Optional[str], path: Optional[str], auth_psw: Optiona
     return RedirectResponse(path)
 
 
+@app.get("/config")
+async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
+    try:
+        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            return show_forbidden_page()
+        name = path.split("/")
+        name = name[len(name) - 1]
+        new_path = path.split("/")[:-1]
+        new_path = "/".join(new_path) + f"/{arg}"
+        os.rename(f"temp/{path}", f"temp/{new_path}")
+        files = os.listdir(f"temp/{new_path}")
+        if "hidden" in files:
+            os.remove(f"temp/{new_path}/hidden")
+        elif "viewer" in files:
+            os.remove(f"temp/{new_path}/viewer")
+        elif "init" in files:
+            os.remove(f"temp/{new_path}/init")
+        if access == "root":
+            with open(f"temp/{new_path}/hidden", "w") as hidden:
+                hidden.write("init")
+        elif access == "auth":
+            with open(f"temp/{new_path}/viewer", "w") as viewer:
+                viewer.write("init")
+        else:
+            with open(f"temp/{new_path}/init", "w") as init:
+                init.write("init")
+        return RedirectResponse(f"/{new_path}", status_code=302)
+    except AttributeError:
+        return show_forbidden_page()
+    except Exception as er:
+        print(er)
+
+
+@app.post("/upload")
+async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
+                      auth_psw: Optional[str] = Cookie(None)):
+    try:
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_forbidden_page()
+        except AttributeError:
+            return show_forbidden_page()
+        with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
+            uploaded_file.write(await data.read())
+        return RedirectResponse(f"/{path}", status_code=302)
+    except Exception as er:
+        print(er)
+
+
+@app.get("/new_folder")
+async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
+    try:
+        print(path)
+        print(access)
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_forbidden_page()
+        except AttributeError:
+            return show_forbidden_page()
+        os.mkdir(f"temp/{path}/{arg}")
+        if path == "files/":
+            path = path[:-1]
+        if access == "root":
+            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
+                hidden.write("init")
+        elif access == "auth":
+            with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
+                viewer.write("init")
+        else:
+            with open(f"temp/{path}/{arg}/init", "w") as init:
+                init.write("init")
+        if path[len(path) - 1] == "/":
+            path = path[:-1]
+        return RedirectResponse(f"/{path}", status_code=302)
+    except FileNotFoundError:
+        show_not_found_page()
+
+
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
-                     download: Optional[bool] = None, redirect: Optional[str] = None):
+                     download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
     if path == "files":
         return handler("", "", request, auth_psw, download)
     elif path == "auth":
@@ -199,55 +279,34 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             else:
                 with open("templates/create.html", "r") as page:
                     with open("source/create.css", "r") as create_style:
-                        return HTMLResponse(content=page.read().format(arg, create_style.read()), status_code=200)
+                        return HTMLResponse(content=page.read().format(arg, create_style.read(), "Create folder",
+                                                                       "new_folder", "", "checked", "", ""),
+                                            status_code=200)
+        except AttributeError:
+            return show_forbidden_page()
+    elif path == "settings":
+        try:
+            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+                return show_forbidden_page()
+            else:
+                name = arg.split("/")
+                name = name[len(name) - 1]
+                files = os.listdir(f"temp/{arg}")
+                root, auth, all_users = "", "", ""
+                if "hidden" in files:
+                    root = "checked"
+                elif "viewer" in files:
+                    auth = "checked"
+                elif "init" in files:
+                    all_users = "checked"
+                with open("templates/create.html", "r") as page:
+                    with open("source/create.css", "r") as create_style:
+                        return HTMLResponse(content=page.read().format(arg, create_style.read(), "Folder settings",
+                                                                       "config", name, root, auth, all_users),
+                                            status_code=200)
         except AttributeError:
             return show_forbidden_page()
     return show_not_found_page()
-
-
-@app.post("/upload/")
-async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
-                      auth_psw: Optional[str] = Cookie(None)):
-    try:
-        try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                return show_forbidden_page()
-        except AttributeError:
-            return show_forbidden_page()
-        with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
-            uploaded_file.write(await data.read())
-        return RedirectResponse(f"/{path}", status_code=302)
-    except Exception as er:
-        print(er)
-
-
-@app.get("/create/")
-async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
-    try:
-        print(path)
-        print(access)
-        try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                return show_forbidden_page()
-        except AttributeError:
-            return show_forbidden_page()
-        os.mkdir(f"temp/{path}/{arg}")
-        if path == "files/":
-            path = path[:-1]
-        if access == "root":
-            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
-                hidden.write("init")
-        elif access == "auth":
-            with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
-                viewer.write("init")
-        else:
-            with open(f"temp/{path}/{arg}/init", "w") as init:
-                init.write("init")
-        if path[len(path) - 1] == "/":
-            path = path[:-1]
-        return RedirectResponse(f"/{path}", status_code=302)
-    except FileNotFoundError:
-        show_not_found_page()
 
 
 @app.get("/files/{catchall:path}")

@@ -1,30 +1,28 @@
 <html><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Create folder</title>
+  <title>{2}</title>
     <style>
         {1}
     </style>
  </head>
  <body>
 
- <form method="get" action="/create/">
+ <form method="get" action="/{3}">
   <input type="hidden" name="path" value="{0}">
   <p><h1>Folder name:</h1>
-   <input type="text" name="arg" size="40">
+   <input type="text" name="arg" size="40" value="{4}">
   </p>
 
  <div class="form_radio_group">
 <div class="form_radio_group-item">
-	<input id="radio-1" type="radio" name="access" value="root" checked="">
+	<input id="radio-1" type="radio" name="access" value="root" {5}>
 	<label for="radio-1">Root only</label>
 </div><div class="form_radio_group-item">
-	<input id="radio-2" type="radio" name="access" value="auth">
+	<input id="radio-2" type="radio" name="access" value="auth" {6}>
 	<label for="radio-2">Authorized users</label>
-</div>
-
-<div class="form_radio_group-item">
-	<input id="radio-3" type="radio" name="access" value="all">
+</div><div class="form_radio_group-item">
+	<input id="radio-3" type="radio" name="access" value="all" {7}>
 	<label for="radio-3">All users</label>
 </div>
      </div>

@@ -1,151 +1,25 @@
 import os
-import time
 
 import bcrypt
-import mammoth
 from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
-from fastapi.responses import HTMLResponse, RedirectResponse
-from starlette.responses import FileResponse
-from typing import Optional
+from fastapi.responses import RedirectResponse
 from git import Repo
 
+from funcs.builder import handler
+from funcs.pages import *
+from funcs.utils import create_new_folder
+from routers import source
+
 app = FastAPI()
-max_retries = 10
+app.include_router(source.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-url = "https://c1oud.herokuapp.com/"
-# url = "http://localhost:8000/"
+url = os.environ.get("server_url")
 with open("source/style.css", "r") as file:
     style = file.read()
 with open("source/aboba.js", "r") as jaba:
     jaba_script = jaba.read()
-
-
-def listdir(directory: str, request: Request, auth_psw):
-    local_files = ""
-    try:
-        files = sorted(os.listdir(f"temp/files{directory}"))
-        if "hidden" in files:
-            try:
-                if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                    return "<li>Access denied</li>"
-            except AttributeError:
-                return "<li>Access denied</li>"
-        elif "viewer" in files:
-            try:
-                if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")) and not \
-                        bcrypt.checkpw(viewer_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                    return "<li>Access denied</li>"
-            except AttributeError:
-                return "<li>Access denied</li>"
-        for i in files:
-            if i == "hidden" or i == "init" or i == "viewer":
-                continue
-            file_class = "folder" if len(i.split(".")) == 1 else "file"
-            local_files += f"""<li>
-                <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
-                class="{file_class}">{i}</a></li>"""
-        return local_files
-    except FileNotFoundError:
-        return HTMLResponse(status_code=404)
-
-
-def builder(index_of: str, files: str, auth_psw):
-    upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
-    icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
-            title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
-    back_button, menu = "", ""
-    try:
-        if bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-            icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
-                        <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
-                        <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
-                        <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>
-                        <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
-                        <img src="{"/source/gear.svg"}" width="30" height="25" alt="settings"></a></i></h1>"""
-            menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
-                          <form action="/delete" method="get">
-                            <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
-                            <input type="hidden" id="del_name" name="del_name" value="empty">
-                            <input type="submit" value="Delete" class="button button2">
-                          </form>
-                      </ul>{jaba_script}"""
-    except AttributeError:
-        pass
-    if index_of[len(index_of) - 1] == "/":
-        index_of = index_of[:-1]
-    index_of = index_of.replace("//", "/")
-    if index_of != "root":
-        back_url = index_of.replace("root", "files", 1).split("/")
-        back_url.pop(len(back_url) - 1)
-        back_url = "/".join(back_url)
-        back_button = f"""<h1><i><a href="/{back_url}" title="Go back">
-                    <img src="{"/source/back_arrow.svg"}" width="30" height="25" alt="back"></a></i></h1>"""
-    html_content = f"""<html>
-                        <head>
-                            <meta name="viewport" content="width=device-width,initial-scale=1">
-                            <title>{"Cloud"}</title>{style}
-                        </head>
-                        <body>
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-                        <main>
-                            <header>{back_button}<h1><i>Index of /{index_of}</i></h1>
-                            {icons}</header>
-                        <ul id="files">{files}</ul>
-                        {menu}
-                        </main>
-                        </body><footer><a style="color:#000" href="https://github.com/Delivery-Klad">
-                        @Delivery-Klad</a></footer></html>"""
-    return HTMLResponse(content=html_content, status_code=200)
-
-
-def handler(path: str, filename: str, request: Request, auth_psw, download):
-    try:
-        files = listdir(path, request, auth_psw)
-        if type(files) != str:
-            if path == "":
-                time.sleep(5)
-                files = listdir(path, request, auth_psw)
-                if type(files) != str:
-                    time.sleep(4)
-                    files = listdir(path, request, auth_psw)
-            else:
-                return show_not_found_page()
-        index_of = "root" if path == "" else f"root{path}"
-        return builder(index_of, files, auth_psw)
-    except NotADirectoryError:
-        file_extension = filename.split(".")[len(filename.split(".")) - 1]
-        if not download:
-            if file_extension in ["html", "txt", "py", "cs", "java"]:
-                with open(f"temp/files{path}", "r") as page:
-                    return HTMLResponse(content=page.read(), status_code=200)
-            elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
-                with open("templates/img_viewer.html", "r") as html_page:
-                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
-            elif file_extension == "docx":
-                with open(f"temp/files{path}", "rb") as page:
-                    res = mammoth.convert_to_html(page)
-                with open("templates/doc_reader.html", "r") as html_page:
-                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}") + res.value,
-                                        status_code=200)
-        return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
-
-
-def show_auth_page(redirect: Optional[str] = "None"):
-    with open("templates/auth.html", "r") as page:
-        with open("source/auth.css", "r") as auth_style:
-            return HTMLResponse(content=page.read().format(redirect, auth_style.read()), status_code=200)
-
-
-def show_forbidden_page():
-    with open("templates/403.html", "r") as page:
-        return HTMLResponse(content=page.read(), status_code=403)
-
-
-def show_not_found_page():
-    with open("templates/404.html", "r") as page:
-        return HTMLResponse(content=page.read(), status_code=404)
 
 
 @app.get("/")
@@ -171,8 +45,6 @@ async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[s
     try:
         if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
             return show_forbidden_page()
-        name = path.split("/")
-        name = name[len(name) - 1]
         new_path = path.split("/")[:-1]
         new_path = "/".join(new_path) + f"/{arg}"
         os.rename(f"temp/{path}", f"temp/{new_path}")
@@ -218,28 +90,12 @@ async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File
 @app.get("/new_folder")
 async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
     try:
-        print(path)
-        print(access)
         try:
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
-        os.mkdir(f"temp/{path}/{arg}")
-        if path == "files/":
-            path = path[:-1]
-        if access == "root":
-            with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
-                hidden.write("init")
-        elif access == "auth":
-            with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
-                viewer.write("init")
-        else:
-            with open(f"temp/{path}/{arg}/init", "w") as init:
-                init.write("init")
-        if path[len(path) - 1] == "/":
-            path = path[:-1]
-        return RedirectResponse(f"/{path}", status_code=302)
+        return create_new_folder(path, arg, access)
     except FileNotFoundError:
         show_not_found_page()
 
@@ -248,7 +104,7 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
     if path == "files":
-        return handler("", "", request, auth_psw, download)
+        return handler("", "", request, auth_psw, download, jaba_script, style)
     elif path == "auth":
         if arg is None:
             return show_auth_page(redirect)
@@ -267,9 +123,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_forbidden_page()
             else:
-                with open("templates/upload.html", "r") as page:
-                    with open("source/upload.css", "r") as upload_style:
-                        return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
+                return show_upload_page(arg)
         except AttributeError:
             return show_forbidden_page()
     elif path == "create":
@@ -277,11 +131,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_forbidden_page()
             else:
-                with open("templates/create.html", "r") as page:
-                    with open("source/create.css", "r") as create_style:
-                        return HTMLResponse(content=page.read().format(arg, create_style.read(), "Create folder",
-                                                                       "new_folder", "", "checked", "", ""),
-                                            status_code=200)
+                return show_create_page(arg, "Create folder", "new_folder", "", "checked", "", "")
         except AttributeError:
             return show_forbidden_page()
     elif path == "settings":
@@ -299,11 +149,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                     auth = "checked"
                 elif "init" in files:
                     all_users = "checked"
-                with open("templates/create.html", "r") as page:
-                    with open("source/create.css", "r") as create_style:
-                        return HTMLResponse(content=page.read().format(arg, create_style.read(), "Folder settings",
-                                                                       "config", name, root, auth, all_users),
-                                            status_code=200)
+                return show_create_page(arg, "Folder settings", "config", name, root, auth, all_users)
         except AttributeError:
             return show_forbidden_page()
     return show_not_found_page()
@@ -313,15 +159,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
     name = path.split("/")
-    return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
-
-
-@app.get("/source/{name}")
-async def get_source(name: str, request: Request):
-    try:
-        return FileResponse(f"source/{name}")
-    except FileNotFoundError:
-        show_not_found_page()
+    return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, jaba_script, style)
 
 
 @app.on_event("startup")

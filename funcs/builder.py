@@ -21,6 +21,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
                         time.sleep(1)
                     else:
                         break
+                time.sleep(1)
                 if type(files) != str:
                     return show_not_found_page()
             else:

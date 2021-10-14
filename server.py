@@ -71,7 +71,7 @@ async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[s
         print(er)
 
 
-@app.post("/upload_file")
+@app.post("/upload_file", response_class=RedirectResponse, status_code=302)
 async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
@@ -82,7 +82,7 @@ async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File
             return show_forbidden_page()
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        return RedirectResponse(f"/{path}", status_code=302)
+        return f"/{path}"
     except Exception as er:
         print(er)
 

@@ -71,7 +71,7 @@ async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[s
         print(er)
 
 
-@app.post("/upload_file")
+@app.post("/upload_file/")
 async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     try:

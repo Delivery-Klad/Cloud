@@ -71,18 +71,23 @@ async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[s
         print(er)
 
 
-@app.post("/upload_file", response_class=RedirectResponse, status_code=302)
+@app.post("/upload_file")
 async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         try:
+            print(1)
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_forbidden_page()
+            print(2)
         except AttributeError:
+            print(3)
             return show_forbidden_page()
+        print(4)
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        return f"/{path}"
+        print(5)
+        return RedirectResponse(f"/{path}", status_code=302)
     except Exception as er:
         print(er)
 

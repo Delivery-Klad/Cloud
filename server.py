@@ -181,10 +181,10 @@ async def shutdown():
     for item in repo.index.diff(None):
         result.append(item)
     if result:
-        print("Untracked files detected")
+        print("Untracked files detected!")
         repo.git.add(all=True)
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
-        print("Push success")
-    print("shutdown")
+        print("Push success!")
+    print("Shutdown...")

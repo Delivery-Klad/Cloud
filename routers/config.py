@@ -1,11 +1,11 @@
 import os
 
-import bcrypt
 from fastapi import APIRouter, Cookie
 from fastapi.responses import RedirectResponse
 from typing import Optional
 
 from funcs.pages import show_forbidden_page
+from funcs.utils import is_root_user
 
 router = APIRouter(prefix="/config")
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/config")
 @router.get("/")
 async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
     try:
-        if not bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
+        if not is_root_user(auth_psw):
             return show_forbidden_page()
         new_path = path.split("/")[:-1]
         new_path = "/".join(new_path) + f"/{arg}"

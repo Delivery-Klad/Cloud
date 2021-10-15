@@ -1,8 +1,9 @@
 import os
-import bcrypt
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
+
+from funcs.utils import is_root_user, is_authorized_user
 
 
 def listdir(directory: str, request: Request, auth_psw):
@@ -11,14 +12,13 @@ def listdir(directory: str, request: Request, auth_psw):
         files = sorted(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
             try:
-                if not bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
+                if not is_root_user(auth_psw):
                     return "<li>Access denied</li>"
             except AttributeError:
                 return "<li>Access denied</li>"
         elif "viewer" in files:
             try:
-                if not bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")) and not \
-                        bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), auth_psw.encode("utf-8")):
+                if not is_authorized_user(auth_psw):
                     return "<li>Access denied</li>"
             except AttributeError:
                 return "<li>Access denied</li>"

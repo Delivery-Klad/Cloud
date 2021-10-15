@@ -1,6 +1,16 @@
 import os
 
+import bcrypt
 from fastapi.responses import RedirectResponse
+
+
+def is_root_user(password: str):
+    return bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
+
+
+def is_authorized_user(password: str):
+    return bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), password.encode("utf-8")) or \
+           bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
 
 
 def create_new_folder(path, arg, access):

@@ -1,6 +1,5 @@
 import os
 import time
-import bcrypt
 
 import mammoth
 from fastapi import Request
@@ -8,6 +7,7 @@ from fastapi.responses import FileResponse
 
 from funcs.listdir import listdir
 from funcs.pages import *
+from funcs.utils import is_root_user
 
 
 def handler(path: str, filename: str, request: Request, auth_psw, download, script: str, style: str):
@@ -53,7 +53,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
             title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
     back_button, menu = "", ""
     try:
-        if bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
+        if is_root_user(auth_psw):
             icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                         <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
                         <h1><i><a href="/create/?arg=files{upload_path}" title="Create folder">

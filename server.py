@@ -1,20 +1,21 @@
 import os
 
 import bcrypt
-from fastapi import FastAPI, File, UploadFile, Request, Query, Cookie
+from fastapi import FastAPI, Request, Cookie
 from fastapi.responses import RedirectResponse
 from git import Repo
 
 from funcs.builder import handler
 from funcs.pages import *
-from funcs.utils import create_new_folder
-from routers import source, delete, config, add_text
+from funcs.utils import create_new_folder, is_root_user
+from routers import source, delete, config, add_text, upload
 
 app = FastAPI()
 app.include_router(source.router)
 app.include_router(delete.router)
 app.include_router(config.router)
 app.include_router(add_text.router)
+app.include_router(upload.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
@@ -30,27 +31,11 @@ async def homepage():
     return RedirectResponse(url + "files")
 
 
-@app.post("/upload_file/")
-async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File(...),
-                      auth_psw: Optional[str] = Cookie(None)):
-    try:
-        try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-                return show_forbidden_page()
-        except AttributeError:
-            return show_forbidden_page()
-        with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
-            uploaded_file.write(await data.read())
-        return RedirectResponse(f"/{path}", status_code=302)
-    except Exception as er:
-        print(er)
-
-
 @app.get("/new_folder")
 async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
     try:
         try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            if not is_root_user(auth_psw):
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
@@ -79,7 +64,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_forbidden_page()
     elif path == "upload":
         try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            if not is_root_user(auth_psw):
                 return show_forbidden_page()
             else:
                 return show_upload_page(arg)
@@ -87,7 +72,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_forbidden_page()
     elif path == "create":
         try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            if not is_root_user(auth_psw):
                 return show_forbidden_page()
             else:
                 return show_create_page(arg, "Create folder", "new_folder", "", "checked", "", "")
@@ -95,7 +80,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_forbidden_page()
     elif path == "settings":
         try:
-            if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
+            if not is_root_user(auth_psw):
                 return show_forbidden_page()
             else:
                 name = arg.split("/")
@@ -132,7 +117,7 @@ async def startup():
         print("Cloning success!")
     except FileExistsError:
         pass
-    print("Startup!")
+    print("Startup complete!")
 
 
 @app.on_event("shutdown")
@@ -145,10 +130,10 @@ async def shutdown():
     for item in repo.index.diff(None):
         result.append(item)
     if result:
-        print("Untracked files detected!")
+        print("Untracked files detected...")
         repo.git.add(all=True)
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
         print("Push success!")
-    print("Shutdown!")
+    print("Shutdown complete!")

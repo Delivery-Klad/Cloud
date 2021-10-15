@@ -27,19 +27,6 @@ async def homepage():
     return RedirectResponse(url + "files")
 
 
-@app.get("/delete")
-async def delete(del_name: Optional[str], path: Optional[str], auth_psw: Optional[str] = Cookie(None)):
-    try:
-        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-            return show_forbidden_page()
-    except AttributeError:
-        return show_forbidden_page()
-    file_path = f"temp/{path}/{del_name}"
-    print(file_path)
-    os.remove(file_path)
-    return RedirectResponse(path)
-
-
 @app.get("/config")
 async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
     try:
@@ -76,17 +63,12 @@ async def upload_file(path: Optional[str] = Query(None), data: UploadFile = File
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         try:
-            print(1)
             if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
                 return show_forbidden_page()
-            print(2)
         except AttributeError:
-            print(3)
             return show_forbidden_page()
-        print(4)
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
-        print(5)
         return RedirectResponse(f"/{path}", status_code=302)
     except Exception as er:
         print(er)

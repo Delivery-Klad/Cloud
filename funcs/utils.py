@@ -1,7 +1,8 @@
 import os
 
 import bcrypt
-from fastapi.responses import RedirectResponse
+from fastapi import Request
+from fastapi.responses import RedirectResponse, HTMLResponse
 
 
 def is_root_user(password: str):
@@ -29,3 +30,31 @@ def create_new_folder(path, arg, access):
     if path[len(path) - 1] == "/":
         path = path[:-1]
     return RedirectResponse(f"/{path}", status_code=302)
+
+
+def listdir(directory: str, request: Request, auth_psw):
+    local_files = ""
+    try:
+        files = sorted(os.listdir(f"temp/files{directory}"))
+        if "hidden" in files:
+            try:
+                if not is_root_user(auth_psw):
+                    return "<li>Access denied</li>"
+            except AttributeError:
+                return "<li>Access denied</li>"
+        elif "viewer" in files:
+            try:
+                if not is_authorized_user(auth_psw):
+                    return "<li>Access denied</li>"
+            except AttributeError:
+                return "<li>Access denied</li>"
+        for i in files:
+            if i == "hidden" or i == "init" or i == "viewer":
+                continue
+            file_class = "folder" if len(i.split(".")) == 1 else "file"
+            local_files += f"""<li>
+                <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
+                class="{file_class}">{i}</a></li>"""
+        return local_files
+    except FileNotFoundError:
+        return HTMLResponse(status_code=404)

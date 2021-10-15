@@ -1,11 +1,10 @@
 import os
 import time
 
-import mammoth
 from fastapi import Request
 from fastapi.responses import FileResponse
 
-from funcs.listdir import listdir
+from funcs.utils import listdir
 from funcs.pages import *
 from funcs.utils import is_root_user
 
@@ -38,10 +37,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
-            elif file_extension == "docx":
-                with open("templates/pdf_viewer.html", "r") as html_page:
-                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
-            elif file_extension == "pdf":
+            elif file_extension in ["docx", "doc", "pptx", "ppt", "xls", "xlsx"]:
                 with open("templates/pdf_viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')

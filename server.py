@@ -8,18 +8,19 @@ from git import Repo
 from funcs.builder import handler
 from funcs.pages import *
 from funcs.utils import create_new_folder
-from routers import source
+from routers import source, delete
 
 app = FastAPI()
 app.include_router(source.router)
+app.include_router(delete.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
-token = "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"
+# token = "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"
 url = os.environ.get("server_url")
 with open("source/style.css", "r") as file:
     style = file.read()
-with open("source/aboba.js", "r") as jaba:
-    jaba_script = jaba.read()
+with open("source/context.js", "r") as context:
+    context_script = context.read()
 
 
 @app.get("/")
@@ -91,7 +92,7 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
     if path == "files":
-        return handler("", "", request, auth_psw, download, jaba_script, style)
+        return handler("", "", request, auth_psw, download, context_script, style)
     elif path == "auth":
         if arg is None:
             return show_auth_page(redirect)
@@ -146,7 +147,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
     name = path.split("/")
-    return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, jaba_script, style)
+    return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, context_script, style)
 
 
 @app.on_event("startup")

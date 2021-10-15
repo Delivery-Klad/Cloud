@@ -8,11 +8,12 @@ from git import Repo
 from funcs.builder import handler
 from funcs.pages import *
 from funcs.utils import create_new_folder
-from routers import source, delete
+from routers import source, delete, config
 
 app = FastAPI()
 app.include_router(source.router)
 app.include_router(delete.router)
+app.include_router(config.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 # token = "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"
@@ -26,37 +27,6 @@ with open("source/context.js", "r") as context:
 @app.get("/")
 async def homepage():
     return RedirectResponse(url + "files")
-
-
-@app.get("/config")
-async def folder_settings(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
-    try:
-        if not bcrypt.checkpw(root_key.encode("utf-8"), auth_psw.encode("utf-8")):
-            return show_forbidden_page()
-        new_path = path.split("/")[:-1]
-        new_path = "/".join(new_path) + f"/{arg}"
-        os.rename(f"temp/{path}", f"temp/{new_path}")
-        files = os.listdir(f"temp/{new_path}")
-        if "hidden" in files:
-            os.remove(f"temp/{new_path}/hidden")
-        elif "viewer" in files:
-            os.remove(f"temp/{new_path}/viewer")
-        elif "init" in files:
-            os.remove(f"temp/{new_path}/init")
-        if access == "root":
-            with open(f"temp/{new_path}/hidden", "w") as hidden:
-                hidden.write("init")
-        elif access == "auth":
-            with open(f"temp/{new_path}/viewer", "w") as viewer:
-                viewer.write("init")
-        else:
-            with open(f"temp/{new_path}/init", "w") as init:
-                init.write("init")
-        return RedirectResponse(f"/{new_path}", status_code=302)
-    except AttributeError:
-        return show_forbidden_page()
-    except Exception as er:
-        print(er)
 
 
 @app.post("/upload_file/")
@@ -155,7 +125,8 @@ async def startup():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo
-        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files_folder", "temp")
+        # {token}:x-oauth-basic@
+        Repo.clone_from(f"https://github.com/Delivery-Klad/files_folder", "temp")
     except FileExistsError:
         pass
 

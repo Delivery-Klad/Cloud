@@ -16,7 +16,7 @@ app.include_router(delete.router)
 app.include_router(config.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
-# token = "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"
+token = "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"
 url = os.environ.get("server_url")
 with open("source/style.css", "r") as file:
     style = file.read()
@@ -125,8 +125,7 @@ async def startup():
     try:
         os.mkdir("temp")
         from git.repo.base import Repo
-        # {token}:x-oauth-basic@
-        Repo.clone_from(f"https://github.com/Delivery-Klad/files_folder", "temp")
+        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files_folder", "temp")
     except FileExistsError:
         pass
 

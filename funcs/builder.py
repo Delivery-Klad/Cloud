@@ -56,12 +56,12 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
         if bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
             icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                         <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
-                        <h1><i><a href="/create?arg=files{upload_path}" title="Create folder">
+                        <h1><i><a href="/create/?arg=files{upload_path}" title="Create folder">
                         <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>
                         <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
                         <img src="{"/source/gear.svg"}" width="30" height="25" alt="settings"></a></i></h1>"""
             menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
-                          <form action="/delete" method="get">
+                          <form action="/delete/" method="get">
                             <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
                             <input type="hidden" id="del_name" name="del_name" value="empty">
                             <input type="submit" value="Delete" class="button button2">

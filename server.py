@@ -8,12 +8,13 @@ from git import Repo
 from funcs.builder import handler
 from funcs.pages import *
 from funcs.utils import create_new_folder
-from routers import source, delete, config
+from routers import source, delete, config, add_text
 
 app = FastAPI()
 app.include_router(source.router)
 app.include_router(delete.router)
 app.include_router(config.router)
+app.include_router(add_text.router)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"

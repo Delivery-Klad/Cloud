@@ -30,8 +30,8 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
         return builder(index_of, files, auth_psw, script, style)
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
+        url = os.environ.get("server_url")
         if not download:
-            url = os.environ.get("server_url")
             if file_extension in ["html", "txt", "py", "cs", "java"]:
                 with open(f"temp/files{path}", "r") as page:
                     return HTMLResponse(content=page.read(), status_code=200)
@@ -44,6 +44,12 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
                 with open("templates/doc_reader.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}") + res.value,
                                         status_code=200)
+            elif file_extension == "pdf":
+                return FileResponse(path=f"temp/files{path}", filename=filename,
+                                    media_type='application/octet-stream')
+        if file_extension == "pdf":
+            with open("templates/pdf_viewer.html", "r") as html_page:
+                return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 

@@ -26,9 +26,14 @@ def listdir(directory: str, request: Request, auth_psw):
             if i == "hidden" or i == "init" or i == "viewer":
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
+            name = i
+            if file_class == "file":
+                file_extension = i.split(".")
+                if file_extension[len(file_extension) - 1] == "pdf":
+                    i += "?download=true"
             local_files += f"""<li>
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
-                class="{file_class}">{i}</a></li>"""
+                class="{file_class}">{name}</a></li>"""
         return local_files
     except FileNotFoundError:
         return HTMLResponse(status_code=404)

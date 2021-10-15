@@ -1,7 +1,7 @@
 import os
 
 import bcrypt
-from fastapi import APIRouter
+from fastapi import APIRouter, Cookie
 from fastapi.responses import RedirectResponse
 from typing import Optional
 

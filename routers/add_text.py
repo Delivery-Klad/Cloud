@@ -13,9 +13,8 @@ router = APIRouter(prefix="/add_text")
 @router.get("/")
 async def add_text(main_theme: str, arg: str, themes: str, auth_psw: Optional[str] = Cookie(None)):
     try:
-        if not bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), auth_psw.encode("utf-8")):
-            return show_forbidden_page()
-        if not bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
+        if not bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), auth_psw.encode("utf-8")) and not \
+                bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), auth_psw.encode("utf-8")):
             return show_forbidden_page()
         print(main_theme)
         print(arg)

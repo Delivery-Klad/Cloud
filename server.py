@@ -123,16 +123,21 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 
 @app.on_event("startup")
 async def startup():
+    print("Starting startup process...")
     try:
+        print("Cloning repo...")
         os.mkdir("temp")
         from git.repo.base import Repo
         Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files_folder", "temp")
+        print("Cloning success!")
     except FileExistsError:
         pass
+    print("Startup!")
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    print("Starting shutdown process...")
     result = []
     repo = Repo("temp/.git")
     for item in repo.untracked_files:
@@ -146,4 +151,4 @@ async def shutdown():
         origin = repo.remote(name='origin')
         origin.push()
         print("Push success!")
-    print("Shutdown...")
+    print("Shutdown!")

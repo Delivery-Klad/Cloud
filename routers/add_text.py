@@ -6,12 +6,17 @@ from docx.enum.style import WD_STYLE_TYPE
 from fastapi import APIRouter, Cookie
 from fastapi.responses import RedirectResponse
 from typing import Optional
+from pydantic import BaseModel
 
 from funcs.pages import show_forbidden_page
 from funcs.utils import is_authorized_user
 
 router = APIRouter(prefix="/add_text")
 folder_path = "temp/files/7 сем/Информационно-поисковые системы/300 текстов"
+
+
+class Temp(BaseModel):
+    arg: str
 
 
 @router.get("/")
@@ -58,12 +63,12 @@ async def add_text(main_theme: str, arg: str, themes: str, link: str, auth_psw: 
         print(er)
 
 
-@router.get("/check/")
-async def check_text(arg: str, auth_psw: Optional[str] = Cookie(None)):
+@router.post("/check/")
+async def check_text(arg: Temp, auth_psw: Optional[str] = Cookie(None)):
     try:
         if not is_authorized_user(auth_psw):
             return show_forbidden_page()
-        arg = arg.replace("\n", " ")
+        arg = arg.arg.replace("\n", " ")
         return f"Words count: {len(arg.split(' '))}"
     except AttributeError:
         return show_forbidden_page()

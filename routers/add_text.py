@@ -26,7 +26,7 @@ async def add_text(main_theme: str, arg: str, themes: str, link: str, auth_psw: 
             path = f"{folder_path}/Middle"
         elif 499 < len(arg.split(" ")) < 800:
             path = f"{folder_path}/Long"
-        texts = sorted(os.listdir(path))
+        texts = sorted(os.listdir(path), key=lambda x: int(x.split(".")[0] if x.split(".")[0].isdigit() else 0))
         if len(texts) == 1:
             name = "1.docx"
         else:

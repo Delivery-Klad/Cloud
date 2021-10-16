@@ -47,7 +47,8 @@ async def add_text(main_theme: str, arg: str, themes: str, link: str, auth_psw: 
         font_object = font_charstyle.font
         font_object.size = Pt(14)
         font_object.name = 'Times New Roman'
-        p.add_run(f"Количество слов - {len(arg.split(' '))}\nОсновная тематика - {main_theme}\nСмежные"
+        count = arg.replace("\n", " ")
+        p.add_run(f"Количество слов - {len(count.split(' '))}\nОсновная тематика - {main_theme}\nСмежные"
                   f" тематики - {themes}\nИсточник - {link}", style='CommentsStyle')
         document.save(f'{path}/Справочные карточки/Справочная карточка_{name}')
         return RedirectResponse(f"/files/7%20сем/Информационно-поисковые%20системы", status_code=302)
@@ -62,6 +63,7 @@ async def check_text(arg: str, auth_psw: Optional[str] = Cookie(None)):
     try:
         if not is_authorized_user(auth_psw):
             return show_forbidden_page()
+        arg = arg.replace("\n", " ")
         return f"Words count: {len(arg.split(' '))}"
     except AttributeError:
         return show_forbidden_page()

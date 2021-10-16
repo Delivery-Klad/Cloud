@@ -63,12 +63,10 @@ async def add_text(main_theme: str, arg: str, themes: str, link: str, auth_psw: 
         print(er)
 
 
-@router.post("/check/")
-async def check_text(arg: Temp, auth_psw: Optional[str] = Cookie(None)):
+@router.get("/check/")
+async def check_text(arg: str):
     try:
-        if not is_authorized_user(auth_psw):
-            return show_forbidden_page()
-        arg = arg.arg.replace("\n", " ")
+        arg = arg.replace("\n", " ")
         return f"Words count: {len(arg.split(' '))}"
     except AttributeError:
         return show_forbidden_page()

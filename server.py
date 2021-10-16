@@ -6,9 +6,11 @@ from fastapi.responses import RedirectResponse
 from git import Repo
 
 from funcs.builder import handler
+from funcs.content_lenth import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import create_new_folder, is_root_user
 from routers import source, delete, config, add_text, upload
+
 
 app = FastAPI()
 app.include_router(source.router)
@@ -16,6 +18,7 @@ app.include_router(delete.router)
 app.include_router(config.router)
 app.include_router(add_text.router)
 app.include_router(upload.router)
+app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"

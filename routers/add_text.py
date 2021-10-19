@@ -28,9 +28,9 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         if not is_authorized_user(auth_psw):
             return show_forbidden_page()
         document = Document()
-        if len(query.arg.split(" ")) < 200:
+        if len(query.arg.split(" ")) <= 200:
             path = f"{folder_path}/Short"
-        elif 499 < len(query.arg.split(" ")) < 800:
+        elif 499 < len(query.arg.split(" ")) < 900:
             path = f"{folder_path}/Middle"
         elif 999 < len(query.arg.split(" ")) < 1600:
             path = f"{folder_path}/Long"
@@ -57,6 +57,8 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         font_object.name = 'Times New Roman'
         count = query.arg.replace("\n", " ")
         count = count.replace("- ", "")
+        count = count.replace("  ", " ")
+        count = count.replace("   ", " ")
         p.add_run(f"Количество слов - {len(count.split(' '))}\nОсновная тематика - {query.main_theme}\nСмежные"
                   f" тематики - {query.themes}\nИсточник - {query.link}", style='CommentsStyle')
         document.save(f'{path}/Справочные карточки/Справочная карточка_{name}')

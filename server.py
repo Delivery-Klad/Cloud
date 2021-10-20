@@ -94,7 +94,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                     root = "checked"
                 elif "viewer" in files:
                     auth = "checked"
-                elif "init" in files:
+                else:
                     all_users = "checked"
                 return show_create_page(arg, "Folder settings", "config", name, root, auth, all_users)
         except AttributeError:

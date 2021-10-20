@@ -63,13 +63,13 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         p.add_run(f"Количество слов - {len(count.split(' '))}\nОсновная тематика - {query.main_theme}\nСмежные"
                   f" тематики - {query.themes}\nИсточник - {query.link}", style='CommentsStyle')
         document.save(f'{path}/Справочные карточки/Справочная карточка_{name}')
-        repo = Repo("temp/.git")
+        """repo = Repo("temp/.git")
         print("Untracked files detected...")
         repo.git.add(all=True)
         repo.index.commit("commit from cloud")
         origin = repo.remote(name='origin')
         origin.push()
-        print("Push success!")
+        print("Push success!")"""
         return RedirectResponse(f"/files/7%20сем/Информационно-поисковые%20системы", status_code=302)
     except AttributeError:
         return show_forbidden_page()

@@ -74,6 +74,14 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
         back_url = "/".join(back_url)
         back_button = f"""<h1><i><a href="/{back_url}" title="Go back">
                     <img src="{"/source/back_arrow.svg"}" width="30" height="25" alt="back"></a></i></h1>"""
+    index_of = index_of.split("/")
+    title = ""
+    for i in index_of:
+        if len(i) < 10:
+            title += i
+        else:
+            title += i[:10] + "..."
+        title += "/"
     html_content = f"""<html>
                         <head>
                             <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -82,7 +90,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
                         <body>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
                         <main>
-                            <header>{back_button}<h1><i>Index of /{index_of}</i></h1>
+                            <header>{back_button}<h1><i>Index of /{title}</i></h1>
                             {icons}</header>
                         <ul id="files">{files}</ul>
                         {menu}

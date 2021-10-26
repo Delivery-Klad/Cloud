@@ -130,6 +130,7 @@ async def startup():
     except FileExistsError:
         pass
     ready = True
+    print(os.listdir("temp/files"))
     print("Startup complete!")
 
 

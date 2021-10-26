@@ -1,5 +1,4 @@
 import os
-import time
 
 from fastapi import Request
 from fastapi.responses import FileResponse
@@ -13,18 +12,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
-            if path == "":
-                for i in range(10):
-                    files = listdir(path, request, auth_psw)
-                    if type(files) != str:
-                        time.sleep(1)
-                    else:
-                        break
-                time.sleep(1)
-                if type(files) != str:
-                    return show_not_found_page()
-            else:
-                return show_not_found_page()
+            return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw, script, style)
     except NotADirectoryError:

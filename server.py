@@ -1,4 +1,5 @@
 import os
+import time
 
 import bcrypt
 from fastapi import FastAPI, Request, Cookie
@@ -13,6 +14,7 @@ from routers import source, delete, config, add_text, upload
 
 
 app = FastAPI()
+ready = False
 app.include_router(source.router)
 app.include_router(delete.router)
 app.include_router(config.router)
@@ -51,6 +53,9 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
     if path == "files":
+        if not ready:
+            while not ready:
+                time.sleep(1)
         return handler("", "", request, auth_psw, download, context_script, style)
     elif path == "auth":
         if arg is None:
@@ -106,11 +111,15 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
     name = path.split("/")
+    if not ready:
+        while not ready:
+            time.sleep(1)
     return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, context_script, style)
 
 
 @app.on_event("startup")
 async def startup():
+    global ready
     print("Starting startup process...")
     try:
         print("Cloning repo...")
@@ -120,6 +129,7 @@ async def startup():
         print("Cloning success!")
     except FileExistsError:
         pass
+    ready = True
     print("Startup complete!")
 
 

@@ -1,4 +1,5 @@
 import os
+import time
 
 import bcrypt
 from fastapi import Request
@@ -35,6 +36,9 @@ def create_new_folder(path, arg, access):
 def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
+        if os.environ.get("last_folder") not in os.listdir(f"temp/files{directory}") or "Other" not in \
+                os.listdir(f"temp/files{directory}"):
+            time.sleep(2)
         files = sorted(os.listdir(f"temp/files{directory}"),
                        key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
         if "hidden" in files:

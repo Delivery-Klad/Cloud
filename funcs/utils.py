@@ -36,6 +36,8 @@ def create_new_folder(path, arg, access):
 def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
+        print(os.environ.get("last_folder") not in os.listdir(f"temp/files{directory}"))
+        print("Other" not in os.listdir(f"temp/files{directory}"))
         if os.environ.get("last_folder") not in os.listdir(f"temp/files{directory}") or "Other" not in \
                 os.listdir(f"temp/files{directory}"):
             time.sleep(2)

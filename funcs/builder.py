@@ -11,7 +11,6 @@ from funcs.utils import is_root_user
 def handler(path: str, filename: str, request: Request, auth_psw, download, script: str, style: str):
     try:
         files = listdir(path, request, auth_psw)
-        print(f"path: {path}")
         if type(files) != str:
             if path == "":
                 while type(files) != str:

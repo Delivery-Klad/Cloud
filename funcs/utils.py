@@ -37,6 +37,10 @@ def listdir(directory: str, request: Request, auth_psw):
     try:
         files = sorted(os.listdir(f"temp/files{directory}"),
                        key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
+        if directory == "":
+            while "7 сем" not in files or "Other" not in files:
+                files = sorted(os.listdir(f"temp/files{directory}"),
+                               key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
         if "hidden" in files:
             try:
                 if not is_root_user(auth_psw):

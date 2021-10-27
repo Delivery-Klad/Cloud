@@ -24,8 +24,38 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
         if not download:
             url = os.environ.get("server_url")
             if file_extension in ["html", "txt", "py", "cs", "java"]:
-                with open(f"temp/files{path}", "r") as page:
-                    return HTMLResponse(content=page.read(), status_code=200)
+                if "UPLOAD.html" in path:
+                    with open("temp/files/7 сем/Информационно-поисковые системы/script", "r") as scrpt:
+                        return HTMLResponse(content=f"""
+                            <html><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add text</title>
+ </head><body>
+ <form name="testform">
+  <p></p>
+   <p><label for="text0">Main theme</label><br>
+   <input type="text" name="main_theme" size="40" value="ИТ, компьютерная техника, ПО ()" id="text0"></p>
+   
+   <p><label for="text1">Text</label><br>
+   <textarea name="arg" style="margin: 0px; width: 786px; height: 246px;" id="text1"></textarea></p>
+   
+    <p><label for="text2">Themes</label><br>
+	<input type="text" name="themes" size="40" value="" id="text2"></p>
+	
+	<p><label for="text3">Link</label><br>
+	<input type="text" name="link" size="40" value="" id="text3"></p>
+  <p></p>
+  <input type="submit" value="Save text">
+ </form>
+<script type="text/javascript">
+{scrpt.read()}
+</script>
+</body></html>
+                            """, status_code=200)
+                else:
+                    with open(f"temp/files{path}", "r") as page:
+                        return HTMLResponse(content=page.read(), status_code=200)
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)

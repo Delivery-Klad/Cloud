@@ -31,9 +31,9 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         document = Document()
         if len(query.arg.split(" ")) <= 200:
             path = f"{folder_path}/Short"
-        elif 499 < len(query.arg.split(" ")) < 900:
+        elif 490 < len(query.arg.split(" ")) < 900:
             path = f"{folder_path}/Middle"
-        elif 999 < len(query.arg.split(" ")) < 1600:
+        elif 990 < len(query.arg.split(" ")) < 1600:
             path = f"{folder_path}/Long"
         texts = sorted(os.listdir(path), key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
         if len(texts) == 1:

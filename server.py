@@ -53,6 +53,7 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
     if path == "files":
+        print(ready)
         if not ready:
             while not ready:
                 time.sleep(1)
@@ -111,6 +112,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
     name = path.split("/")
+    print(ready)
     if not ready:
         while not ready:
             time.sleep(1)
@@ -118,7 +120,7 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 
 
 @app.on_event("startup")
-async def startup():
+def startup():
     global ready
     print("Starting startup process...")
     try:
@@ -134,7 +136,7 @@ async def startup():
 
 
 @app.on_event("shutdown")
-async def shutdown():
+def shutdown():
     print("Starting shutdown process...")
     result = []
     repo = Repo("temp/.git")

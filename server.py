@@ -129,9 +129,9 @@ def startup():
         from git.repo.base import Repo
         Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files", "temp")
         print("Cloning success!")
+        ready = True
     except FileExistsError:
-        pass
-    ready = True
+        ready = True
     print("Startup complete!")
 
 

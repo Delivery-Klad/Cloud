@@ -11,8 +11,13 @@ from funcs.utils import is_root_user
 def handler(path: str, filename: str, request: Request, auth_psw, download, script: str, style: str):
     try:
         files = listdir(path, request, auth_psw)
+        print(f"path: {path}")
         if type(files) != str:
-            return show_not_found_page()
+            if path == "":
+                while type(files) != str:
+                    files = listdir(path, request, auth_psw)
+            else:
+                return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw, script, style)
     except NotADirectoryError:

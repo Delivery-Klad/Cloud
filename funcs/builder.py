@@ -28,6 +28,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
                     with open("temp/files/7 сем/Информационно-поисковые системы/script", "r") as scrpt:
                         return HTMLResponse(content=f"""
                             <html><head>
+<link rel="icon" href="https://c1oud.site/favicon.ico" type="image/x-icon">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Add text</title>
@@ -106,6 +107,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
         title += "/"
     html_content = f"""<html>
                         <head>
+                            <link rel="icon" href="https://c1oud.site/favicon.ico" type="image/x-icon">
                             <meta name="viewport" content="width=device-width,initial-scale=1">
                             <title>{"Cloud"}</title>{style}
                         </head>

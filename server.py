@@ -7,7 +7,7 @@ from fastapi.responses import RedirectResponse
 from git import Repo
 
 from funcs.builder import handler
-from funcs.content_lenth import LimitUploadSize
+from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import create_new_folder, is_root_user
 from routers import source, delete, config, add_text, upload

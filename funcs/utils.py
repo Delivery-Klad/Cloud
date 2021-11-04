@@ -1,7 +1,7 @@
 import os
+import re
 
 import bcrypt
-from natsort import os_sorted
 from fastapi import Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 
@@ -13,6 +13,11 @@ def is_root_user(password: str):
 def is_authorized_user(password: str):
     return bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), password.encode("utf-8")) or \
            bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
+
+
+def sort_dir_files(listdir_files):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    return sorted(listdir_files, key=lambda key: [convert(c) for c in re.split('([0-9]+)', key)])
 
 
 def create_new_folder(path, arg, access):
@@ -40,7 +45,7 @@ def listdir(directory: str, request: Request, auth_psw):
         if directory == "":
             while "7 сем" not in files or "Other" not in files:
                 files = os.listdir(f"temp/files{directory}")
-        files = os_sorted(os.listdir(f"temp/files{directory}"))
+        files = sort_dir_files(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
             try:
                 if not is_root_user(auth_psw):

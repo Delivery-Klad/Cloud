@@ -59,6 +59,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                 time.sleep(1)
         return handler("", "", request, auth_psw, download, context_script, style)
     elif path == "auth":
+        print(arg)
         if arg is None:
             return show_auth_page(redirect)
         else:

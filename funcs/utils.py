@@ -1,6 +1,7 @@
 import os
 
 import bcrypt
+from natsort import os_sorted
 from fastapi import Request
 from fastapi.responses import RedirectResponse, HTMLResponse
 
@@ -35,12 +36,11 @@ def create_new_folder(path, arg, access):
 def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
-        files = sorted(os.listdir(f"temp/files{directory}"),
-                       key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
+        files = os.listdir(f"temp/files{directory}")
         if directory == "":
             while "7 сем" not in files or "Other" not in files:
-                files = sorted(os.listdir(f"temp/files{directory}"),
-                               key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
+                files = os.listdir(f"temp/files{directory}")
+        files = os_sorted(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
             try:
                 if not is_root_user(auth_psw):

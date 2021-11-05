@@ -143,7 +143,6 @@ def startup():
 def shutdown():
     print("Starting shutdown process...")
     try:
-        print(1 + "" / 2)
         result = []
         repo = Repo("temp/.git")
         for item in repo.untracked_files:

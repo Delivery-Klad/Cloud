@@ -1,7 +1,9 @@
 import os
 import time
+import shutil
 
 import bcrypt
+import dropbox
 from fastapi import FastAPI, Request, Cookie
 from fastapi.responses import RedirectResponse
 from git import Repo
@@ -24,6 +26,7 @@ app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
+dbx_token = "vuMWKf0zPEgAAAAAAAAAAe4Uhy9mh-hSArGSGdU5w7AyUvFE7TKwNzX6h_dpDP4r"
 url = os.environ.get("server_url")
 with open("source/style.css", "r") as file:
     style = file.read()
@@ -139,17 +142,26 @@ def startup():
 @app.on_event("shutdown")
 def shutdown():
     print("Starting shutdown process...")
-    result = []
-    repo = Repo("temp/.git")
-    for item in repo.untracked_files:
-        result.append(item)
-    for item in repo.index.diff(None):
-        result.append(item)
-    if result:
-        print("Untracked files detected...")
-        repo.git.add(all=True)
-        repo.index.commit("commit from cloud")
-        origin = repo.remote(name='origin')
-        origin.push()
-        print("Push success!")
+    try:
+        print(1 + "" / 2)
+        result = []
+        repo = Repo("temp/.git")
+        for item in repo.untracked_files:
+            result.append(item)
+        for item in repo.index.diff(None):
+            result.append(item)
+        if result:
+            print("Untracked files detected...")
+            repo.git.add(all=True)
+            repo.index.commit("commit from cloud")
+            origin = repo.remote(name='origin')
+            origin.push()
+            print("Push success!")
+    except Exception as e:
+        print(f"Error: {e}")
+        dbx = dropbox.Dropbox(dbx_token)
+        shutil.make_archive("aboba", "zip", "temp/files/7 сем")
+        import random
+        with open("aboba.zip", "rb") as archive:
+            dbx.files_upload(archive.read(), f"/backup{random.randint(1, 1000)}.zip")
     print("Shutdown complete!")

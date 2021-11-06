@@ -12,11 +12,12 @@ from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import create_new_folder, is_root_user
-from routers import source, delete, config, add_text, upload
+from routers import source, delete, config, add_text, upload, admin
 
 
 app = FastAPI()
 ready = False
+app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(delete.router)
 app.include_router(config.router)
@@ -109,6 +110,11 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                 return show_create_page(arg, "Folder settings", "config", name, root, auth, all_users)
         except AttributeError:
             return show_forbidden_page()
+    elif path == "admin":
+        if is_root_user(auth_psw):
+            return show_admin_index()
+        else:
+            return show_auth_page("admin")
     return show_not_found_page()
 
 
@@ -158,9 +164,12 @@ def shutdown():
             print("Push success!")
     except Exception as e:
         print(f"Error: {e}")
+        print("Creating archive!")
         dbx = dropbox.Dropbox(dbx_token)
         shutil.make_archive("aboba", "zip", "temp/files/7 сем")
         import random
         with open("aboba.zip", "rb") as archive:
+            print("Upload archive!")
             dbx.files_upload(archive.read(), f"/backup{random.randint(1, 1000)}.zip")
+        print("Archive uploaded!")
     print("Shutdown complete!")

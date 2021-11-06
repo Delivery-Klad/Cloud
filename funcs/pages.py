@@ -2,6 +2,11 @@ from fastapi.responses import HTMLResponse
 from typing import Optional
 
 
+def show_admin_index():
+    with open("templates/admin.html", "r") as page:
+        return HTMLResponse(content=page.read().format("aboba"), status_code=200)
+
+
 def show_auth_page(redirect: Optional[str] = "None"):
     with open("templates/auth.html", "r") as page:
         with open("source/auth.css", "r") as auth_style:

@@ -109,7 +109,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
                         <head>
                             <link rel="icon" href="https://c1oud.site/favicon.ico" type="image/x-icon">
                             <meta name="viewport" content="width=device-width,initial-scale=1">
-                            <title>{"Cloud"}</title>{style}
+                            <title>Cloud</title>{style}
                         </head>
                         <body>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>

@@ -3,11 +3,10 @@ import os
 from docx import Document
 from docx.shared import Pt
 from docx.enum.style import WD_STYLE_TYPE
-from fastapi import APIRouter, Cookie
+from fastapi import APIRouter, Cookie, Response
 from fastapi.responses import RedirectResponse
 from typing import Optional
 from pydantic import BaseModel
-from git import Repo
 
 from funcs.pages import show_forbidden_page
 from funcs.utils import is_authorized_user
@@ -29,12 +28,19 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         if not is_authorized_user(auth_psw):
             return show_forbidden_page()
         document = Document()
-        if len(query.arg.split(" ")) <= 200:
+        count = query.arg.replace("\n", " ")
+        count = count.replace("- ", "")
+        count = count.replace("  ", " ")
+        count = count.replace("   ", " ")
+        if 50 < len(count.split(' ')) <= 200:
             path = f"{folder_path}/Short"
-        elif 490 < len(query.arg.split(" ")) < 900:
+        elif 490 < len(count.split(' ')) <= 900:
             path = f"{folder_path}/Middle"
-        elif 990 < len(query.arg.split(" ")) < 1600:
+        elif 990 < len(count.split(' ')) <= 1600:
             path = f"{folder_path}/Long"
+        else:
+            return Response(content=f"Текст с количестком слов {len(count.split(' '))} не подходит никуда",
+                            status_code=404)
         texts = sorted(os.listdir(path), key=lambda x: int(x.split(".")[0]) if x.split(".")[0].isdigit() else 0)
         if len(texts) == 1:
             name = "1.docx"
@@ -56,20 +62,9 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
         font_object = font_charstyle.font
         font_object.size = Pt(14)
         font_object.name = 'Times New Roman'
-        count = query.arg.replace("\n", " ")
-        count = count.replace("- ", "")
-        count = count.replace("  ", " ")
-        count = count.replace("   ", " ")
         p.add_run(f"Количество слов - {len(count.split(' '))}\nОсновная тематика - {query.main_theme}\nСмежные"
                   f" тематики - {query.themes}\nИсточник - {query.link}", style='CommentsStyle')
         document.save(f'{path}/Справочные карточки/Справочная карточка_{name}')
-        """repo = Repo("temp/.git")
-        print("Untracked files detected...")
-        repo.git.add(all=True)
-        repo.index.commit("commit from cloud")
-        origin = repo.remote(name='origin')
-        origin.push()
-        print("Push success!")"""
         return RedirectResponse(f"/files/7%20сем/Информационно-поисковые%20системы", status_code=302)
     except AttributeError:
         return show_forbidden_page()
@@ -81,25 +76,28 @@ async def add_text(query: Test, auth_psw: Optional[str] = Cookie(None)):
 async def get_link(query: str):
     query = query.strip()
     res = []
-    for i in os.listdir(f"{folder_path}/Short/Справочные карточки"):
-        if i != "init":
-            doc = Document(f"{folder_path}/Short/Справочные карточки/{i}")
-            for p in doc.paragraphs:
-                if str(p.text.split("\n")[3])[11:] == query:
-                    res.append("Short/" + i)
-    for i in os.listdir(f"{folder_path}/Middle/Справочные карточки"):
-        if i != "init":
-            doc = Document(f"{folder_path}/Middle/Справочные карточки/{i}")
-            for p in doc.paragraphs:
-                if str(p.text.split("\n")[3])[11:] == query:
-                    res.append("Middle/" + i)
-    for i in os.listdir(f"{folder_path}/Long/Справочные карточки"):
-        if i != "init":
-            doc = Document(f"{folder_path}/Long/Справочные карточки/{i}")
-            for p in doc.paragraphs:
-                if str(p.text.split("\n")[3])[11:] == query:
-                    res.append("Long/" + i)
-    if not res:
-        return {"res": "Цыганства не обнаружено"}
-    else:
-        return {"res": str(res)[1:-1]}
+    try:
+        for i in os.listdir(f"{folder_path}/Short/Справочные карточки"):
+            if i != "init":
+                doc = Document(f"{folder_path}/Short/Справочные карточки/{i}")
+                for p in doc.paragraphs:
+                    if str(p.text.split("\n")[3])[11:] == query:
+                        res.append("Short/" + i)
+        for i in os.listdir(f"{folder_path}/Middle/Справочные карточки"):
+            if i != "init":
+                doc = Document(f"{folder_path}/Middle/Справочные карточки/{i}")
+                for p in doc.paragraphs:
+                    if str(p.text.split("\n")[3])[11:] == query:
+                        res.append("Middle/" + i)
+        for i in os.listdir(f"{folder_path}/Long/Справочные карточки"):
+            if i != "init":
+                doc = Document(f"{folder_path}/Long/Справочные карточки/{i}")
+                for p in doc.paragraphs:
+                    if str(p.text.split("\n")[3])[11:] == query:
+                        res.append("Long/" + i)
+        if not res:
+            return {"res": "Цыганства не обнаружено"}
+        else:
+            return {"res": str(res)[1:-1]}
+    except Exception as e:
+        return {"res": e}

@@ -1,3 +1,4 @@
+import os
 import shutil
 
 import dropbox
@@ -11,20 +12,22 @@ router = APIRouter(prefix="/admin")
 dbx_token = "vuMWKf0zPEgAAAAAAAAAAe4Uhy9mh-hSArGSGdU5w7AyUvFE7TKwNzX6h_dpDP4r"
 
 
-@router.get("/home")
-async def admin_home(auth_psw: Optional[str] = Cookie(None)):
-    if is_root_user(auth_psw):
-        return "Success"
-    else:
-        return "Failed"
-
-
 @router.get("/dashboard")
-async def admin_dashboard(auth_psw: Optional[str] = Cookie(None)):
+async def admin_dashboard(arg: bool = False, auth_psw: Optional[str] = Cookie(None)):
     if is_root_user(auth_psw):
-        return "Success"
+        result = ["Untracked files"]
+        repo = Repo("temp/.git")
+        for item in repo.untracked_files:
+            result.append(item)
+        for item in repo.index.diff(None):
+            result.append(item)
+        if not arg:
+            return {"res": [f"Current session starts in:   {os.environ.get('start_time')}",
+                            f"Untracked files count:       {len(result) - 1}"]}
+        else:
+            return {"res": result}
     else:
-        return "Failed"
+        return {"res": "Failed"}
 
 
 @router.get("/push_files")
@@ -45,6 +48,9 @@ async def admin_push_files(auth_psw: Optional[str] = Cookie(None)):
                 origin = repo.remote(name='origin')
                 origin.push()
                 print("Push success!")
+            else:
+                print("There is no files to push!")
+                return Response(content="There is no files to push!", status_code=200)
         except Exception as e:
             print(f"Error: {e}")
             print("Creating archive!")

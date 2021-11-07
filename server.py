@@ -1,6 +1,7 @@
 import os
 import time
 import shutil
+from datetime import datetime
 
 import bcrypt
 import dropbox
@@ -112,7 +113,11 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
             return show_forbidden_page()
     elif path == "admin":
         if is_root_user(auth_psw):
-            return show_admin_index()
+            content = ""
+            temp = await admin.admin_dashboard(auth_psw=auth_psw)
+            for i in temp['res']:
+                content += f"<div>{i}</div>"
+            return show_admin_index(content)
         else:
             return show_auth_page("admin")
     return show_not_found_page()
@@ -132,6 +137,7 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 @app.on_event("startup")
 def startup():
     global ready
+    os.environ["start_time"] = str(datetime.utcnow())[:-7]
     print("Starting startup process...")
     try:
         print("Cloning repo...")

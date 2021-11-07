@@ -12,7 +12,7 @@ from git import Repo
 from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
-from funcs.utils import create_new_folder, is_root_user
+from funcs.utils import create_new_folder, is_root_user, log, error_log
 from routers import source, delete, config, add_text, upload, admin
 
 
@@ -37,12 +37,14 @@ with open("source/context.js", "r") as context:
 
 
 @app.get("/")
-async def homepage():
+async def homepage(request: Request):
+    log(f"Request to '/' from '{request.client.host}'")
     return RedirectResponse(url + "files")
 
 
 @app.get("/new_folder")
-async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str] = Cookie(None)):
+async def create_folder(path: str, arg: str, access: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"Request to '/new_folder' from '{request.client.host}'")
     try:
         try:
             if not is_root_user(auth_psw):
@@ -57,8 +59,8 @@ async def create_folder(path: str, arg: str, access: str, auth_psw: Optional[str
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
+    log(f"Request to '{path}' from '{request.client.host}' with cookies '{auth_psw}'")
     if path == "files":
-        print(ready)
         if not ready:
             while not ready:
                 time.sleep(1)
@@ -114,7 +116,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
     elif path == "admin":
         if is_root_user(auth_psw):
             content = ""
-            temp = await admin.admin_dashboard(auth_psw=auth_psw)
+            temp = await admin.admin_dashboard(request, auth_psw=auth_psw)
             for i in temp['res']:
                 content += f"<div>{i}</div>"
             return show_admin_index(content)
@@ -126,8 +128,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 @app.get("/files/{catchall:path}")
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     path = request.path_params["catchall"]
+    log(f"Request to '{path}' from '{request.client.host}'")
     name = path.split("/")
-    print(ready)
     if not ready:
         while not ready:
             time.sleep(1)
@@ -137,6 +139,10 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 @app.on_event("startup")
 def startup():
     global ready
+    with open("log.txt", "w") as log_file:
+        log_file.write(f"Application startup")
+    with open("error_log.txt", "w") as log_file:
+        log_file.write(f"Application startup")
     os.environ["start_time"] = str(datetime.utcnow())[:-7]
     print("Starting startup process...")
     try:

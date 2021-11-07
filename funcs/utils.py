@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 
 import bcrypt
 from fastapi import Request
@@ -19,6 +20,16 @@ def is_authorized_user(password: str):
                bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
     except AttributeError:
         return False
+
+
+def log(text: str):
+    with open("log.txt", "a") as log_file:
+        log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
+
+
+def error_log(text: str):
+    with open("error_log.txt", "a") as log_file:
+        log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
 
 
 def sort_dir_files(listdir_files):

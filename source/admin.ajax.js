@@ -8,6 +8,8 @@ function open_dashboard(){
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
             document.getElementById("sidebar2").className = "sidebar-item";
+            document.getElementById("sidebar3").className = "sidebar-item";
+            document.getElementById("sidebar4").className = "sidebar-item";
             document.getElementById("sidebar1").className = "sidebar-item active";
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
@@ -31,6 +33,8 @@ function untracked(){
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
             document.getElementById("sidebar1").className = "sidebar-item";
+            document.getElementById("sidebar3").className = "sidebar-item";
+            document.getElementById("sidebar4").className = "sidebar-item";
             document.getElementById("sidebar2").className = "sidebar-item active";
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
@@ -42,6 +46,56 @@ function untracked(){
         }
         if(xhr.readyState === 4 && xhr.status === 403){
             alert(JSON.parse(xhr.responseText).res);
+        }
+    }
+    xhr.send()
+}
+
+function logs(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/admin/logs/');
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+            document.getElementById("sidebar1").className = "sidebar-item";
+            document.getElementById("sidebar2").className = "sidebar-item";
+            document.getElementById("sidebar4").className = "sidebar-item";
+            document.getElementById("sidebar3").className = "sidebar-item active";
+			var arr = JSON.parse(xhr.responseText).res;
+            place_holder.textContent = "";
+            arr.forEach((element) => {
+                let block = document.createElement('div');
+                block.textContent += element;
+                place_holder.append(block);
+            })
+        }
+        if(xhr.readyState === 4 && xhr.status === 403){
+            alert(xhr.responseText);
+        }
+    }
+    xhr.send()
+}
+
+function errors(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/admin/errors/');
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+            document.getElementById("sidebar1").className = "sidebar-item";
+            document.getElementById("sidebar2").className = "sidebar-item";
+            document.getElementById("sidebar3").className = "sidebar-item";
+            document.getElementById("sidebar4").className = "sidebar-item active";
+			var arr = JSON.parse(xhr.responseText).res;
+            place_holder.textContent = "";
+            arr.forEach((element) => {
+                let block = document.createElement('div');
+                block.textContent += element;
+                place_holder.append(block);
+            })
+        }
+        if(xhr.readyState === 4 && xhr.status === 403){
+            alert(xhr.responseText);
         }
     }
     xhr.send()

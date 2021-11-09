@@ -21,7 +21,7 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
         for item in repo.untracked_files:
             result.append(item)
         for item in repo.index.diff(None):
-            result.append(item)
+            result.append(item.a_path)
         if not arg:
             dbx = dropbox.Dropbox(dbx_token)
             return {"res": [f"Current session starts in:   {os.environ.get('start_time')}",

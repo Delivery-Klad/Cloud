@@ -22,7 +22,7 @@ $(document).ready(function() {
 $(document).bind("click", function(event) {
   document.getElementById("menu_m").className = "hide";
 });
-
+// 85
 function mouseX(evt) {
   if (evt.pageX) {
     return evt.pageX;

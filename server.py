@@ -166,7 +166,7 @@ def shutdown():
         for item in repo.untracked_files:
             result.append(item)
         for item in repo.index.diff(None):
-            result.append(item)
+            result.append(item.a_path)
         if result:
             print("Untracked files detected...")
             repo.git.add(all=True)

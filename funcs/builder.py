@@ -69,7 +69,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
 def builder(index_of: str, files: str, auth_psw, script: str, style: str):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
-            title="Authorization"><img src="{"/source/lock.svg"}" width="30 height="25" alt="auth"></a></i></h1>"""
+            title="Authorization"><img src="{"/source/lock.svg"}" width="30" height="25" alt="auth"></a></i></h1>"""
     back_button, menu = "", ""
     try:
         if is_root_user(auth_psw):

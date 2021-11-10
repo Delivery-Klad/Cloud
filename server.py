@@ -149,7 +149,7 @@ def startup():
         print("Cloning repo...")
         os.mkdir("temp")
         from git.repo.base import Repo
-        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files", "temp")
+        Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/folder", "temp")
         print("Cloning success!")
         ready = True
     except FileExistsError:

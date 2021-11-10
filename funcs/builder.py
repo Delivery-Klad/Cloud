@@ -20,10 +20,13 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
                 retries = 0
                 while retries < 10:
                     files = listdir(path, request, auth_psw)
-                    time.sleep(0.8)
+                    if type(files) == str:
+                        break
+                    time.sleep(1)
                     retries += 1
                 if type(files) != str:
                     return show_not_found_page()
+                files = listdir(path, request, auth_psw)
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw, script, style)
     except NotADirectoryError:

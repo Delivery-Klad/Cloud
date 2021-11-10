@@ -21,6 +21,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
                 while retries < 10:
                     files = listdir(path, request, auth_psw)
                     time.sleep(0.8)
+                    retries += 1
                 if type(files) != str:
                     return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"

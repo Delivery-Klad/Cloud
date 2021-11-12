@@ -79,16 +79,16 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, scri
 def builder(index_of: str, files: str, auth_psw, script: str, style: str):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
-            title="Authorization"><img src="{"/source/lock.svg"}" width="30" height="25" alt="auth"></a></i></h1>"""
+            title="Authorization"><img src="/source/lock.svg" width="30" height="25" alt="auth"></a></i></h1>"""
     back_button, menu = "", ""
     try:
         if is_root_user(auth_psw):
             icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
-                        <img src="{"/source/upload.svg"}" width="30" height="25" alt="upload"></a></i></h1>
+                        <img src="/source/upload.svg" width="30" height="25" alt="upload"></a></i></h1>
                         <h1><i><a href="/create/?arg=files{upload_path}" title="Create folder">
-                        <img src="{"/source/create.svg"}" width="30" height="25" alt="create"></a></i></h1>
+                        <img src="/source/create.svg" width="30" height="25" alt="create"></a></i></h1>
                         <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
-                        <img src="{"/source/gear.svg"}" width="30" height="25" alt="settings"></a></i></h1>"""
+                        <img src="/source/gear.svg" width="30" height="25" alt="settings"></a></i></h1>"""
             menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
                           <form action="/delete/" method="get">
                             <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
@@ -106,7 +106,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
         back_url.pop(len(back_url) - 1)
         back_url = "/".join(back_url)
         back_button = f"""<h1><i><a href="/{back_url}" title="Go back">
-                    <img src="{"/source/back_arrow.svg"}" width="30" height="25" alt="back"></a></i></h1>"""
+                    <img src="/source/back_arrow.svg" width="30" height="25" alt="back"></a></i></h1>"""
     index_of = index_of.split("/")
     title = ""
     for i in index_of:
@@ -117,6 +117,8 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
         title += "/"
     html_content = f"""<html>
                         <head>
+                            <link rel="preload" as="image" href="/source/back_arrow.svg">
+                            <link rel="preload" as="image" href="/source/lock.svg">
                             <link rel="icon" href="https://c1oud.site/favicon.ico" type="image/x-icon">
                             <meta name="viewport" content="width=device-width,initial-scale=1">
                             <title>Cloud</title>{style}

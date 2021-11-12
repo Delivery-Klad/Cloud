@@ -122,6 +122,7 @@ def builder(index_of: str, files: str, auth_psw, script: str, style: str):
                             <title>Cloud</title>{style}
                         </head>
                         <body>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
                         <main>
                             <header>{back_button}<h1><i>Index of /{title}</i></h1>
                             {icons}</header>

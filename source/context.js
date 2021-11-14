@@ -1,4 +1,5 @@
 <script type="text/javascript">
+var place_holder = document.getElementById("meta_place_holder")
 $(document).ready(function() {
 
   if ($("#file").addEventListener) {
@@ -9,8 +10,22 @@ $(document).ready(function() {
   } else {
 
     $('body').on('contextmenu', 'a.file', function() {
-      document.getElementById("menu_m").className = "show";
+      var xhr = new XMLHttpRequest();
       var text = $(this).contents()[0].nodeValue.trim();
+      xhr.open('GET', '/meta/?path=' + document.getElementById("path").value + '&name=/' + text);
+      xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+			var arr = JSON.parse(xhr.responseText).res;
+            place_holder.textContent = "";
+            arr.forEach((element) => {
+                let block = document.createElement('div');
+                block.textContent += element;
+                place_holder.append(block);
+            })
+        }
+      }
+      xhr.send()
+      document.getElementById("menu_m").className = "show";
       document.getElementById('del_name').value = text;
       document.getElementById("menu_m").style.top = mouseY(event) + 'px';
       document.getElementById("menu_m").style.left = mouseX(event) + 'px';

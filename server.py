@@ -13,7 +13,7 @@ from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import create_new_folder, is_root_user, log, error_log
-from routers import source, delete, config, upload, admin
+from routers import source, delete, config, upload, admin, files_info
 
 
 app = FastAPI()
@@ -23,6 +23,7 @@ app.include_router(source.router)
 app.include_router(delete.router)
 app.include_router(config.router)
 app.include_router(upload.router)
+app.include_router(files_info.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")

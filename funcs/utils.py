@@ -76,7 +76,7 @@ def listdir(directory: str, request: Request, auth_psw):
             except AttributeError:
                 return "<li>Access denied</li>"
         for i in files:
-            if i == "hidden" or i == "init" or i == "viewer":
+            if i == "hidden" or i == "init" or i == "viewer" or (".meta" in i):
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li>
@@ -87,20 +87,28 @@ def listdir(directory: str, request: Request, auth_psw):
         return HTMLResponse(status_code=404)
 
 
-def constructor(icons, upload_path, index_of):
-    with open("source/context.js", "r") as context:
-        script = context.read()
+def constructor(icons, upload_path):
     icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
                             <img src="/source/upload.svg" width="30" height="25" alt="upload"></a></i></h1>
                             <h1><i><a href="/create/?arg=files{upload_path}" title="Create folder">
                             <img src="/source/create.svg" width="30" height="25" alt="create"></a></i></h1>
                             <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
                             <img src="/source/gear.svg" width="30" height="25" alt="settings"></a></i></h1>"""
+    return icons
+
+
+def get_menu(index_of, is_root):
+    with open("source/context.js", "r") as context:
+        script = context.read()
     menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
-                              <form action="/delete/" method="get">
-                                <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
-                                <input type="hidden" id="del_name" name="del_name" value="empty">
-                                <input type="submit" value="Delete" class="button button2">
-                              </form>
-                          </ul>{script}"""
-    return icons, menu
+                  <form action="/delete/" method="get">
+                      <div id="meta_place_holder">test</div>
+                      <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
+                      <input type="hidden" id="del_name" name="del_name" value="empty">"""
+    if is_root:
+        menu += f"""<input type="submit" value="Delete" class="button button2">
+                </form>
+                </ul>{script}"""
+    else:
+        menu += f"""</form></ul>{script}"""
+    return menu

@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 
 from funcs.utils import listdir
 from funcs.pages import *
-from funcs.utils import is_root_user, constructor
+from funcs.utils import is_root_user, constructor, get_menu
 
 
 def handler(path: str, filename: str, request: Request, auth_psw, download):
@@ -52,9 +52,12 @@ def builder(index_of: str, files: str, auth_psw):
     back_button, menu, title = "", "", ""
     try:
         if is_root_user(auth_psw):
-            icons, menu = constructor(icons, upload_path, index_of)
+            icons = constructor(icons, upload_path)
+            menu = get_menu(index_of, True)
+        else:
+            menu = get_menu(index_of, False)
     except AttributeError:
-        pass
+        menu = get_menu(index_of, False)
     index_of = index_of.replace("//", "/")
     if index_of[len(index_of) - 1] == "/":
         index_of = index_of[:-1]

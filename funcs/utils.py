@@ -112,3 +112,13 @@ def get_menu(index_of, is_root):
     else:
         menu += f"""</form></ul>{script}"""
     return menu
+
+
+def check_cookies(cookies):
+    try:
+        if bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), cookies.encode("utf-8")):
+            return "Administrator"
+        if bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), cookies.encode("utf-8")):
+            return "Authorized user"
+    except AttributeError:
+        return "Unauthorized"

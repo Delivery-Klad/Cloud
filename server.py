@@ -12,7 +12,7 @@ from git import Repo
 from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
-from funcs.utils import create_new_folder, is_root_user, log, error_log
+from funcs.utils import create_new_folder, is_root_user, log, error_log, check_cookies
 from routers import source, delete, config, upload, admin, files_info
 
 
@@ -43,7 +43,7 @@ async def homepage(request: Request):
 
 @app.get("/new_folder")
 async def create_folder(path: str, arg: str, access: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/new_folder' from '{request.client.host}'")
+    log(f"Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         try:
             if not is_root_user(auth_psw):
@@ -58,7 +58,7 @@ async def create_folder(path: str, arg: str, access: str, request: Request, auth
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
-    log(f"Request to '{path}' from '{request.client.host}' with cookies '{auth_psw}'")
+    log(f"Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if path == "files":
             if not ready:
@@ -117,7 +117,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                 content = ""
                 temp = await admin.admin_dashboard(request, auth_psw=auth_psw)
                 for i in temp['res']:
-                    content += f"<div>{i}</div>"
+                    if i == "Summary":
+                        content += f"""<div style="font-weight: bold; font-size: 20px;">{i}</div>"""
+                    else:
+                        content += f"<div>{i}</div>"
                 return show_admin_index(content)
             else:
                 return show_auth_page("admin")
@@ -130,7 +133,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     try:
         path = request.path_params["catchall"]
-        log(f"Request to '{path}' from '{request.client.host}'")
+        log(f"Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
         name = path.split("/")
         if not ready:
             while not ready:

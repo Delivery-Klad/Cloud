@@ -15,6 +15,10 @@ function open_dashboard(){
             place_holder.textContent = "";
             arr.forEach((element) => {
                 let block = document.createElement('div');
+                if (element === "Summary"){
+                    block.style.fontWeight = "bold";
+                    block.style.fontSize = "20px";
+                }
                 block.textContent += element;
                 place_holder.append(block);
             })
@@ -40,6 +44,10 @@ function untracked(){
             place_holder.textContent = "";
             arr.forEach((element) => {
                 let block = document.createElement('div');
+                if (element === "Untracked files"){
+                    block.style.fontWeight = "bold";
+                    block.style.fontSize = "20px";
+                }
                 block.textContent += element;
                 place_holder.append(block);
             })

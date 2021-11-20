@@ -2,9 +2,7 @@ import os
 import json
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse
 
-from funcs.pages import show_not_found_page
 
 router = APIRouter(prefix="/meta")
 

@@ -18,6 +18,10 @@ async def delete(del_name: Optional[str], path: Optional[str], auth_psw: Optiona
     except AttributeError:
         return show_forbidden_page()
     file_path = f"temp/{path}/{del_name}"
-    print(file_path)
+    meta_file = f"temp/{path}/{del_name}.meta"
     os.remove(file_path)
+    try:
+        os.remove(meta_file)
+    except FileNotFoundError:
+        pass
     return RedirectResponse(path)

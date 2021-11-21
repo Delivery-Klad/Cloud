@@ -1,24 +1,40 @@
 var place_holder = document.getElementById("place_holder1")
 var sidebar1 = document.getElementById("sidebar")
 
+function toggle_menu(num){
+    document.getElementById("sidebar1").className = "sidebar-item";
+    document.getElementById("sidebar2").className = "sidebar-item";
+    document.getElementById("sidebar3").className = "sidebar-item";
+    document.getElementById("sidebar4").className = "sidebar-item";
+    document.getElementById("sidebar" + num).className = "sidebar-item active";
+}
+
+function fill_placeholder(response, func){
+    var arr = JSON.parse(response).res;
+    place_holder.textContent = "";
+    let div_block = document.createElement('div');
+    let href = document.createElement('a');
+    href.href = func;
+    href.textContent = "Clear logs";
+    href.className = "clear";
+    place_holder.append(div_block);
+    div_block.appendChild(href);
+    arr.forEach((element) => {
+        let block = document.createElement('div');
+        block.textContent += element;
+        place_holder.append(block);
+    })
+}
+
 function open_dashboard(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            document.getElementById("sidebar2").className = "sidebar-item";
-            document.getElementById("sidebar3").className = "sidebar-item";
-            document.getElementById("sidebar4").className = "sidebar-item";
-            document.getElementById("sidebar1").className = "sidebar-item active";
+            toggle_menu(1)
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
-            let li_block = document.createElement('li');
-            let href = document.createElement('a');
-            href.href = "aboba.php";
-            href.textContent = "dfddf";
-            place_holder.append(li_block);
-            li_block.appendChild(href);
             arr.forEach((element) => {
                 let block = document.createElement('div');
                 if (element === "Summary"){
@@ -42,10 +58,7 @@ function untracked(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            document.getElementById("sidebar1").className = "sidebar-item";
-            document.getElementById("sidebar3").className = "sidebar-item";
-            document.getElementById("sidebar4").className = "sidebar-item";
-            document.getElementById("sidebar2").className = "sidebar-item active";
+            toggle_menu(2)
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             arr.forEach((element) => {
@@ -71,17 +84,23 @@ function logs(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            document.getElementById("sidebar1").className = "sidebar-item";
-            document.getElementById("sidebar2").className = "sidebar-item";
-            document.getElementById("sidebar4").className = "sidebar-item";
-            document.getElementById("sidebar3").className = "sidebar-item active";
-			var arr = JSON.parse(xhr.responseText).res;
-            place_holder.textContent = "";
-            arr.forEach((element) => {
-                let block = document.createElement('div');
-                block.textContent += element;
-                place_holder.append(block);
-            })
+            toggle_menu(3)
+			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
+        }
+        if(xhr.readyState === 4 && xhr.status === 403){
+            alert(xhr.responseText);
+        }
+    }
+    xhr.send()
+}
+
+function clear_logs(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/admin/clear_logs/');
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
         }
         if(xhr.readyState === 4 && xhr.status === 403){
             alert(xhr.responseText);
@@ -96,17 +115,23 @@ function errors(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            document.getElementById("sidebar1").className = "sidebar-item";
-            document.getElementById("sidebar2").className = "sidebar-item";
-            document.getElementById("sidebar3").className = "sidebar-item";
-            document.getElementById("sidebar4").className = "sidebar-item active";
-			var arr = JSON.parse(xhr.responseText).res;
-            place_holder.textContent = "";
-            arr.forEach((element) => {
-                let block = document.createElement('div');
-                block.textContent += element;
-                place_holder.append(block);
-            })
+            toggle_menu(4)
+			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
+        }
+        if(xhr.readyState === 4 && xhr.status === 403){
+            alert(xhr.responseText);
+        }
+    }
+    xhr.send()
+}
+
+function clear_errors(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/admin/clear_errors/');
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
         }
         if(xhr.readyState === 4 && xhr.status === 403){
             alert(xhr.responseText);

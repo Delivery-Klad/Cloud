@@ -57,7 +57,10 @@ async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(No
     log(f"GET Request to '/admin/clear_logs' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
-            pass
+            clear_log("log.txt")
+            with open("log.txt", "r") as log_file:
+                result = log_file.read()
+            return {"res": result.split("\n")}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -69,7 +72,9 @@ async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None))
     log(f"GET Request to '/admin/errors' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
-            clear_log("log.txt")
+            with open("error_log.txt", "r") as log_file:
+                result = log_file.read()
+            return {"res": result.split("\n")}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -82,6 +87,9 @@ async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(
     try:
         if is_root_user(auth_psw):
             clear_log("error_log.txt")
+            with open("error_log.txt", "r") as log_file:
+                result = log_file.read()
+            return {"res": result.split("\n")}
         else:
             return {"res": "Failed"}
     except Exception as e:

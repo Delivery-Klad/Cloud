@@ -1,12 +1,13 @@
 import os
 import shutil
+from datetime import datetime
 
 import dropbox
 from fastapi import APIRouter, Cookie, Response, Request
 from git import Repo
 from typing import Optional
 
-from funcs.utils import is_root_user, log, error_log, check_cookies
+from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
 dbx_token = "vuMWKf0zPEgAAAAAAAAAAe4Uhy9mh-hSArGSGdU5w7AyUvFE7TKwNzX6h_dpDP4r"
@@ -14,7 +15,7 @@ dbx_token = "vuMWKf0zPEgAAAAAAAAAAe4Uhy9mh-hSArGSGdU5w7AyUvFE7TKwNzX6h_dpDP4r"
 
 @router.get("/dashboard")
 async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/admin/dashboard' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/admin/dashboard' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
             result = ["Untracked files"]
@@ -39,7 +40,7 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
 
 @router.get("/logs")
 async def admin_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/admin/logs' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/admin/logs' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
             with open("log.txt", "r") as log_file:
@@ -53,12 +54,10 @@ async def admin_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
 
 @router.get("/clear_logs")
 async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/admin/clear_logs' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/admin/clear_logs' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
-            with open("log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            pass
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -67,12 +66,22 @@ async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(No
 
 @router.get("/errors")
 async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/admin/errors' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/admin/errors' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if is_root_user(auth_psw):
-            with open("error_log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            clear_log("log.txt")
+        else:
+            return {"res": "Failed"}
+    except Exception as e:
+        error_log(str(e))
+
+
+@router.get("/clear_errors")
+async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/admin/clear_errors' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    try:
+        if is_root_user(auth_psw):
+            clear_log("error_log.txt")
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -81,7 +90,7 @@ async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None))
 
 @router.get("/push_files")
 async def admin_push_files(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/admin/push_files' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/admin/push_files' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     if is_root_user(auth_psw):
         print("Starting push files process...")
         try:

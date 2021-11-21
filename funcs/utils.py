@@ -22,14 +22,22 @@ def is_authorized_user(password: str):
         return False
 
 
-def log(text: str):
+def log(text: str, code: bool = False):
     with open("log.txt", "a") as log_file:
-        log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
+        if code:
+            log_file.write(f" - {text}")
+        else:
+            log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
 
 
 def error_log(text: str):
     with open("error_log.txt", "a") as log_file:
         log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
+
+
+def clear_log(table: str):
+    with open(table, "w") as log_file:
+        log_file.write(f"Log cleared {str(datetime.utcnow())[:-7]}")
 
 
 def sort_dir_files(listdir_files):

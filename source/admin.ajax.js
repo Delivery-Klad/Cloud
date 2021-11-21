@@ -13,6 +13,12 @@ function open_dashboard(){
             document.getElementById("sidebar1").className = "sidebar-item active";
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
+            let li_block = document.createElement('li');
+            let href = document.createElement('a');
+            href.href = "aboba.php";
+            href.textContent = "dfddf";
+            place_holder.append(li_block);
+            li_block.appendChild(href);
             arr.forEach((element) => {
                 let block = document.createElement('div');
                 if (element === "Summary"){

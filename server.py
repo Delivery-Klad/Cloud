@@ -35,7 +35,7 @@ url = os.environ.get("server_url")
 @app.get("/")
 async def homepage(request: Request):
     try:
-        log(f"Request to '/' from '{request.client.host}'")
+        log(f"GET Request to '/' from '{request.client.host}'")
         return RedirectResponse(url + "files")
     except Exception as e:
         error_log(str(e))
@@ -43,7 +43,7 @@ async def homepage(request: Request):
 
 @app.get("/new_folder")
 async def create_folder(path: str, arg: str, access: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         try:
             if not is_root_user(auth_psw):
@@ -58,7 +58,7 @@ async def create_folder(path: str, arg: str, access: str, request: Request, auth
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
-    log(f"Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
     try:
         if path == "files":
             if not ready:
@@ -133,7 +133,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     try:
         path = request.path_params["catchall"]
-        log(f"Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+        log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
         name = path.split("/")
         if not ready:
             while not ready:
@@ -148,9 +148,9 @@ def startup():
     global ready
     try:
         with open("log.txt", "w") as log_file:
-            log_file.write(f"Application startup")
+            log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         with open("error_log.txt", "w") as log_file:
-            log_file.write(f"Application startup")
+            log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         os.environ["start_time"] = str(datetime.utcnow())[:-7]
         print("Starting startup process...")
         try:

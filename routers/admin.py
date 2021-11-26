@@ -12,7 +12,7 @@ from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
 dbx_token = "sl.A9Cxkk177CIGlG-VctESNqO5GHhtz_xyt4SNXCUzhL4sqx9KtSc7QvBeULm_IX53-1xQNsmfCSQIYNYyFDhjSAuGlLhLMYwwzaZ2-" \
-            "3PvQARa_u3GbRbNn-kkE465HG42GrkoVSw666"
+            "3PvQARa_u3GbRbNn-kkE465HG42GrkoVSw"
 
 
 @router.get("/dashboard")

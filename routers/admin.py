@@ -3,6 +3,7 @@ import shutil
 from datetime import datetime
 
 import dropbox
+from dropbox.exceptions import AuthError
 from fastapi import APIRouter, Cookie, Response, Request
 from git import Repo
 from typing import Optional
@@ -10,7 +11,8 @@ from typing import Optional
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
-dbx_token = "vuMWKf0zPEgAAAAAAAAAAe4Uhy9mh-hSArGSGdU5w7AyUvFE7TKwNzX6h_dpDP4r"
+dbx_token = "sl.A9Cxkk177CIGlG-VctESNqO5GHhtz_xyt4SNXCUzhL4sqx9KtSc7QvBeULm_IX53-1xQNsmfCSQIYNYyFDhjSAuGlLhLMYwwzaZ2-" \
+            "3PvQARa_u3GbRbNn-kkE465HG42GrkoVSw666"
 
 
 @router.get("/dashboard")
@@ -25,11 +27,15 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
             for item in repo.index.diff(None):
                 result.append(item.a_path)
             if not arg:
-                dbx = dropbox.Dropbox(dbx_token)
+                try:
+                    dbx = dropbox.Dropbox(dbx_token)
+                    backups = len(dbx.files_list_folder(path='').entries)
+                except AuthError:
+                    backups = "Not found"
                 return {"res": [f"Summary",
                                 f"Current session starts in:   {os.environ.get('start_time')}",
                                 f"Untracked files count:       {len(result) - 1}",
-                                f"Backup archives count:       {len(dbx.files_list_folder(path='').entries)}"]}
+                                f"Backup archives count:       {backups}"]}
             else:
                 return {"res": result}
         else:

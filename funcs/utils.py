@@ -31,6 +31,7 @@ def log(text: str, code: bool = False):
 
 
 def error_log(text: str):
+    print(text)
     with open("error_log.txt", "a") as log_file:
         log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
 

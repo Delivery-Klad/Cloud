@@ -11,8 +11,8 @@ from typing import Optional
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
-dbx_token = "sl.A9Cxkk177CIGlG-VctESNqO5GHhtz_xyt4SNXCUzhL4sqx9KtSc7QvBeULm_IX53-1xQNsmfCSQIYNYyFDhjSAuGlLhLMYwwzaZ2-" \
-            "3PvQARa_u3GbRbNn-kkE465HG42GrkoVSw"
+dbx_token = "sl.A9D30kaLzF7_LrgW1YEFtUPoExkegqVJ0zVRGbHl9Z7FnQU9JVguI5WSskEjIyRT8XxnwngGDaK_dJ36YKE1T7a3WcFxR4hUzoya" \
+            "MdRQLH3qhWKinf3LWvvs5zqNZZ2I5Hpq43M"
 
 
 @router.get("/dashboard")

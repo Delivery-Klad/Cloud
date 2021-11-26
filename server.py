@@ -28,8 +28,8 @@ app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 root_key = os.environ.get("root_psw")
 viewer_key = os.environ.get("viewer_key")
 token = "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"
-dbx_token = "sl.A9Cxkk177CIGlG-VctESNqO5GHhtz_xyt4SNXCUzhL4sqx9KtSc7QvBeULm_IX53-1xQNsmfCSQIYNYyFDhjSAuGlLhLMYwwzaZ2-" \
-            "3PvQARa_u3GbRbNn-kkE465HG42GrkoVSw"
+dbx_token = "sl.A9D30kaLzF7_LrgW1YEFtUPoExkegqVJ0zVRGbHl9Z7FnQU9JVguI5WSskEjIyRT8XxnwngGDaK_dJ36YKE1T7a3WcFxR4hUzoy" \
+            "aMdRQLH3qhWKinf3LWvvs5zqNZZ2I5Hpq43M"
 url = os.environ.get("server_url")
 
 

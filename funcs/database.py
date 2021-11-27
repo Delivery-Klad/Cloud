@@ -25,8 +25,6 @@ def create_tables():
                        "password TEXT NOT NULL,"
                        "useragent TEXT NOT NULL,"
                        "permissions INT NOT NULL)")
-        # cursor.execute("SELECT * FROM users")
-        # print(cursor.fetchall())
         connect.commit()
     except Exception as e:
         print(e)
@@ -41,10 +39,9 @@ def get_permissions(login: str):
         connect, cursor = db_connect()
         cursor.execute("""SELECT permissions FROM users WHERE login=%(login)s""", {"login": login})
         try:
-            db_permissions = cursor.fetchall()[0][0]
+            return cursor.fetchall()[0][0]
         except TypeError:
             return None
-        return db_permissions
     except Exception as e:
         print(e)
         return None

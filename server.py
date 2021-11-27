@@ -91,6 +91,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                 return show_auth_page(redirect)
             else:
                 result = check_password(arg2, arg)
+                print(result)
                 if result:
                     authorize = AuthJWT()
                     if redirect is None:

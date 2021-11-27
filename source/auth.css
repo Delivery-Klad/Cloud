@@ -41,6 +41,8 @@ body {
     background: transparent;
   }
   .login-box .user-box label {
+    width: 100%;
+    height: 9px;
     position: absolute;
     top:0;
     left: 0;
@@ -49,6 +51,7 @@ body {
     color: #fff;
     pointer-events: none;
     transition: .5s;
+    background: #0d1520;
   }
 
   .login-box .user-box input:focus ~ label,

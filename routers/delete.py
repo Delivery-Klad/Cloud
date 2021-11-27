@@ -13,7 +13,7 @@ router = APIRouter(prefix="/delete")
 @router.get("/")
 async def delete(request: Request, name: Optional[str], path: Optional[str], auth_psw: Optional[str] = Cookie(None)):
     try:
-        log(f"GET Request to '/delete' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+        log(f"GET Request to '/delete' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         try:
             if not is_root_user(auth_psw):
                 return show_forbidden_page()

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/meta")
 
 @router.get("/")
 async def get_meta(path: str, name: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/meta' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/meta' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         size = os.path.getsize(f"temp/{path}{name}")
         size /= 1024

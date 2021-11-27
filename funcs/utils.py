@@ -2,22 +2,29 @@ import os
 import re
 from datetime import datetime
 
-import bcrypt
 from fastapi import Request
+from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import RedirectResponse, HTMLResponse
 
+from funcs.database import get_permissions
 
-def is_root_user(password: str):
+
+def is_root_user(cookie: str):
     try:
-        return bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
+        if cookie.split("://:")[0] == "5":
+            return True
+        else:
+            return False
     except AttributeError:
         return False
 
 
-def is_authorized_user(password: str):
+def is_authorized_user(cookie: str):
     try:
-        return bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), password.encode("utf-8")) or \
-               bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), password.encode("utf-8"))
+        if type(cookie.split("://:")[0]) == str:
+            return True
+        else:
+            return False
     except AttributeError:
         return False
 
@@ -123,11 +130,18 @@ def get_menu(index_of, is_root):
     return menu
 
 
-def check_cookies(cookies):
+def check_cookies(request: Request, cookie: str):
     try:
-        if bcrypt.checkpw(os.environ.get("root_psw").encode("utf-8"), cookies.encode("utf-8")):
+        permissions = get_permissions(get_jwt_sub(request, cookie.split("://:")[1]))
+        if permissions == 5:
             return "Administrator"
-        if bcrypt.checkpw(os.environ.get("viewer_key").encode("utf-8"), cookies.encode("utf-8")):
+        else:
             return "Authorized user"
     except AttributeError:
         return "Unauthorized"
+
+
+def get_jwt_sub(request: Request, cookie: str):
+    request.headers.__dict__["_list"].append(("authorization".encode(), f"Bearer {cookie}".encode()))
+    authorize = AuthJWT(request)
+    return authorize.get_jwt_subject()

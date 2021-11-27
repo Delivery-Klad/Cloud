@@ -11,4 +11,6 @@ mammoth==1.4.17
 bcrypt==3.2.0
 python-docx==0.8.11
 pdfkit==0.6.1
-dropbox
+dropbox==11.25.0
+psycopg2==2.9.2
+psycopg2-binary==2.9.2

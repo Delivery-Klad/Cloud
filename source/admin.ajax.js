@@ -6,6 +6,7 @@ function toggle_menu(num){
     document.getElementById("sidebar2").className = "sidebar-item";
     document.getElementById("sidebar3").className = "sidebar-item";
     document.getElementById("sidebar4").className = "sidebar-item";
+    document.getElementById("sidebar5").className = "sidebar-item";
     document.getElementById("sidebar" + num).className = "sidebar-item active";
 }
 
@@ -24,6 +25,29 @@ function fill_placeholder(response, func){
         block.textContent += element;
         place_holder.append(block);
     })
+}
+
+function set_table_attributes(table){
+    table.setAttribute("style", "width:100%");
+}
+
+function set_table_header(table){
+    var headers = table.insertRow();
+    var id_header = document.createElement("th");
+    id_header.textContent = " Id ";
+    headers.appendChild(id_header);
+    var name_header = document.createElement("th");
+    name_header.textContent = " Username ";
+    headers.appendChild(name_header);
+    var password_header = document.createElement("th");
+    password_header.textContent = " Password ";
+    headers.appendChild(password_header);
+    var agent_header = document.createElement("th");
+    agent_header.textContent = " User-Agent ";
+    headers.appendChild(agent_header);
+    var permissions_header = document.createElement("th");
+    permissions_header.textContent = " Permissions ";
+    headers.appendChild(permissions_header);
 }
 
 function open_dashboard(){
@@ -135,6 +159,43 @@ function clear_errors(){
         }
         if(xhr.readyState === 4 && xhr.status === 403){
             alert(xhr.responseText);
+        }
+    }
+    xhr.send()
+}
+
+function users(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/admin/users');
+
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4 && xhr.status === 200){
+            toggle_menu(5)
+            var arr = JSON.parse(xhr.responseText).res;
+            place_holder.textContent = "";
+            var table = document.createElement("TABLE");
+            set_table_attributes(table);
+            set_table_header(table);
+            arr.forEach((element) => {
+                if (element === "Users"){
+                    let block = document.createElement('div');
+                    block.setAttribute("style", "font-weight: bold; font-size: 20px;");
+                    block.textContent += element;
+                    place_holder.append(block);
+                }
+                else{
+                    var current_row = table.insertRow();
+                    element.forEach((row) => {
+                        var table_block = document.createElement("td");
+                        table_block.textContent = row;
+                        current_row.appendChild(table_block);
+                    })
+                }
+            })
+            place_holder.append(table);
+        }
+        if(xhr.readyState === 4 && xhr.status === 403){
+            alert(JSON.parse(xhr.responseText).res);
         }
     }
     xhr.send()

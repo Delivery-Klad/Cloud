@@ -16,7 +16,7 @@ router = APIRouter(prefix="/upload_file")
 async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/upload/{data.filename}' from '{request.client.host}' "
-        f"with cookies '{check_cookies(auth_psw)}'")
+        f"with cookies '{check_cookies(request, auth_psw)}'")
     try:
         try:
             if not is_root_user(auth_psw):

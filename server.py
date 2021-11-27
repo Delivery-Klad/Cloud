@@ -6,9 +6,13 @@ from datetime import datetime
 import bcrypt
 import dropbox
 from fastapi import FastAPI, Request, Cookie
-from fastapi.responses import RedirectResponse
+from fastapi_jwt_auth import AuthJWT
+from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi.responses import RedirectResponse, JSONResponse
+from pydantic import BaseModel
 from git import Repo
 
+from funcs.database import create_tables, check_password, create_account, get_permissions
 from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
@@ -25,12 +29,27 @@ app.include_router(config.router)
 app.include_router(upload.router)
 app.include_router(files_info.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
-root_key = os.environ.get("root_psw")
-viewer_key = os.environ.get("viewer_key")
 token = "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"
-dbx_token = "sl.A9D30kaLzF7_LrgW1YEFtUPoExkegqVJ0zVRGbHl9Z7FnQU9JVguI5WSskEjIyRT8XxnwngGDaK_dJ36YKE1T7a3WcFxR4hUzoy" \
-            "aMdRQLH3qhWKinf3LWvvs5zqNZZ2I5Hpq43M"
+dbx_token = "sl.A9H7dEsey3fjUdVo0dCddszrI99NFgHEDhErtLgW1GACJthi-B6mqGHOaEYRdA9pt9yjjSrqJZmvdtrREHEpvMgJE0qLPHWWyf3k" \
+            "nkNy0E9hmOqL5_jAGakZDImMpZGMv77-u00"
 url = os.environ.get("server_url")
+
+
+class JWTSettings(BaseModel):
+    authjwt_secret_key: str = "SecreT_Auth_JWT"
+
+
+@AuthJWT.load_config
+def get_config():
+    return JWTSettings()
+
+
+@app.exception_handler(AuthJWTException)
+def authjwt_exception_handler(request: Request, exc: AuthJWTException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.message}
+    )
 
 
 @app.get("/")
@@ -44,7 +63,7 @@ async def homepage(request: Request):
 
 @app.get("/new_folder")
 async def create_folder(path: str, arg: str, access: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+    log(f"GET Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         try:
             if not is_root_user(auth_psw):
@@ -57,9 +76,10 @@ async def create_folder(path: str, arg: str, access: str, request: Request, auth
 
 
 @app.get("/{path}")
-async def other_page(path: str, request: Request, arg: Optional[str] = None, auth_psw: Optional[str] = Cookie(None),
-                     download: Optional[bool] = None, redirect: Optional[str] = None, access: Optional[str] = None):
-    log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+async def other_page(path: str, request: Request, arg: Optional[str] = None, arg2: Optional[str] = None,
+                     auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None,
+                     redirect: Optional[str] = None, access: Optional[str] = None):
+    log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         if path == "files":
             if not ready:
@@ -67,18 +87,33 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
                     time.sleep(1)
             return handler("", "", request, auth_psw, download)
         elif path == "auth":
-            if arg is None:
+            if arg is None or arg2 is None:
                 return show_auth_page(redirect)
             else:
-                if arg == root_key or arg == viewer_key:
+                result = check_password(arg2, arg)
+                if result:
+                    authorize = AuthJWT()
                     if redirect is None:
                         response = RedirectResponse("files")
                     else:
                         response = RedirectResponse(redirect)
-                    response.set_cookie(key="auth_psw", value=str(bcrypt.hashpw(arg.encode("utf-8"),
-                                                                                bcrypt.gensalt()))[2:-1])
+                    perm = get_permissions(arg2)
+                    response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
                     return response
-                return show_forbidden_page()
+                elif result is None:
+                    if create_account(arg2, str(bcrypt.hashpw(arg.encode("utf-8"), bcrypt.gensalt()))[2:-1], request):
+                        authorize = AuthJWT()
+                        if redirect is None:
+                            response = RedirectResponse("files")
+                        else:
+                            response = RedirectResponse(redirect)
+                        perm = get_permissions(arg2)
+                        response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
+                        return response
+                    else:
+                        return show_forbidden_page()
+                elif not result:
+                    return show_forbidden_page()
         elif path == "upload":
             try:
                 if not is_root_user(auth_psw):
@@ -134,7 +169,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, aut
 async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
     try:
         path = request.path_params["catchall"]
-        log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(auth_psw)}'")
+        log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         name = path.split("/")
         if not ready:
             while not ready:
@@ -163,6 +198,7 @@ def startup():
             ready = True
         except FileExistsError:
             ready = True
+        create_tables()
         print("Startup complete!")
     except Exception as e:
         error_log(str(e))

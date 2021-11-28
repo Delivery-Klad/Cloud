@@ -11,22 +11,10 @@ from funcs.utils import is_root_user, constructor, get_menu
 
 def handler(path: str, filename: str, request: Request, auth_psw, download):
     try:
+        print(1)
         files = listdir(path, request, auth_psw)
         if type(files) != str:
-            if path == "":
-                while type(files) != str:
-                    files = listdir(path, request, auth_psw)
-            else:
-                retries = 0
-                while retries < 10:
-                    files = listdir(path, request, auth_psw)
-                    if type(files) == str:
-                        break
-                    time.sleep(1)
-                    retries += 1
-                if type(files) != str:
-                    return show_not_found_page()
-                files = listdir(path, request, auth_psw)
+            return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw)
     except NotADirectoryError:

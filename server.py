@@ -1,4 +1,5 @@
 import os
+import time
 import shutil
 from datetime import datetime
 
@@ -27,6 +28,7 @@ app.include_router(config.router)
 app.include_router(upload.router)
 app.include_router(files_info.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
+token = "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"
 dbx_token = "sl.A9H7dEsey3fjUdVo0dCddszrI99NFgHEDhErtLgW1GACJthi-B6mqGHOaEYRdA9pt9yjjSrqJZmvdtrREHEpvMgJE0qLPHWWyf3k" \
             "nkNy0E9hmOqL5_jAGakZDImMpZGMv77-u00"
 url = os.environ.get("server_url")
@@ -184,7 +186,7 @@ def startup():
             print("Cloning repo...")
             os.mkdir("temp")
             from git.repo.base import Repo
-            Repo.clone_from(f"https://github.com/Delivery-Klad/files.git", "temp")
+            Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files", "temp")
             print("Cloning success!")
         except FileExistsError:
             pass

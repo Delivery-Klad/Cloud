@@ -2,7 +2,7 @@ import os
 import time
 
 from fastapi import Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from funcs.utils import listdir
 from funcs.pages import *
@@ -11,9 +11,11 @@ from funcs.utils import is_root_user, constructor, get_menu
 
 def handler(path: str, filename: str, request: Request, auth_psw, download):
     try:
-        print(1)
         files = listdir(path, request, auth_psw)
         if type(files) != str:
+            if path == "":
+                time.sleep(5)
+                return RedirectResponse("files")
             return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw)

@@ -16,7 +16,8 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
             if path == "":
                 time.sleep(5)
                 return RedirectResponse("files")
-            return show_not_found_page()
+            else:
+                return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
         return builder(index_of, files, auth_psw)
     except NotADirectoryError:
@@ -38,7 +39,12 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
 def builder(index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
-            title="Authorization"><img src="/source/lock.svg" width="30" height="25" alt="auth"></a></i></h1>"""
+            title="Authorization"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg></a></i></h1>"""
     back_button, menu, title = "", "", ""
     try:
         if is_root_user(auth_psw):
@@ -55,7 +61,11 @@ def builder(index_of: str, files: str, auth_psw):
         back_url = index_of.replace("root", "files", 1).split("/")
         back_url.pop(len(back_url) - 1)
         back_button = f"""<h1><i><a href="/{"/".join(back_url)}" title="Go back">
-                    <img src="/source/back_arrow.svg" width="30" height="25" alt="back"></a></i></h1>"""
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg></a></i></h1>"""
     index_of = index_of.split("/")
     for i in index_of:
         if len(i) < 10:

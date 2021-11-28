@@ -21,7 +21,6 @@ from routers import source, delete, config, upload, admin, files_info
 
 
 app = FastAPI()
-ready = False
 app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(delete.router)
@@ -82,9 +81,6 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
     log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         if path == "files":
-            if not ready:
-                while not ready:
-                    time.sleep(1)
             return handler("", "", request, auth_psw, download)
         elif path == "auth":
             if arg is None or arg2 is None:
@@ -172,9 +168,6 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
         path = request.path_params["catchall"]
         log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         name = path.split("/")
-        if not ready:
-            while not ready:
-                time.sleep(1)
         return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
     except Exception as e:
         error_log(str(e))
@@ -182,7 +175,6 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 
 @app.on_event("startup")
 def startup():
-    global ready
     try:
         with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
@@ -196,9 +188,8 @@ def startup():
             from git.repo.base import Repo
             Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/folder", "temp")
             print("Cloning success!")
-            ready = True
         except FileExistsError:
-            ready = True
+            pass
         create_tables()
         print("Startup complete!")
     except Exception as e:

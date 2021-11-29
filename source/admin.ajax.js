@@ -1,5 +1,19 @@
-var place_holder = document.getElementById("place_holder1")
-var sidebar1 = document.getElementById("sidebar")
+var place_holder = document.getElementById("place_holder1");
+var sidebar1 = document.getElementById("sidebar");
+
+function create_arrow(up, user){
+    var a_block = document.createElement("a");
+    a_block.setAttribute("href", "javascript:set_permissions(" + up + "," + user + ");");
+    var arrow = document.createElement("img");
+    if (up === true){
+        arrow.setAttribute("src", "source/up_arrow.svg");
+    }
+    else{
+        arrow.setAttribute("src", "source/down_arrow.svg");
+    }
+    a_block.appendChild(arrow);
+    return a_block;
+}
 
 function toggle_menu(num){
     document.getElementById("sidebar1").className = "sidebar-item";
@@ -185,10 +199,17 @@ function users(){
                 }
                 else{
                     var current_row = table.insertRow();
+                    var counter = 0;
+                    var user_id = element[0];
                     element.forEach((row) => {
+                        counter = counter + 1;
                         var table_block = document.createElement("td");
                         table_block.textContent = row;
                         current_row.appendChild(table_block);
+                        if (counter === 5){
+                            table_block.appendChild(create_arrow(true, user_id));
+                            table_block.appendChild(create_arrow(false, user_id));
+                        }
                     })
                 }
             })
@@ -222,5 +243,19 @@ function hide_sidebar(){
     }
     else{
         sidebar1.className = "sidebar js-sidebar";
+    }
+}
+
+function set_permissions(up, user){
+    if (window.confirm('Are you sure?'))
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "admin/permissions/?up=" + up + "&user=" + user);
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4 && xhr.status === 200){
+                alert("Current permissions: " + xhr.responseText);
+            }
+        }
+        xhr.send();
     }
 }

@@ -50,6 +50,30 @@ def get_permissions(login: str):
         connect.close()
 
 
+def set_permissions(user_id: int, up: bool):
+    try:
+        connect, cursor = db_connect()
+        cursor.execute(f"SELECT permissions FROM users WHERE id={user_id}")
+        current_permissions = int(cursor.fetchall()[0][0])
+        if up:
+            if current_permissions >= 5:
+                return current_permissions
+            current_permissions += 1
+        else:
+            if current_permissions <= 0:
+                return current_permissions
+            current_permissions -= 1
+        cursor.execute(f"UPDATE users SET permissions={current_permissions} WHERE id={user_id}")
+        connect.commit()
+        return current_permissions
+    except Exception as e:
+        print(e)
+        return None
+    finally:
+        cursor.close()
+        connect.close()
+
+
 def get_users():
     try:
         connect, cursor = db_connect()

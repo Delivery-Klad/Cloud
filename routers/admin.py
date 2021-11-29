@@ -7,7 +7,7 @@ from fastapi import APIRouter, Cookie, Response, Request
 from git import Repo
 from typing import Optional
 
-from funcs.database import get_users
+from funcs.database import get_users, set_permissions
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
@@ -120,6 +120,19 @@ async def admin_users(request: Request, auth_psw: Optional[str] = Cookie(None)):
     except Exception as e:
         error_log(str(e))
     return {"res": result}
+
+
+@router.get("/permissions")
+async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/admin/users' from '{request.client.host}' with cookies "
+        f"'{check_cookies(request, auth_psw)}'")
+    try:
+        if is_root_user(auth_psw):
+            return set_permissions(user, up)
+        else:
+            return "fck u"
+    except Exception as e:
+        error_log(str(e))
 
 
 @router.get("/push_files")

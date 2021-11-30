@@ -21,6 +21,7 @@ function toggle_menu(num){
     document.getElementById("sidebar3").className = "sidebar-item";
     document.getElementById("sidebar4").className = "sidebar-item";
     document.getElementById("sidebar5").className = "sidebar-item";
+    document.getElementById("sidebar6").className = "sidebar-item";
     document.getElementById("sidebar" + num).className = "sidebar-item active";
 }
 
@@ -70,7 +71,7 @@ function open_dashboard(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(1)
+            toggle_menu(1);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             arr.forEach((element) => {
@@ -96,7 +97,7 @@ function untracked(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(2)
+            toggle_menu(2);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             arr.forEach((element) => {
@@ -122,7 +123,7 @@ function logs(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(3)
+            toggle_menu(3);
 			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
         }
         if(xhr.readyState === 4 && xhr.status === 403){
@@ -153,7 +154,7 @@ function errors(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(4)
+            toggle_menu(4);
 			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
         }
         if(xhr.readyState === 4 && xhr.status === 403){
@@ -184,7 +185,7 @@ function users(){
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(5)
+            toggle_menu(5);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             var table = document.createElement("TABLE");
@@ -235,6 +236,17 @@ function push_files(){
         }
     }
     xhr.send()
+}
+
+function swagger(){
+    toggle_menu(6);
+    place_holder.textContent = "";
+    var docs_page = document.createElement("iframe");
+    docs_page.setAttribute("src", "d0cumentati0n");
+    docs_page.setAttribute("width", "100%");
+    docs_page.setAttribute("height", "100%");
+    docs_page.setAttribute("scrolling", "auto%");
+    place_holder.append(docs_page);
 }
 
 function hide_sidebar(){

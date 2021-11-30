@@ -19,7 +19,7 @@ from funcs.utils import create_new_folder, is_root_user, log, error_log, check_c
 from routers import source, delete, config, upload, admin, files_info
 
 
-app = FastAPI()
+app = FastAPI(docs_url="/d0cumentati0n", redoc_url=None)
 app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(delete.router)

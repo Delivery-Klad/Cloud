@@ -86,30 +86,23 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                 return show_auth_page(redirect)
             else:
                 result = check_password(arg2, arg)
-                print(result)
                 if result:
                     authorize = AuthJWT()
-                    if redirect is None:
-                        response = RedirectResponse("files")
-                    else:
-                        response = RedirectResponse(redirect)
+                    response = JSONResponse({"result": True})
                     perm = get_permissions(arg2)
                     response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
                     return response
                 elif result is None:
                     if create_account(arg2, str(bcrypt.hashpw(arg.encode("utf-8"), bcrypt.gensalt()))[2:-1], request):
                         authorize = AuthJWT()
-                        if redirect is None:
-                            response = RedirectResponse("files")
-                        else:
-                            response = RedirectResponse(redirect)
+                        response = JSONResponse({"result": True})
                         perm = get_permissions(arg2)
                         response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
                         return response
                     else:
-                        return show_forbidden_page()
+                        return JSONResponse({"result": "Что-то пошло не так"}, status_code=403)
                 elif not result:
-                    return show_forbidden_page()
+                    return JSONResponse({"result": "Неверный пароль"}, status_code=403)
         elif path == "upload":
             try:
                 if not is_root_user(auth_psw):

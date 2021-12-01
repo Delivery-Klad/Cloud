@@ -152,12 +152,15 @@ def get_menu(index_of, is_root):
     with open("source/context.js", "r") as context:
         script = context.read()
     menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
-                  <form action="/delete/" method="get">
+                  <form method="get">
                       <div id="meta_place_holder"></div>
                       <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
-                      <input type="hidden" id="del_name" name="del_name" value="empty">"""
+                      <input type="hidden" id="del_name" name="del_name" value="empty">
+                    <input type="hidden" id="new_name" name="new_name" size="27" >"""
     if is_root:
-        menu += f"""<input type="submit" value="Delete" class="button button2">
+        menu += f"""<div><input id="new_name" name="new_name" size="27" ></div>
+                <div><input formaction="/rename/" type="submit" value="Rename" class="button button2"></div>
+                <div><input formaction="/delete/" type="submit" value="Delete" class="button button2"></div>
                 </form>
                 </ul>{script}"""
     else:

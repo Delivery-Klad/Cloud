@@ -29,6 +29,7 @@ $(document).ready(function() {
       document.getElementById('del_name').value = text;
       document.getElementById("menu_m").style.top = mouseY(event) + 'px';
       document.getElementById("menu_m").style.left = mouseX(event) + 'px';
+      setFocusToTextBox();
       window.event.returnValue = false;
     });
   }
@@ -60,5 +61,9 @@ function mouseY(evt) {
   } else {
     return null;
   }
+}
+
+function setFocusToTextBox(){
+    document.getElementById("new_name").focus();
 }
 </script>

@@ -134,10 +134,8 @@ footer{
   color: #000000;
   padding: 10px 10px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
   font-size: 14px;
-  margin: 2px 2px -13px 2px;
+  margin: 2px;
   cursor: pointer;
   -webkit-transition-duration: 0.4s;
   transition-duration: 0.4s;

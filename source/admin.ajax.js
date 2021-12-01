@@ -242,7 +242,7 @@ function swagger(){
     toggle_menu(6);
     place_holder.textContent = "";
     var docs_page = document.createElement("iframe");
-    docs_page.setAttribute("src", "d0cumentati0n");
+    docs_page.setAttribute("src", "doCUMentation");
     docs_page.setAttribute("width", "100%");
     docs_page.setAttribute("height", "100%");
     docs_page.setAttribute("scrolling", "auto%");

@@ -16,12 +16,13 @@ from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import create_new_folder, is_root_user, log, error_log, check_cookies
-from routers import source, delete, config, upload, admin, files_info
+from routers import source, delete, config, upload, admin, files_info, rename
 
 
-app = FastAPI(docs_url="/d0cumentati0n", redoc_url=None)
+app = FastAPI(docs_url="/doCUMentation", redoc_url=None)
 app.include_router(admin.router)
 app.include_router(source.router)
+app.include_router(rename.router)
 app.include_router(delete.router)
 app.include_router(config.router)
 app.include_router(upload.router)

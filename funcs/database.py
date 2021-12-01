@@ -5,11 +5,11 @@ import bcrypt
 
 def db_connect():
     try:
-        con = psycopg2.connect(host="ec2-34-254-120-2.eu-west-1.compute.amazonaws.com",
-                               database="d1i4fejvtsp4ga",
-                               user="pcihdikacxzpgs",
+        con = psycopg2.connect(host="ec2-52-214-178-113.eu-west-1.compute.amazonaws.com",
+                               database="d843ppmbnactup",
+                               user="gdbusytrmyeoqa",
                                port=5432,
-                               password="b80966adbbd1850e53829957e573f73b6cb81029d8a13a9eea88b11f6594f951")
+                               password="e01b3717ac9a5ec8a52d14f89c2483ace413784a7595d5338e72ab5701571c22")
         cur = con.cursor()
         return con, cur
     except Exception as e:

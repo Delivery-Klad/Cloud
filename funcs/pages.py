@@ -2,9 +2,9 @@ from fastapi.responses import HTMLResponse
 from typing import Optional
 
 
-def show_admin_index(content: str):
+def show_admin_index(content: str, redirect: str):
     with open("templates/admin.html", "r") as page:
-        return HTMLResponse(content=page.read().format(content), status_code=200)
+        return HTMLResponse(content=page.read().format(content, redirect), status_code=200)
 
 
 def show_auth_page(redirect: Optional[str] = "None"):

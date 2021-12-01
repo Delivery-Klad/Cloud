@@ -88,9 +88,11 @@ def listdir(directory: str, request: Request, auth_psw):
         elif "viewer" in files:
             try:
                 if not is_authorized_user(auth_psw):
-                    return "<li>Access denied</li>"
+                    return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
+                                title="Authorization">Login or register</a>"""
             except AttributeError:
-                return "<li>Access denied</li>"
+                return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
+                            title="Authorization">Login or register</a>"""
         for i in files:
             if i == "hidden" or i == "init" or i == "viewer" or (".meta" in i):
                 continue
@@ -136,7 +138,13 @@ def constructor(icons, upload_path):
                                 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1
                                 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
                                 </path>
-                            </svg></a></i></h1>"""
+                            </svg></a></i></h1>
+                            <h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line></svg></a></i></h1>"""
     return icons
 
 

@@ -146,7 +146,9 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                         content += f"""<div style="font-weight: bold; font-size: 20px;">{i}</div>"""
                     else:
                         content += f"<div>{i}</div>"
-                return show_admin_index(content)
+                if arg is None:
+                    arg = "files"
+                return show_admin_index(content, arg)
             else:
                 return show_auth_page("admin")
         return show_not_found_page()

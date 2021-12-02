@@ -36,7 +36,11 @@ $(document).ready(function() {
 });
 
 $(document).bind("click", function(event) {
-  document.getElementById("menu_m").className = "hide";
+    if (event.target.name === "new_name"){
+        return;
+    }
+    place_holder.textContent = "";
+    document.getElementById("menu_m").className = "hide";
 });
 
 function mouseX(evt) {

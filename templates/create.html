@@ -8,13 +8,13 @@
  </head>
  <body>
 
-<form method="get" action="/{3}/">
-  <input type="hidden" name="path" value="{0}">
+<form>
+  <input type="hidden" id="path" value="{0}">
   <p><h1>Folder name:</h1>
-   <input type="text" name="arg" size="40" value="{4}">
+   <input type="text" id="arg" size="40" value="{4}">
   </p>
 
-    <div class="form_radio_group">
+    <div class="form_radio_group" name="access">
         <div class="form_radio_group-item">
             <input id="radio-1" type="radio" name="access" value="root" {5}>
             <label for="radio-1">Root only</label>
@@ -26,7 +26,7 @@
             <label for="radio-3">All users</label>
         </div>
     </div>
-  <p><input class="button button2" type="submit" value="Submit"></p>
+  <p><input class="button button2" onclick="{3}();" value="Submit"></p>
 </form>
-
+<script src="source/folder.js"></script>
 </body></html>

@@ -68,7 +68,7 @@ def create_new_folder(path, arg, access):
             init.write("init")
     if path[len(path) - 1] == "/":
         path = path[:-1]
-    return RedirectResponse(f"/{path}", status_code=302)
+    return {"res": True}
 
 
 def listdir(directory: str, request: Request, auth_psw):
@@ -97,7 +97,7 @@ def listdir(directory: str, request: Request, auth_psw):
             if i == "hidden" or i == "init" or i == "viewer" or (".meta" in i):
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
-            local_files += f"""<li>
+            local_files += f"""<li id="{i}">
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
                 class="{file_class}">{i}</a></li>"""
         return local_files
@@ -149,19 +149,21 @@ def constructor(icons, upload_path):
 
 
 def get_menu(index_of, is_root):
-    with open("source/context.js", "r") as context:
-        script = context.read()
+    with open("source/context.js", "r") as data:
+        script = data.read()
     menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
                   <form method="get">
                       <div id="meta_place_holder"></div>
-                      <input type="hidden" id="path" name="path" value="/{index_of.replace("root", "files")}">
-                      <input type="hidden" id="del_name" name="del_name" value="empty">"""
+                      <input type="hidden" id="file_path" name="path" value="/{index_of.replace("root", "files")}">
+                      <input type="hidden" id="file_name" name="del_name" value="empty">"""
     if is_root:
+        with open("source/context_admin.js", "r") as data:
+            admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
-                <div><input formaction="/rename/" type="submit" value="Rename" class="button button2"></div>
-                <div><input formaction="/delete/" type="submit" value="Delete" class="button button2"></div>
+                <div><input onclick="rename_file();" value="Rename" class="button button2"></div>
+                <div><input onclick="delete_file();" value="Delete" class="button button2"></div>
                 </form>
-                </ul>{script}"""
+                </ul>{script}{admin_script}"""
     else:
         menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul>{script}"""
     return menu

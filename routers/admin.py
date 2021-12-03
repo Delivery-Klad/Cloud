@@ -59,9 +59,9 @@ async def admin_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
         error_log(str(e))
 
 
-@router.get("/clear_logs")
+@router.delete("/clear_logs")
 async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/admin/clear_logs' from '{request.client.host}' with cookies "
+    log(f"DELETE Request to '/admin/clear_logs' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(auth_psw):
@@ -90,9 +90,9 @@ async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None))
         error_log(str(e))
 
 
-@router.get("/clear_errors")
+@router.delete("/clear_errors")
 async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/admin/clear_errors' from '{request.client.host}' with cookies "
+    log(f"DELETE Request to '/admin/clear_errors' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(auth_psw):
@@ -122,9 +122,9 @@ async def admin_users(request: Request, auth_psw: Optional[str] = Cookie(None)):
     return {"res": result}
 
 
-@router.get("/permissions")
+@router.patch("/permissions")
 async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/admin/users' from '{request.client.host}' with cookies "
+    log(f"PATCH Request to '/admin/users' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(auth_psw):
@@ -135,9 +135,9 @@ async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Opt
         error_log(str(e))
 
 
-@router.get("/push_files")
+@router.post("/")
 async def admin_push_files(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/admin/push_files' from '{request.client.host}' with cookies "
+    log(f"POST Request to '/admin/push_files' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     if is_root_user(auth_psw):
         print("Starting push files process...")

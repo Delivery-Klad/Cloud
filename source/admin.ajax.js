@@ -119,7 +119,7 @@ function untracked(){
 
 function logs(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/admin/logs/');
+    xhr.open('GET', '/admin/logs');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
@@ -135,7 +135,7 @@ function logs(){
 
 function clear_logs(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/admin/clear_logs/');
+    xhr.open('DELETE', '/admin/clear_logs');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
@@ -150,7 +150,7 @@ function clear_logs(){
 
 function errors(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/admin/errors/');
+    xhr.open('GET', '/admin/errors');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
@@ -166,7 +166,7 @@ function errors(){
 
 function clear_errors(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/admin/clear_errors/');
+    xhr.open('DELETE', '/admin/clear_errors');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
@@ -225,7 +225,7 @@ function users(){
 
 function push_files(){
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/admin/push_files/');
+    xhr.open('POST', '/admin/');
 
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
@@ -262,7 +262,7 @@ function set_permissions(up, user){
     if (window.confirm('Are you sure?'))
     {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', "admin/permissions/?up=" + up + "&user=" + user);
+        xhr.open('PATCH', "admin/permissions/?up=" + up + "&user=" + user);
         xhr.onreadystatechange = function(){
             if(xhr.readyState === 4 && xhr.status === 200){
                 alert("Current permissions: " + xhr.responseText);

@@ -15,17 +15,15 @@ from funcs.database import create_tables, check_password, create_account, get_pe
 from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
-from funcs.utils import create_new_folder, is_root_user, log, error_log, check_cookies
-from routers import source, delete, config, upload, admin, files_info, rename
+from funcs.utils import is_root_user, log, error_log, check_cookies
+from routers import source, file, admin, files_info, folder
 
 
 app = FastAPI(docs_url="/doCUMentation", redoc_url=None)
 app.include_router(admin.router)
 app.include_router(source.router)
-app.include_router(rename.router)
-app.include_router(delete.router)
-app.include_router(config.router)
-app.include_router(upload.router)
+app.include_router(folder.router)
+app.include_router(file.router)
 app.include_router(files_info.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 token = "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"
@@ -58,20 +56,6 @@ async def homepage(request: Request):
         return RedirectResponse(url + "files")
     except Exception as e:
         error_log(str(e))
-
-
-@app.get("/new_folder")
-async def create_folder(path: str, arg: str, access: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/new_folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
-    try:
-        try:
-            if not is_root_user(auth_psw):
-                return show_forbidden_page()
-        except AttributeError:
-            return show_forbidden_page()
-        return create_new_folder(path, arg, access)
-    except FileNotFoundError:
-        show_not_found_page()
 
 
 @app.get("/{path}")

@@ -16,7 +16,7 @@ from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import is_root_user, log, error_log, check_cookies
-from routers import source, file, admin, files_info, folder
+from routers import source, file, admin, folder
 
 
 app = FastAPI(docs_url="/doCUMentation", redoc_url=None)
@@ -24,7 +24,6 @@ app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(folder.router)
 app.include_router(file.router)
-app.include_router(files_info.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 token = "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"
 dbx_token = "sl.A9H7dEsey3fjUdVo0dCddszrI99NFgHEDhErtLgW1GACJthi-B6mqGHOaEYRdA9pt9yjjSrqJZmvdtrREHEpvMgJE0qLPHWWyf3k" \

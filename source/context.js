@@ -12,7 +12,7 @@ $(document).ready(function() {
     $('body').on('contextmenu', 'a.file', function() {
       var xhr = new XMLHttpRequest();
       var text = $(this).contents()[0].nodeValue.trim();
-      xhr.open('GET', '/meta/?path=' + document.getElementById("file_path").value + '&name=/' + text);
+      xhr.open('GET', '/file/meta?path=' + document.getElementById("file_path").value + '&name=/' + text);
       xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
 			var arr = JSON.parse(xhr.responseText).res;

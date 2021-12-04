@@ -33,7 +33,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
                 with open("templates/img_viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
-                with open("templates/pdf_viewer.html", "r") as html_page:
+                with open("templates/viewer.html", "r") as html_page:
                     return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 

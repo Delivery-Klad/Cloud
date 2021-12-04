@@ -1,39 +1,38 @@
 body{
   margin:0;
-  padding:30px;
   background:#fff;
   font-family:-apple-system,BlinkMacSystemFont,segoe ui,roboto,oxygen,ubuntu,cantarell,fira sans,droid sans,helvetica neue,sans-serif;
   -webkit-font-smoothing:antialiased
 }
 main{
-  max-width:920px
+  max-width:100%;
 }
 header{
   display:flex;
   justify-content:start;
-  flex-wrap:wrap
+  flex-wrap:wrap;
 }
 h1{
   font-size:22px;
   font-weight:500;
   margin-top:0;
-  color:#000
+  color:#000;
 }
 h1 i{
-  font-style:normal
+  font-style:normal;
 }
 ul{
   margin:0 0 0 -2px;
-  padding:20px 0 0
+  padding:20px 0 0;
 }
 ul li{
   list-style:none;
   font-size:14px;
   display:flex;
-  justify-content:space-between
+  justify-content:space-between;
 }
 a{
-  text-decoration:none
+  text-decoration:none;
 }
 ul a{
   color:#000;

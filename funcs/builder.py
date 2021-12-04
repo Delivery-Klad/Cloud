@@ -24,8 +24,10 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
             url = os.environ.get("server_url")
-            if file_extension in ["html", "txt", "py", "cs", "java"]:
-                with open(f"temp/files{path}", "r") as page:
+            if file_extension in ["txt", "py", "cs", "java", "class", "php", "html"]:
+                with open(f"temp/files{path}", "rb") as page:
+                    if file_extension != "html":
+                        return HTMLResponse(content=page.read().decode("utf-8").replace("\n", "<br>"), status_code=200)
                     return HTMLResponse(content=page.read(), status_code=200)
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as html_page:

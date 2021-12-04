@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import HTMLResponse
 
 from funcs.database import get_permissions
 

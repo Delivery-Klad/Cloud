@@ -4,14 +4,14 @@ from datetime import datetime
 
 from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from funcs.database import get_permissions
 
 
-def is_root_user(cookie: str):
+def is_root_user(request: Request, cookie: str):
     try:
-        if cookie.split("://:")[0] == "5":
+        if get_jwt_sub(request, cookie).split("://:")[0] == "5":
             return True
         else:
             return False
@@ -19,14 +19,20 @@ def is_root_user(cookie: str):
         return False
 
 
-def is_authorized_user(cookie: str):
+def is_authorized_user(request: Request, cookie: str):
     try:
-        if type(cookie.split("://:")[0]) == str:
+        if type(get_jwt_sub(request, cookie).split("://:")[0]) == str:
             return True
         else:
             return False
     except AttributeError:
         return False
+
+
+def fail_response(redirect: str):  # пока не используется
+    response = RedirectResponse(redirect)
+    response.delete_cookie("auth_psw")
+    return response
 
 
 def log(text: str, code: bool = False):
@@ -81,13 +87,13 @@ def listdir(directory: str, request: Request, auth_psw):
         files = sort_dir_files(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
             try:
-                if not is_root_user(auth_psw):
+                if not is_root_user(request, auth_psw):
                     return "<li>Access denied</li>"
             except AttributeError:
                 return "<li>Access denied</li>"
         elif "viewer" in files:
             try:
-                if not is_authorized_user(auth_psw):
+                if not is_authorized_user(request, auth_psw):
                     return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
                                 title="Authorization">Login or register</a>"""
             except AttributeError:
@@ -171,9 +177,11 @@ def get_menu(index_of, is_root):
 
 def check_cookies(request: Request, cookie: str):
     try:
-        permissions = get_permissions(get_jwt_sub(request, cookie.split("://:")[1]))
+        permissions = get_permissions(get_jwt_sub(request, cookie).split("://:")[1])
         if permissions == 5:
             return "Administrator"
+        elif permissions is None:
+            return "Revoke"
         else:
             return "Authorized user"
     except AttributeError:
@@ -183,4 +191,11 @@ def check_cookies(request: Request, cookie: str):
 def get_jwt_sub(request: Request, cookie: str):
     request.headers.__dict__["_list"].append(("authorization".encode(), f"Bearer {cookie}".encode()))
     authorize = AuthJWT(request)
-    return authorize.get_jwt_subject()
+    try:
+        return authorize.get_jwt_subject()
+    except Exception as e:
+        if str(e) == "":
+            return None
+        else:
+            error_log(str(e))
+            return None

@@ -42,10 +42,8 @@ def get_config():
 
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.message}
-    )
+    print("token error")
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
 
 
 @app.get("/")
@@ -74,14 +72,14 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                     authorize = AuthJWT()
                     response = JSONResponse({"result": True})
                     perm = get_permissions(arg2)
-                    response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
+                    response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
                     return response
                 elif result is None:
                     if create_account(arg2, str(bcrypt.hashpw(arg.encode("utf-8"), bcrypt.gensalt()))[2:-1], request):
                         authorize = AuthJWT()
                         response = JSONResponse({"result": True})
                         perm = get_permissions(arg2)
-                        response.set_cookie(key="auth_psw", value=f"{perm}://:{authorize.create_refresh_token(arg2)}")
+                        response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
                         return response
                     else:
                         return JSONResponse({"result": "Что-то пошло не так"}, status_code=403)
@@ -89,7 +87,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                     return JSONResponse({"result": "Неверный пароль"}, status_code=403)
         elif path == "upload":
             try:
-                if not is_root_user(auth_psw):
+                if not is_root_user(request, auth_psw):
                     return show_forbidden_page()
                 else:
                     return show_upload_page(arg)
@@ -97,7 +95,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                 return show_forbidden_page()
         elif path == "create":
             try:
-                if not is_root_user(auth_psw):
+                if not is_root_user(request, auth_psw):
                     return show_forbidden_page()
                 else:
                     return show_create_page(arg, "Create folder", "new_folder", "", "checked", "", "")
@@ -105,7 +103,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                 return show_forbidden_page()
         elif path == "settings":
             try:
-                if not is_root_user(auth_psw):
+                if not is_root_user(request, auth_psw):
                     return show_forbidden_page()
                 else:
                     name = arg.split("/")
@@ -122,7 +120,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
             except AttributeError:
                 return show_forbidden_page()
         elif path == "admin":
-            if is_root_user(auth_psw):
+            if is_root_user(request, auth_psw):
                 content = ""
                 temp = await admin.admin_dashboard(request, auth_psw=auth_psw)
                 for i in temp['res']:

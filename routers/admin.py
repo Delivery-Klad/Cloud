@@ -20,7 +20,7 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
     log(f"GET Request to '/admin/dashboard' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             result = ["Untracked files"]
             repo = Repo("temp/.git")
             for item in repo.untracked_files:
@@ -49,7 +49,7 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
 async def admin_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/admin/logs' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             with open("log.txt", "r") as log_file:
                 result = log_file.read()
             return {"res": result.split("\n")}
@@ -64,7 +64,7 @@ async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(No
     log(f"DELETE Request to '/admin/clear_logs' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             clear_log("log.txt")
             with open("log.txt", "r") as log_file:
                 result = log_file.read()
@@ -80,7 +80,7 @@ async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None))
     log(f"GET Request to '/admin/errors' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             with open("error_log.txt", "r") as log_file:
                 result = log_file.read()
             return {"res": result.split("\n")}
@@ -95,7 +95,7 @@ async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(
     log(f"DELETE Request to '/admin/clear_errors' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             clear_log("error_log.txt")
             with open("error_log.txt", "r") as log_file:
                 result = log_file.read()
@@ -112,7 +112,7 @@ async def admin_users(request: Request, auth_psw: Optional[str] = Cookie(None)):
         f"'{check_cookies(request, auth_psw)}'")
     result = ["Users"]
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             for i in get_users():
                 result.append([i[0], i[1], "Password hash", i[3], i[4]])
         else:
@@ -127,7 +127,7 @@ async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Opt
     log(f"PATCH Request to '/admin/users' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             return set_permissions(user, up)
         else:
             return "fck u"
@@ -139,7 +139,7 @@ async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Opt
 async def admin_push_files(request: Request, auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/admin/push_files' from '{request.client.host}' with cookies "
         f"'{check_cookies(request, auth_psw)}'")
-    if is_root_user(auth_psw):
+    if is_root_user(request, auth_psw):
         print("Starting push files process...")
         try:
             result = []

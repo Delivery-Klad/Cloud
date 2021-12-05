@@ -19,7 +19,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
             else:
                 return show_not_found_page()
         index_of = "root" if path == "" else f"root{path}"
-        return builder(index_of, files, auth_psw)
+        return builder(request, index_of, files, auth_psw)
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
@@ -38,7 +38,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
-def builder(index_of: str, files: str, auth_psw):
+def builder(request: Request, index_of: str, files: str, auth_psw):
     upload_path = "/" if index_of.split("root")[1] == "" else index_of.split("root")[1]
     icons = f"""<h1><i><a href="/auth?redirect=files{upload_path}"
             title="Authorization"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -49,7 +49,7 @@ def builder(index_of: str, files: str, auth_psw):
             </svg></a></i></h1>"""
     back_button, menu, title = "", "", ""
     try:
-        if is_root_user(auth_psw):
+        if is_root_user(request, auth_psw):
             icons = constructor(icons, upload_path)
             menu = get_menu(index_of, True)
         else:

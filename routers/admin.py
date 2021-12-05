@@ -11,8 +11,7 @@ from funcs.database import get_users, set_permissions
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
-dbx_token = "sl.A9H7dEsey3fjUdVo0dCddszrI99NFgHEDhErtLgW1GACJthi-B6mqGHOaEYRdA9pt9yjjSrqJZmvdtrREHEpvMgJE0qLPHWWyf3k" \
-            "nkNy0E9hmOqL5_jAGakZDImMpZGMv77-u00"
+dbx_token = "8DB7UppEmUwAAAAAAAAAAeZTbSRQ4J-Y_ZG_ZcCWIv3lh9ZFfXNsovvh2GZFX6vc"
 
 
 @router.get("/dashboard")

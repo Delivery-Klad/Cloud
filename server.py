@@ -26,8 +26,7 @@ app.include_router(folder.router)
 app.include_router(file.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
 token = "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"
-dbx_token = "sl.A9H7dEsey3fjUdVo0dCddszrI99NFgHEDhErtLgW1GACJthi-B6mqGHOaEYRdA9pt9yjjSrqJZmvdtrREHEpvMgJE0qLPHWWyf3k" \
-            "nkNy0E9hmOqL5_jAGakZDImMpZGMv77-u00"
+dbx_token = "8DB7UppEmUwAAAAAAAAAAeZTbSRQ4J-Y_ZG_ZcCWIv3lh9ZFfXNsovvh2GZFX6vc"
 url = os.environ.get("server_url")
 
 

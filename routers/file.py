@@ -26,7 +26,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         f"with cookies '{check_cookies(request, auth_psw)}'")
     try:
         try:
-            if not is_root_user(auth_psw):
+            if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
@@ -51,7 +51,7 @@ async def rename(request: Request, file: FileData, auth_psw: Optional[str] = Coo
     try:
         log(f"PUT Request to '/file' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         try:
-            if not is_root_user(auth_psw):
+            if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
@@ -72,7 +72,7 @@ async def delete(request: Request, file: FileData, auth_psw: Optional[str] = Coo
         log(f"DELETE Request to '/file' from '{request.client.host}' with cookies "
             f"'{check_cookies(request, auth_psw)}'")
         try:
-            if not is_root_user(auth_psw):
+            if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()

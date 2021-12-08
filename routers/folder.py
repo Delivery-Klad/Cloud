@@ -20,7 +20,7 @@ async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] 
     log(f"POST Request to '/folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         try:
-            if not is_root_user(auth_psw):
+            if not is_root_user(request, auth_psw):
                 return {"res": False}
         except AttributeError:
             return {"res": False}
@@ -30,9 +30,9 @@ async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] 
 
 
 @router.patch("/")
-async def config_folder(data: Folder, auth_psw: Optional[str] = Cookie(None)):
+async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] = Cookie(None)):
     try:
-        if not is_root_user(auth_psw):
+        if not is_root_user(request, auth_psw):
             return {"res": False}
         new_path = data.path.split("/")[:-1]
         new_path = "/".join(new_path) + f"/{data.arg}"

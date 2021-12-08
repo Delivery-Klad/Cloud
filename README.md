@@ -1,4 +1,4 @@
-# Cloud
+# Cloud  (добавить бд)
 |Var name  |Value                     |
 |----------|--------------------------|
 |root_psw  |root password (ex. root)  |

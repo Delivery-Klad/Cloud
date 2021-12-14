@@ -25,6 +25,7 @@ def create_tables():
                        "password TEXT NOT NULL,"
                        "useragent TEXT NOT NULL,"
                        "permissions INT NOT NULL)")
+        # cursor.execute("DELETE FROM users WHERE id=")
         connect.commit()
     except Exception as e:
         print(e)
@@ -94,7 +95,6 @@ def check_password(login: str, password: str):
         try:
             db_password = cursor.fetchall()[0][0]
         except IndexError:
-            print("not found")
             return None
         if bcrypt.checkpw(password.encode("utf-8"), db_password.encode("utf-8")):
             return True

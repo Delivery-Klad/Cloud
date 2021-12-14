@@ -74,6 +74,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                     response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
                     return response
                 elif result is None:
+                    for i in arg2:
+                        if ord(i) < 33 or ord(i) > 122:
+                            return JSONResponse({"result": "И как ты до этого добрался? Сказано же, что нельзя "
+                                                           "использовать эти символы"}, status_code=403)
                     if create_account(arg2, str(bcrypt.hashpw(arg.encode("utf-8"), bcrypt.gensalt()))[2:-1], request):
                         authorize = AuthJWT()
                         response = JSONResponse({"result": True})

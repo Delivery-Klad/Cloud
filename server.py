@@ -74,6 +74,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                     response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
                     return response
                 elif result is None:
+                    if len(arg2) < 4 or len(arg) < 8:
+                        return JSONResponse({"result": "Неверная длина данных"}, status_code=403)
                     for i in arg2:
                         if ord(i) < 33 or ord(i) > 122:
                             return JSONResponse({"result": "И как ты до этого добрался? Сказано же, что нельзя "

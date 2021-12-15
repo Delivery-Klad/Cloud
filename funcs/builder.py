@@ -9,7 +9,7 @@ from funcs.pages import *
 from funcs.utils import is_root_user, constructor, get_menu
 
 
-def handler(path: str, filename: str, request: Request, auth_psw, download):
+def handler(path: str, filename: str, request: Request, auth_psw, download, redirects=None):
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
@@ -17,7 +17,10 @@ def handler(path: str, filename: str, request: Request, auth_psw, download):
                 time.sleep(5)
                 return RedirectResponse("files")
             else:
-                return show_not_found_page()
+                if redirects is None:
+                    return show_not_found_page()
+                else:
+                    return RedirectResponse(f"files/{path}?redirects={redirects + 1}")
         index_of = "root" if path == "" else f"root{path}"
         return builder(request, index_of, files, auth_psw)
     except NotADirectoryError:

@@ -57,7 +57,7 @@ async def homepage(request: Request):
 @app.get("/{path}")
 async def other_page(path: str, request: Request, arg: Optional[str] = None, arg2: Optional[str] = None,
                      auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None,
-                     redirect: Optional[str] = None, access: Optional[str] = None):
+                     redirect: Optional[str] = None):
     log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
         if path == "files":
@@ -146,12 +146,17 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
 
 
 @app.get("/files/{catchall:path}")
-async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None):
+async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None,
+                    redirects: Optional[int] = None):
     try:
         path = request.path_params["catchall"]
         log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         name = path.split("/")
-        return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
+        if redirects is None or redirects < 10:
+            return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
+        else:
+            if redirects < 10:
+                return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, redirects)
     except Exception as e:
         error_log(str(e))
 

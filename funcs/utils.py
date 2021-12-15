@@ -19,6 +19,17 @@ def is_root_user(request: Request, cookie: str):
         return False
 
 
+def is_privileged_user(request: Request, cookie: str):
+    try:
+        subject = get_jwt_sub(request, cookie).split("://:")[0]
+        if subject == "3" or subject == "5":
+            return True
+        else:
+            return False
+    except AttributeError:
+        return False
+
+
 def is_authorized_user(request: Request, cookie: str):
     try:
         if type(get_jwt_sub(request, cookie).split("://:")[0]) == str:
@@ -60,18 +71,22 @@ def sort_dir_files(listdir_files):
 
 
 def create_new_folder(path, arg, access):
-    os.mkdir(f"temp/{path}/{arg}")
-    if path == "files/":
+    if path[len(path) - 1] == "/":
         path = path[:-1]
+    print(path)
+    os.mkdir(f"temp/{path}/{arg}")
     if access == "root":
-        with open(f"temp/{path}/{arg}/hidden", "w") as hidden:
-            hidden.write("init")
+        with open(f"temp/{path}/{arg}/hidden", "w") as access_file:
+            access_file.write("init")
     elif access == "auth":
-        with open(f"temp/{path}/{arg}/viewer", "w") as viewer:
-            viewer.write("init")
+        with open(f"temp/{path}/{arg}/viewer", "w") as access_file:
+            access_file.write("init")
+    elif access == "privilege":
+        with open(f"temp/{path}/{arg}/privilege", "w") as access_file:
+            access_file.write("init")
     else:
-        with open(f"temp/{path}/{arg}/init", "w") as init:
-            init.write("init")
+        with open(f"temp/{path}/{arg}/init", "w") as access_file:
+            access_file.write("init")
     if path[len(path) - 1] == "/":
         path = path[:-1]
     return {"res": True}
@@ -91,6 +106,12 @@ def listdir(directory: str, request: Request, auth_psw):
                     return "<li>Access denied</li>"
             except AttributeError:
                 return "<li>Access denied</li>"
+        elif "privilege" in files:
+            try:
+                if not is_privileged_user(request, auth_psw):
+                    return "<li>Access denied</li>"
+            except AttributeError:
+                return "<li>Access denied</li>"
         elif "viewer" in files:
             try:
                 if not is_authorized_user(request, auth_psw):
@@ -100,7 +121,7 @@ def listdir(directory: str, request: Request, auth_psw):
                 return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
                             title="Authorization">Login or register</a>"""
         for i in files:
-            if i == "hidden" or i == "init" or i == "viewer" or (".meta" in i):
+            if i == "hidden" or i == "init" or i == "viewer" or i == "privilege" or (".meta" in i):
                 continue
             file_class = "folder" if len(i.split(".")) == 1 else "file"
             local_files += f"""<li id="{i}">

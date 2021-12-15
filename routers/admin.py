@@ -7,7 +7,7 @@ from fastapi import APIRouter, Cookie, Response, Request
 from git import Repo
 from typing import Optional
 
-from funcs.database import get_users, set_permissions
+from funcs.database import get_users, set_permissions, delete_user
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
@@ -105,6 +105,20 @@ async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(
         error_log(str(e))
 
 
+@router.delete("/user/{user}")
+async def admin_delete_user(user: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"DELETE Request to '/admin/user' from '{request.client.host}' with cookies "
+        f"'{check_cookies(request, auth_psw)}'")
+    try:
+        if is_root_user(request, auth_psw):
+            delete_user(user)
+            return {"res": "Success"}
+        else:
+            return {"res": "Failed"}
+    except Exception as e:
+        error_log(str(e))
+
+
 @router.get("/users")
 async def admin_users(request: Request, auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/admin/users' from '{request.client.host}' with cookies "
@@ -161,9 +175,9 @@ async def admin_push_files(request: Request, auth_psw: Optional[str] = Cookie(No
             error_log(str(e))
             print("Creating archive!")
             dbx = dropbox.Dropbox(dbx_token)
-            shutil.make_archive("aboba", "zip", "temp/files/7 сем")
+            shutil.make_archive("backup_archive", "zip", "temp/files/7 сем")
             import random
-            with open("aboba.zip", "rb") as archive:
+            with open("backup_archive.zip", "rb") as archive:
                 print("Upload archive!")
                 dbx.files_upload(archive.read(), f"/backup{random.randint(1, 1000)}.zip")
             print("Archive uploaded!")

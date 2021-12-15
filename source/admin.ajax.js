@@ -63,6 +63,9 @@ function set_table_header(table){
     var permissions_header = document.createElement("th");
     permissions_header.textContent = " Permissions ";
     headers.appendChild(permissions_header);
+    var actions_header = document.createElement("th");
+    actions_header.textContent = " Actions ";
+    headers.appendChild(actions_header);
 }
 
 function open_dashboard(){
@@ -212,6 +215,12 @@ function users(){
                             table_block.appendChild(create_arrow(false, user_id));
                         }
                     })
+                    var table_block = document.createElement("td");
+                    current_row.appendChild(table_block);
+                    var a_block = document.createElement("a");
+                    a_block.setAttribute("href", "javascript:delete_user(" + user_id + ");");
+                    a_block.textContent = "Delete";
+                    table_block.appendChild(a_block);
                 }
             })
             place_holder.append(table);
@@ -266,6 +275,20 @@ function set_permissions(up, user){
         xhr.onreadystatechange = function(){
             if(xhr.readyState === 4 && xhr.status === 200){
                 alert("Current permissions: " + xhr.responseText);
+            }
+        }
+        xhr.send();
+    }
+}
+
+function delete_user(user){
+    if (window.confirm('Are you sure?'))
+    {
+        var xhr = new XMLHttpRequest();
+        xhr.open('DELETE', "admin/user/" + user);
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState === 4 && xhr.status === 200){
+                alert("Successful deleted!");
             }
         }
         xhr.send();

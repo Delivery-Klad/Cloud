@@ -18,14 +18,13 @@ def db_connect():
 
 
 def create_tables():
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
         cursor.execute("CREATE TABLE IF NOT EXISTS users(id SERIAL NOT NULL UNIQUE PRIMARY KEY,"
                        "login TEXT NOT NULL UNIQUE,"
                        "password TEXT NOT NULL,"
                        "useragent TEXT NOT NULL,"
                        "permissions INT NOT NULL)")
-        # cursor.execute("DELETE FROM users WHERE id=")
         connect.commit()
     except Exception as e:
         print(e)
@@ -35,9 +34,15 @@ def create_tables():
         connect.close()
 
 
+def delete_user(user_id: int):
+    connect, cursor = db_connect()
+    cursor.execute(f"DELETE FROM users WHERE id={user_id}")
+    connect.commit()
+
+
 def get_permissions(login: str):
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
         cursor.execute("""SELECT permissions FROM users WHERE login=%(login)s""", {"login": login})
         try:
             return cursor.fetchall()[0][0]
@@ -52,8 +57,8 @@ def get_permissions(login: str):
 
 
 def set_permissions(user_id: int, up: bool):
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
         cursor.execute(f"SELECT permissions FROM users WHERE id={user_id}")
         current_permissions = int(cursor.fetchall()[0][0])
         if up:
@@ -76,9 +81,9 @@ def set_permissions(user_id: int, up: bool):
 
 
 def get_users():
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
-        cursor.execute(f"SELECT * FROM users")
+        cursor.execute(f"SELECT * FROM users ORDER BY id")
         return cursor.fetchall()
     except Exception as e:
         print(e)
@@ -89,8 +94,8 @@ def get_users():
 
 
 def check_password(login: str, password: str):
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
         cursor.execute("""SELECT password FROM users WHERE login=%(login)s""", {"login": login})
         try:
             db_password = cursor.fetchall()[0][0]
@@ -109,8 +114,8 @@ def check_password(login: str, password: str):
 
 
 def create_account(login: str, password: str, request: Request):
+    connect, cursor = db_connect()
     try:
-        connect, cursor = db_connect()
         agent = request.headers["user-agent"]
         cursor.execute(f"INSERT INTO users (login, password, useragent, permissions) VALUES (%(login)s, %(password)s,"
                        f"%(agent)s, 0)", {"login": login, "password": password, "agent": agent})

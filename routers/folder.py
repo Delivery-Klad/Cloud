@@ -42,17 +42,22 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
             os.remove(f"temp/{new_path}/hidden")
         elif "viewer" in files:
             os.remove(f"temp/{new_path}/viewer")
+        elif "privilege" in files:
+            os.remove(f"temp/{new_path}/privilege")
         elif "init" in files:
             os.remove(f"temp/{new_path}/init")
         if data.access == "root":
-            with open(f"temp/{new_path}/hidden", "w") as hidden:
-                hidden.write("init")
+            with open(f"temp/{new_path}/hidden", "w") as access_file:
+                access_file.write("init")
         elif data.access == "auth":
-            with open(f"temp/{new_path}/viewer", "w") as viewer:
-                viewer.write("init")
+            with open(f"temp/{new_path}/viewer", "w") as access_file:
+                access_file.write("init")
+        elif data.access == "privilege":
+            with open(f"temp/{new_path}/privilege", "w") as access_file:
+                access_file.write("init")
         else:
-            with open(f"temp/{new_path}/init", "w") as init:
-                init.write("init")
+            with open(f"temp/{new_path}/init", "w") as access_file:
+                access_file.write("init")
         return {"res": True}
     except AttributeError:
         return {"res": False}

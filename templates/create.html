@@ -11,7 +11,7 @@
 <form>
   <input type="hidden" id="path" value="{0}">
   <p><h1>Folder name:</h1>
-   <input type="text" id="arg" size="40" value="{4}">
+   <input type="text" id="arg" size="90" value="{4}">
   </p>
 
     <div class="form_radio_group" name="access">
@@ -24,6 +24,9 @@
         </div><div class="form_radio_group-item">
             <input id="radio-3" type="radio" name="access" value="all" {7}>
             <label for="radio-3">All users</label>
+        </div><div class="form_radio_group-item">
+            <input id="radio-4" type="radio" name="access" value="privilege" {8}>
+            <label for="radio-4">Privileged</label>
         </div>
     </div>
   <p><input class="button button2" onclick="{3}();" value="Submit"></p>

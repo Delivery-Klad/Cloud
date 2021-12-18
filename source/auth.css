@@ -190,3 +190,11 @@ body {
 {
     visibility: hidden;
 }
+.alert-box {
+    position: absolute;
+    left:5px;
+    bottom:5px;
+    text-align: center;
+    width: 300px;
+    z-index: 999;
+}

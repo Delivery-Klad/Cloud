@@ -24,7 +24,7 @@ def create_tables():
                        "login TEXT NOT NULL UNIQUE,"
                        "password TEXT NOT NULL,"
                        "useragent TEXT NOT NULL,"
-                       "permissions INT NOT NULL)")
+                       "permissions INTEGER NOT NULL)")
         connect.commit()
     except Exception as e:
         print(e)

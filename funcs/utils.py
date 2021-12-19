@@ -123,11 +123,36 @@ def listdir(directory: str, request: Request, auth_psw):
         for i in files:
             if i == "hidden" or i == "init" or i == "viewer" or i == "privilege" or (".meta" in i):
                 continue
-            file_class = "folder" if len(i.split(".")) == 1 else "file"
+            if len(i.split(".")) == 1:
+                file_class = "folder"
+            else:
+                file_type = i.split(".")
+                file_type = file_type[len(file_type) - 1]
+                if file_type.lower() in ["png", "jpg", "bmp", "gif", "jpeg", "heic"]:
+                    file_class = "png"
+                else:
+                    file_class = "file"
             local_files += f"""<li id="{i}">
                 <a href="/files{directory}/{i}" title="/files{directory}/{i}" 
                 class="{file_class}">{i}</a></li>"""
         return local_files
+    except FileNotFoundError:
+        return HTMLResponse(status_code=404)
+
+
+def get_folder_access_level(path: str):
+    try:
+        files = os.listdir(f"temp/{path}")
+        if "hidden" in files:
+            return {"res": 1}
+        elif "viewer" in files:
+            return {"res": 2}
+        elif "init" in files:
+            return {"res": 3}
+        elif "privilege" in files:
+            return {"res": 4}
+        else:
+            return {"res": 3}
     except FileNotFoundError:
         return HTMLResponse(status_code=404)
 
@@ -147,24 +172,6 @@ def constructor(icons, upload_path):
                                  stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg></a></i></h1>
-                            <h1><i><a href="/settings?arg=files{upload_path}" title="Folder settings">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0
-                                0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2
-                                2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0
-                                0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0
-                                0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1
-                                2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2
-                                0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65
-                                0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51
-                                1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0
-                                2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1
-                                2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-                                </path>
                             </svg></a></i></h1>
                             <h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 

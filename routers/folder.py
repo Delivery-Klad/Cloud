@@ -5,7 +5,7 @@ from fastapi import APIRouter, Cookie, Request
 from typing import Optional
 from pydantic import BaseModel
 
-from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder
+from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level
 
 router = APIRouter(prefix="/folder")
 
@@ -20,16 +20,29 @@ class DeleteFolder(BaseModel):
     file_path: str
 
 
+@router.get("/{catchall:path}")
+async def get_access(request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+    try:
+        if not is_root_user(request, auth_psw):
+            return {"res": False}
+        path = request.path_params["catchall"]
+        return get_folder_access_level(path)
+    except AttributeError:
+        return {"res": False}
+    except FileNotFoundError:
+        return {"res": False}
+
+
 @router.post("/")
 async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
-        try:
-            if not is_root_user(request, auth_psw):
-                return {"res": False}
-        except AttributeError:
+        if not is_root_user(request, auth_psw):
             return {"res": False}
         return create_new_folder(data.path, data.arg, data.access)
+    except AttributeError:
+        return {"res": False}
     except FileNotFoundError:
         return {"res": False}
 

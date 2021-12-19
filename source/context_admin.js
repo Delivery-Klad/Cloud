@@ -129,7 +129,7 @@ $(document).ready(function() {
             }
             xhr.send()
             menu_element.className = "show";
-            menu_element.value = text;
+            document.getElementById('file_name').value = text;
             menu_element.style.top = mouseY(event) + 'px';
             menu_element.style.left = mouseX(event) + 'px';
             try{
@@ -205,7 +205,24 @@ $(document).ready(function() {
             menu_form.appendChild(access2_container);
             menu_form.appendChild(access3_container);
             menu_form.appendChild(access4_container);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/folder' + document.getElementById("file_path").value + '/' + text);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    var res = JSON.parse(xhr.responseText).res;
+                    if (res == 1){ access1.checked = true; }
+                    else if (res == 2){ access2.checked = true; }
+                    else if (res == 3){ access3.checked = true; }
+                    else if (res == 4){ access4.checked = true; }
+                }
+            }
+            xhr.send()
             window.event.returnValue = false;
+        });
+        $('body').on('contextmenu', function(e) {
+            if ($(e.target).is("body")){
+                window.event.returnValue = false;
+            }
         });
     }
 });

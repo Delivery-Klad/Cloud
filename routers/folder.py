@@ -1,4 +1,5 @@
 import os
+from shutil import rmtree
 
 from fastapi import APIRouter, Cookie, Request
 from typing import Optional
@@ -13,6 +14,10 @@ class Folder(BaseModel):
     path: str
     arg: str
     access: str
+
+
+class DeleteFolder(BaseModel):
+    file_path: str
 
 
 @router.post("/")
@@ -59,6 +64,20 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
             with open(f"temp/{new_path}/init", "w") as access_file:
                 access_file.write("init")
         return {"res": True}
+    except AttributeError:
+        return {"res": False}
+    except Exception as er:
+        error_log(str(er))
+        return {"res": False}
+
+
+@router.delete("/")
+async def delete_folder(data: DeleteFolder, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    try:
+        if not is_root_user(request, auth_psw):
+            return {"res": False}
+        rmtree(f"temp{data.file_path}")
+        return
     except AttributeError:
         return {"res": False}
     except Exception as er:

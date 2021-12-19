@@ -1,6 +1,8 @@
 import os
 import shutil
 from datetime import datetime
+from random import randint
+from secrets import token_hex
 
 import bcrypt
 import dropbox
@@ -19,7 +21,8 @@ from funcs.utils import is_root_user, log, error_log, check_cookies
 from routers import source, file, admin, folder
 
 
-app = FastAPI(docs_url="/doCUMentation", redoc_url=None)
+swagger_url = token_hex(randint(10, 15))
+app = FastAPI(docs_url=F"/{swagger_url}", redoc_url=None)
 app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(folder.router)
@@ -41,8 +44,12 @@ def get_config():
 
 @app.exception_handler(AuthJWTException)
 def authjwt_exception_handler(request: Request, exc: AuthJWTException):
-    print("token error")
     return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
+
+@app.get("/swagger")
+async def swagger(request: Request):
+    return {"res": swagger_url}
 
 
 @app.get("/")
@@ -137,6 +144,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                         content += f"<div>{i}</div>"
                 if arg is None:
                     arg = "files"
+                if arg[len(arg) - 1] == "/":
+                    arg = arg[:-1]
                 return show_admin_index(content, arg)
             else:
                 return show_auth_page("admin")

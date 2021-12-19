@@ -5,17 +5,14 @@ function create_arrow(up, user){
     var a_block = document.createElement("a");
     a_block.setAttribute("href", "javascript:set_permissions(" + up + "," + user + ");");
     var arrow = document.createElement("img");
-    if (up === true){
-        arrow.setAttribute("src", "source/up_arrow.svg");
-    }
-    else{
-        arrow.setAttribute("src", "source/down_arrow.svg");
-    }
+    if (up === true){ arrow.setAttribute("src", "source/up_arrow.svg"); }
+    else{ arrow.setAttribute("src", "source/down_arrow.svg"); }
     a_block.appendChild(arrow);
     return a_block;
 }
 
 function toggle_menu(num){
+    localStorage.setItem("current_page", num);
     document.getElementById("sidebar1").className = "sidebar-item";
     document.getElementById("sidebar2").className = "sidebar-item";
     document.getElementById("sidebar3").className = "sidebar-item";
@@ -40,10 +37,6 @@ function fill_placeholder(response, func){
         block.textContent += element;
         place_holder.append(block);
     })
-}
-
-function set_table_attributes(table){
-    table.setAttribute("style", "width:100%");
 }
 
 function set_table_header(table){
@@ -71,9 +64,8 @@ function set_table_header(table){
 function open_dashboard(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
+        if (xhr.readyState === 4 && xhr.status === 200){
             toggle_menu(1);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
@@ -87,19 +79,18 @@ function open_dashboard(){
                 place_holder.append(block);
             })
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
+        if (xhr.readyState === 4 && xhr.status === 403){
             alert(JSON.parse(xhr.responseText).res);
         }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function untracked(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/?arg=true');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
+        if (xhr.readyState === 4 && xhr.status === 200){
             toggle_menu(2);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
@@ -113,86 +104,67 @@ function untracked(){
                 place_holder.append(block);
             })
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(JSON.parse(xhr.responseText).res);
-        }
+        if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function logs(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/logs');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
+        if (xhr.readyState === 4 && xhr.status === 200){
             toggle_menu(3);
 			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(xhr.responseText);
-        }
+        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function clear_logs(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/admin/clear_logs');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
-			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
-        }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(xhr.responseText);
-        }
+        if (xhr.readyState === 4 && xhr.status === 200){ fill_placeholder(xhr.responseText, "javascript:clear_logs();") }
+        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function errors(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/errors');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
+        if (xhr.readyState === 4 && xhr.status === 200){
             toggle_menu(4);
 			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(xhr.responseText);
-        }
+        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function clear_errors(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/admin/clear_errors');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
-			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
-        }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(xhr.responseText);
-        }
+        if (xhr.readyState === 4 && xhr.status === 200){ fill_placeholder(xhr.responseText, "javascript:clear_errors();") }
+        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function users(){
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/users');
-
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
             toggle_menu(5);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             var table = document.createElement("TABLE");
-            set_table_attributes(table);
+            table.setAttribute("style", "width:100%");
             set_table_header(table);
             arr.forEach((element) => {
                 if (element === "Users"){
@@ -201,7 +173,7 @@ function users(){
                     block.textContent += element;
                     place_holder.append(block);
                 }
-                else{
+                else {
                     var current_row = table.insertRow();
                     var counter = 0;
                     var user_id = element[0];
@@ -222,36 +194,34 @@ function users(){
                     a_block.textContent = "Delete";
                     table_block.appendChild(a_block);
                 }
-            })
+            });
             place_holder.append(table);
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(JSON.parse(xhr.responseText).res);
-        }
+        else if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function push_files(){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/admin/');
-
     xhr.onreadystatechange = function(){
-        if(xhr.readyState === 4 && xhr.status === 200){
-			alert(xhr.responseText);
-        }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            alert(xhr.responseText);
-        }
+        if (xhr.readyState === 4 && xhr.status === 200){ alert(xhr.responseText); }
+        if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
     }
-    xhr.send()
+    xhr.send();
 }
 
 function swagger(){
     toggle_menu(6);
     place_holder.textContent = "";
     var docs_page = document.createElement("iframe");
-    docs_page.setAttribute("src", "doCUMentation");
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/swagger/');
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){ docs_page.setAttribute("src", JSON.parse(xhr.responseText).res); }
+    }
+    xhr.send();
     docs_page.setAttribute("width", "100%");
     docs_page.setAttribute("height", "100%");
     docs_page.setAttribute("scrolling", "auto%");
@@ -259,12 +229,8 @@ function swagger(){
 }
 
 function hide_sidebar(){
-    if(sidebar1.className === "sidebar js-sidebar"){
-        sidebar1.className = "sidebar js-sidebar collapsed";
-    }
-    else{
-        sidebar1.className = "sidebar js-sidebar";
-    }
+    if (sidebar1.className === "sidebar js-sidebar"){ sidebar1.className = "sidebar js-sidebar collapsed"; }
+    else{ sidebar1.className = "sidebar js-sidebar"; }
 }
 
 function set_permissions(up, user){
@@ -273,9 +239,7 @@ function set_permissions(up, user){
         var xhr = new XMLHttpRequest();
         xhr.open('PATCH', "admin/permissions/?up=" + up + "&user=" + user);
         xhr.onreadystatechange = function(){
-            if(xhr.readyState === 4 && xhr.status === 200){
-                alert("Current permissions: " + xhr.responseText);
-            }
+            if (xhr.readyState === 4 && xhr.status === 200){ alert("Current permissions: " + xhr.responseText); }
         }
         xhr.send();
     }
@@ -287,10 +251,20 @@ function delete_user(user){
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', "admin/user/" + user);
         xhr.onreadystatechange = function(){
-            if(xhr.readyState === 4 && xhr.status === 200){
-                alert("Successful deleted!");
-            }
+            if (xhr.readyState === 4 && xhr.status === 200){ alert("Successful deleted!"); }
         }
         xhr.send();
     }
 }
+
+$(document).ready(function() {
+    page = localStorage.getItem("current_page")
+    if (page == null){ localStorage.setItem("current_page", 1); }
+    else{
+        if (page === "2") { untracked(); }
+        else if (page === "3") { logs(); }
+        else if (page === "4") { errors(); }
+        else if (page === "5") { users(); }
+        else if (page === "6") { swagger(); }
+    }
+});

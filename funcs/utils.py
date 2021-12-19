@@ -176,8 +176,7 @@ def constructor(icons, upload_path):
 
 
 def get_menu(index_of, is_root):
-    with open("source/context.js", "r") as data:
-        script = data.read()
+
     menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
                   <form method="get">
                       <div id="meta_place_holder"></div>
@@ -187,11 +186,13 @@ def get_menu(index_of, is_root):
         with open("source/context_admin.js", "r") as data:
             admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
-                <div><input onclick="rename_file();" value="Rename" class="button button2"></div>
-                <div><input onclick="delete_file();" value="Delete" class="button button2"></div>
-                </form>
-                </ul>{script}{admin_script}"""
+                <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
+                <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
+                <div id="access_holder"></div></form>
+                </ul>{admin_script}"""
     else:
+        with open("source/context.js", "r") as data:
+            script = data.read()
         menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul>{script}"""
     return menu
 

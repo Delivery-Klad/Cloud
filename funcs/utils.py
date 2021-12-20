@@ -158,25 +158,16 @@ def get_folder_access_level(path: str):
 
 
 def constructor(icons, upload_path):
-    icons += f"""<h1><i><a href="/upload?arg=files{upload_path}" title="Upload file">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg></a></i></h1>
-                            <h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line>
-                                <line x1="23" y1="11" x2="17" y2="11"></line></svg></a></i></h1>"""
+    icons += f"""<h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                  stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line>
+                  <line x1="23" y1="11" x2="17" y2="11"></line></svg></a></i></h1>"""
     return icons
 
 
 def get_menu(index_of, is_root):
-
     menu = f"""<ul class="hide" id="menu_m" style="top: 22px; left: 179px;">
                   <form method="get">
                       <div id="meta_place_holder"></div>
@@ -190,7 +181,7 @@ def get_menu(index_of, is_root):
                 <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
                 <div id="access_holder"></div></form>
                 </ul>
-                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;"><form>
+                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;"><div>
                 <div><input id="folder_name" name="folder_name" size="27"></div>
                 <div><input type="hidden" id="folder_path" value="/{index_of.replace("root", "files")}"></div>
                 <div><input onclick="create_new_folder();" value="Create" class="button button2"></div>
@@ -201,7 +192,15 @@ def get_menu(index_of, is_root):
                 </label></div><div><input id="radio-3" type="radio" name="folder_access" value="all" checked><label 
                 for="radio-3">All users</label></div><div><input id="radio-4" type="radio" name="folder_access" 
                 value="privilege"><label for="radio-4">Privileged</label></div></div>
-                </form></ul>{admin_script}"""
+                <br><form action="/file/?path={index_of.replace("root", "files")}/" enctype="multipart/form-data" 
+                method="post">
+                    <div class="upload">
+                        <label class="label">
+                          <input type="file" name="data">
+                        </label>
+                    </div>
+                    <input class="button button2" type="submit" value="Upload">
+                </div></form></ul>{admin_script}"""
     else:
         with open("source/context.js", "r") as data:
             script = data.read()

@@ -97,14 +97,6 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                         return JSONResponse({"result": "Что-то пошло не так"}, status_code=403)
                 elif not result:
                     return JSONResponse({"result": "Неверный пароль"}, status_code=403)
-        elif path == "upload":
-            try:
-                if not is_root_user(request, auth_psw):
-                    return show_forbidden_page()
-                else:
-                    return show_upload_page(arg)
-            except AttributeError:
-                return show_forbidden_page()
         elif path == "admin":
             if is_root_user(request, auth_psw):
                 content = ""

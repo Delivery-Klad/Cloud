@@ -254,6 +254,7 @@ $(document).bind("click", function(event) {
     else if (event.target.name === "access"){ return; }
     else if (event.target.name === "folder_access"){ return; }
     else if (event.target.name === "folder_name"){ return; }
+    else if (event.target.name === "data"){ return; }
     place_holder.textContent = "";
     scnd_menu.className = "hide";
     menu_element.className = "hide";

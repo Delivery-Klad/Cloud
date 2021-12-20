@@ -27,10 +27,3 @@ def show_upload_page(arg):
     with open("templates/upload.html", "r") as page:
         with open("source/upload.css", "r") as upload_style:
             return HTMLResponse(content=page.read().format(arg, upload_style.read()), status_code=200)
-
-
-def show_create_page(arg, title, arg2, name, root, auth, all_users, privileged):
-    with open("templates/create.html", "r") as page:
-        with open("source/create.css", "r") as create_style:
-            return HTMLResponse(content=page.read().format(arg, create_style.read(), title, arg2, name, root, auth,
-                                                           all_users, privileged), status_code=200)

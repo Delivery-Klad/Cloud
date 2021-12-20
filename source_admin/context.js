@@ -51,10 +51,7 @@ function rename_file(){
 function delete_folder(){
     var data = {};
     var local_path = document.getElementById("file_path").value;
-    if (local_path == "/files/"){
-        local_path = "/files";
-    }
-    else {local_path = local_path + "/"; }
+    local_path = local_path + "/";
     data.file_path  = local_path + document.getElementById("file_name").value;
     var json = JSON.stringify(data);
 
@@ -102,6 +99,24 @@ function rename_folder(){
     xhr.send(json);
 }
 
+function create_new_folder(){
+    var data = {};
+    data.path  = document.getElementById("folder_path").value;
+    data.arg = document.getElementById("folder_name").value;
+    data.access = document.querySelector('input[name="folder_access"]:checked').value;
+    var json = JSON.stringify(data);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/folder/", true);
+    xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
+    xhr.onload = function () {
+        var data = JSON.parse(xhr.responseText);
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            document.location.href = document.getElementById("folder_path").value;
+        }
+    }
+    xhr.send(json);
+}
+
 var place_holder = document.getElementById("meta_place_holder")
 var menu_element = document.getElementById("menu_m");
 var scnd_menu = document.getElementById("scnd_menu");
@@ -129,6 +144,7 @@ $(document).ready(function() {
                 }
             }
             xhr.send()
+            scnd_menu.className = "hide";
             menu_element.className = "show";
             document.getElementById('file_name').value = text;
             menu_element.style.top = mouseY(event) + 'px';
@@ -225,8 +241,8 @@ $(document).ready(function() {
             if ($(e.target).is("body")){
                 scnd_menu.className = "show";
                 menu_element.className = "hide";
-                menu_element.style.top = mouseY(event) + 'px';
-                menu_element.style.left = mouseX(event) + 'px';
+                scnd_menu.style.top = mouseY(event) + 'px';
+                scnd_menu.style.left = mouseX(event) + 'px';
                 window.event.returnValue = false;
             }
         });
@@ -235,7 +251,9 @@ $(document).ready(function() {
 
 $(document).bind("click", function(event) {
     if (event.target.name === "new_name"){ return; }
-    if (event.target.name === "access"){ return; }
+    else if (event.target.name === "access"){ return; }
+    else if (event.target.name === "folder_access"){ return; }
+    else if (event.target.name === "folder_name"){ return; }
     place_holder.textContent = "";
     scnd_menu.className = "hide";
     menu_element.className = "hide";

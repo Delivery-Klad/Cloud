@@ -105,34 +105,6 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                     return show_upload_page(arg)
             except AttributeError:
                 return show_forbidden_page()
-        elif path == "create":
-            try:
-                if not is_root_user(request, auth_psw):
-                    return show_forbidden_page()
-                else:
-                    return show_create_page(arg, "Create folder", "new_folder", "", "checked", "", "", "")
-            except AttributeError:
-                return show_forbidden_page()
-        elif path == "settings":
-            try:
-                if not is_root_user(request, auth_psw):
-                    return show_forbidden_page()
-                else:
-                    name = arg.split("/")
-                    name = name[len(name) - 1]
-                    files = os.listdir(f"temp/{arg}")
-                    root, auth, all_users, privileged = "", "", "", ""
-                    if "hidden" in files:
-                        root = "checked"
-                    elif "viewer" in files:
-                        auth = "checked"
-                    elif "privilege" in files:
-                        privileged = "checked"
-                    else:
-                        all_users = "checked"
-                    return show_create_page(arg, "Folder settings", "config", name, root, auth, all_users, privileged)
-            except AttributeError:
-                return show_forbidden_page()
         elif path == "admin":
             if is_root_user(request, auth_psw):
                 content = ""

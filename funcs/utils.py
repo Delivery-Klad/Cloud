@@ -166,13 +166,6 @@ def constructor(icons, upload_path):
                                 <polyline points="17 8 12 3 7 8"></polyline>
                                 <line x1="12" y1="3" x2="12" y2="15"></line>
                             </svg></a></i></h1>
-                            <h1><i><a href="/create/?arg=files{upload_path}" title="Create folder">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                 stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg></a></i></h1>
                             <h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
@@ -190,17 +183,25 @@ def get_menu(index_of, is_root):
                       <input type="hidden" id="file_path" name="path" value="/{index_of.replace("root", "files")}">
                       <input type="hidden" id="file_name" name="del_name" value="empty">"""
     if is_root:
-        with open("source/context_admin.js", "r") as data:
+        with open("source_admin/context.js", "r") as data:
             admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
                 <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
                 <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
                 <div id="access_holder"></div></form>
                 </ul>
-                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;">
-                <div><input id="folder_name" name="folder_name"></div>
-                <div><input type="hidden" id="path" value="/{index_of.replace("root", "files")}"></div><br>
-                <div><input on_click="create_folder();" value="Create" class="button button2"></div>{admin_script}"""
+                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;"><form>
+                <div><input id="folder_name" name="folder_name" size="27"></div>
+                <div><input type="hidden" id="folder_path" value="/{index_of.replace("root", "files")}"></div>
+                <div><input onclick="create_new_folder();" value="Create" class="button button2"></div>
+                <div id="access_holder">
+                <div><input id="radio-1" type="radio" name="folder_access" 
+                value="root"><label for="radio-1">Root</label></div><div><input id="radio-2" type="radio" 
+                name="folder_access" value="auth"><label for="radio-2">Authorized
+                </label></div><div><input id="radio-3" type="radio" name="folder_access" value="all" checked><label 
+                for="radio-3">All users</label></div><div><input id="radio-4" type="radio" name="folder_access" 
+                value="privilege"><label for="radio-4">Privileged</label></div></div>
+                </form></ul>{admin_script}"""
     else:
         with open("source/context.js", "r") as data:
             script = data.read()

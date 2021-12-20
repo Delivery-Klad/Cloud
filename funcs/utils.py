@@ -194,11 +194,11 @@ def get_menu(index_of, is_root):
                 </label></div><div><input id="radio-3" type="radio" name="folder_access" value="all" checked><label 
                 for="radio-3">All users</label></div><div><input id="radio-4" type="radio" name="folder_access" 
                 value="privilege"><label for="radio-4">Privileged</label></div></div>
-                <br><form action="/file/?path={index_of.replace("root", "files")}/" enctype="multipart/form-data" 
+                <form action="/file/?path={index_of.replace("root", "files")}/" enctype="multipart/form-data" 
                 method="post">
                     <div class="upload">
                         <label class="label">
-                          <input type="file" name="data">
+                          <input type="file" name="data" size="27">
                         </label>
                     </div>
                     <input class="button button2" type="submit" value="Upload">

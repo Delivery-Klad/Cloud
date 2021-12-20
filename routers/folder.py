@@ -45,6 +45,8 @@ async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] 
         return {"res": False}
     except FileNotFoundError:
         return {"res": False}
+    except FileExistsError:
+        return {"res": False}
 
 
 @router.patch("/")

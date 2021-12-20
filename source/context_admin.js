@@ -104,6 +104,7 @@ function rename_folder(){
 
 var place_holder = document.getElementById("meta_place_holder")
 var menu_element = document.getElementById("menu_m");
+var scnd_menu = document.getElementById("scnd_menu");
 
 $(document).ready(function() {
     if ($("#file").addEventListener) {
@@ -148,6 +149,7 @@ $(document).ready(function() {
             document.getElementById("access_holder").textContent = "";
             var text = $(this).contents()[0].nodeValue.trim();
             place_holder.textContent = "";
+            scnd_menu.className = "hide";
             menu_element.className = "show";
             document.getElementById('file_name').value = text;
             menu_element.style.top = mouseY(event) + 'px';
@@ -221,6 +223,10 @@ $(document).ready(function() {
         });
         $('body').on('contextmenu', function(e) {
             if ($(e.target).is("body")){
+                scnd_menu.className = "show";
+                menu_element.className = "hide";
+                menu_element.style.top = mouseY(event) + 'px';
+                menu_element.style.left = mouseX(event) + 'px';
                 window.event.returnValue = false;
             }
         });
@@ -231,6 +237,7 @@ $(document).bind("click", function(event) {
     if (event.target.name === "new_name"){ return; }
     if (event.target.name === "access"){ return; }
     place_holder.textContent = "";
+    scnd_menu.className = "hide";
     menu_element.className = "hide";
 });
 

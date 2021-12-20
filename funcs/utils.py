@@ -196,7 +196,11 @@ def get_menu(index_of, is_root):
                 <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
                 <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
                 <div id="access_holder"></div></form>
-                </ul>{admin_script}"""
+                </ul>
+                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;">
+                <div><input id="folder_name" name="folder_name"></div>
+                <div><input type="hidden" id="path" value="/{index_of.replace("root", "files")}"></div><br>
+                <div><input on_click="create_folder();" value="Create" class="button button2"></div>{admin_script}"""
     else:
         with open("source/context.js", "r") as data:
             script = data.read()

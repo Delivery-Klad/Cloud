@@ -58,7 +58,7 @@ async def homepage(request: Request):
         log(f"GET Request to '/' from '{request.client.host}'")
         return RedirectResponse(url + "files")
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @app.get("/{path}")
@@ -115,7 +115,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                 return show_auth_page("admin")
         return show_not_found_page()
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @app.get("/files/{catchall:path}")
@@ -131,7 +131,7 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
             if redirects < 10:
                 return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, redirects)
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @app.on_event("startup")
@@ -154,7 +154,7 @@ def startup():
         create_tables()
         print("Startup complete!")
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @app.on_event("shutdown")

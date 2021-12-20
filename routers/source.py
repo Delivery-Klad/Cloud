@@ -12,6 +12,6 @@ async def get_source(name: str, request: Request):
     try:
         return FileResponse(f"source/{name}")
     except FileNotFoundError:
-        show_not_found_page()
+        return show_not_found_page()
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))

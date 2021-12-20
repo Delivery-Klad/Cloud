@@ -43,7 +43,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
                 dump({"create": str(date), "modif": str(date)}, meta_file)
         return RedirectResponse(f"/{path}", status_code=302)
     except Exception as er:
-        error_log(str(er))
+        return error_log(str(er))
 
 
 @router.put("/")
@@ -62,8 +62,7 @@ async def rename(request: Request, file: FileData, auth_psw: Optional[str] = Coo
             pass
         return {"res": True}
     except Exception as e:
-        error_log(str(e))
-        return {"res": False}
+        return error_log(str(e))
 
 
 @router.delete("/")
@@ -83,8 +82,7 @@ async def delete(request: Request, file: FileData, auth_psw: Optional[str] = Coo
             pass
         return {"res": True}
     except Exception as e:
-        error_log(str(e))
-        return {"res": False}
+        return error_log(str(e))
 
 
 @router.get("/meta")
@@ -112,4 +110,4 @@ async def get_meta(path: str, name: str, request: Request, auth_psw: Optional[st
             return {"res": [f"Дата создания: {date}", f"Дата изменения: {date}",
                             f"Размер: {size}"]}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))

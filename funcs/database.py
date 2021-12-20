@@ -1,6 +1,6 @@
-from fastapi import Request
-import psycopg2
 import bcrypt
+import psycopg2
+from fastapi import Request
 
 
 def db_connect():

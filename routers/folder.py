@@ -80,8 +80,7 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
     except AttributeError:
         return {"res": False}
     except Exception as er:
-        error_log(str(er))
-        return {"res": False}
+        return error_log(str(er))
 
 
 @router.delete("/")
@@ -94,5 +93,4 @@ async def delete_folder(data: DeleteFolder, request: Request, auth_psw: Optional
     except AttributeError:
         return {"res": False}
     except Exception as er:
-        error_log(str(er))
-        return {"res": False}
+        return error_log(str(er))

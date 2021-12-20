@@ -41,7 +41,7 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.get("/logs")
@@ -55,7 +55,7 @@ async def admin_logs(request: Request, auth_psw: Optional[str] = Cookie(None)):
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.delete("/clear_logs")
@@ -71,7 +71,7 @@ async def admin_clear_logs(request: Request, auth_psw: Optional[str] = Cookie(No
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.get("/errors")
@@ -86,7 +86,7 @@ async def admin_errors(request: Request, auth_psw: Optional[str] = Cookie(None))
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.delete("/clear_errors")
@@ -102,7 +102,7 @@ async def admin_clear_errors(request: Request, auth_psw: Optional[str] = Cookie(
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.delete("/user/{user}")
@@ -116,7 +116,7 @@ async def admin_delete_user(user: int, request: Request, auth_psw: Optional[str]
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.get("/users")
@@ -131,7 +131,7 @@ async def admin_users(request: Request, auth_psw: Optional[str] = Cookie(None)):
         else:
             return {"res": "Failed"}
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
     return {"res": result}
 
 
@@ -145,7 +145,7 @@ async def admin_permissions(request: Request, up: bool, user: int, auth_psw: Opt
         else:
             return "fck u"
     except Exception as e:
-        error_log(str(e))
+        return error_log(str(e))
 
 
 @router.post("/")

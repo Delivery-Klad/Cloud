@@ -3,7 +3,6 @@ from json import dump, load
 from datetime import datetime
 
 from fastapi import APIRouter, Cookie, Request, Query, UploadFile, File
-from fastapi.responses import RedirectResponse
 from typing import Optional
 from pydantic import BaseModel
 
@@ -41,7 +40,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         else:
             with open(f"temp/{path}/{data.filename}.meta", "w") as meta_file:
                 dump({"create": str(date), "modif": str(date)}, meta_file)
-        return RedirectResponse(f"/{path}", status_code=302)
+        return True
     except Exception as er:
         return error_log(str(er))
 

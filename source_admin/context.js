@@ -3,7 +3,6 @@ function delete_file(){
     var data = {};
     data.file_path  = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
     var json = JSON.stringify(data);
-
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/file/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
@@ -51,10 +50,8 @@ function rename_file(){
 function delete_folder(){
     var data = {};
     var local_path = document.getElementById("file_path").value;
-    local_path = local_path + "/";
-    data.file_path  = local_path + document.getElementById("file_name").value;
+    data.file_path  = local_path + "/" + document.getElementById("file_name").value;
     var json = JSON.stringify(data);
-
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/folder/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
@@ -92,17 +89,17 @@ function rename_folder(){
             li_href.setAttribute("title", document.getElementById("file_path").value + "/" + new_name);
             li_href.setAttribute("class", "folder");
             li_block.appendChild(li_href);
-        } else {
-            console.log(data);
-        }
+        } else { console.log(data); }
     }
     xhr.send(json);
 }
 
 function create_new_folder(){
     var data = {};
-    data.path  = document.getElementById("folder_path").value;
-    data.arg = document.getElementById("folder_name").value;
+    var folder_name = document.getElementById("folder_name").value;
+    var folder_path = document.getElementById("folder_path").value;
+    data.path  = folder_path;
+    data.arg = folder_name;
     data.access = document.querySelector('input[name="folder_access"]:checked').value;
     var json = JSON.stringify(data);
     var xhr = new XMLHttpRequest();
@@ -111,7 +108,15 @@ function create_new_folder(){
     xhr.onload = function () {
         var data = JSON.parse(xhr.responseText);
         if (xhr.readyState == 4 && xhr.status == 200) {
-            document.location.href = document.getElementById("folder_path").value;
+            let new_folder = document.createElement("li");
+            new_folder.setAttribute("id", folder_name);
+            ul_block.appendChild(new_folder);
+            let folder_href = document.createElement("a");
+            folder_href.textContent = folder_name;
+            folder_href.href = folder_path + "/" + folder_name;
+            new_folder.appendChild(folder_href);
+            folder_href.setAttribute("title", folder_name);
+            folder_href.className = "folder";
         }
     }
     xhr.send(json);
@@ -120,6 +125,7 @@ function create_new_folder(){
 var place_holder = document.getElementById("meta_place_holder")
 var menu_element = document.getElementById("menu_m");
 var scnd_menu = document.getElementById("scnd_menu");
+var ul_block = document.getElementById("files");
 
 $(document).ready(function() {
     if ($("#file").addEventListener) {
@@ -277,4 +283,30 @@ function mouseY(evt) {
 }
 
 function setFocusToTextBox(){ document.getElementById("new_name").focus(); }
+
+$("form#data").submit(function(event){
+    event.preventDefault();
+    var formData = new FormData($(this)[0]);
+    var file_name = document.getElementsByName("data")[0].value.split("\\").pop();
+    $.ajax({
+        url: '/file/?path=' + document.getElementById("upload_path").value,
+        type: 'POST',
+        data: formData,
+        async: true,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function () {
+            let new_file = document.createElement("li");
+            new_file.setAttribute("id", file_name);
+            ul_block.appendChild(new_file);
+            let file_href = document.createElement("a");
+            file_href.textContent = file_name;
+            file_href.href = document.getElementById("upload_path").value + file_name;
+            new_file.appendChild(file_href);
+            file_href.setAttribute("title", file_href.href);
+            file_href.className = "file";
+        }
+    });
+});
 </script>

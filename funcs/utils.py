@@ -9,6 +9,20 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from funcs.database import get_permissions
 
 
+def parse_url():
+    url = os.environ.get("DATABASE_URL")
+    url = url.split("://")[1]
+    os.environ['db_name'] = url.split("/")[1]
+    url = url.split("/")[0]
+    temp = url.split(":")
+    os.environ['db_port'] = temp[2]
+    os.environ['db_user'] = temp[0]
+    url = temp[1]
+    temp = url.split("@")
+    os.environ['db_psw'] = temp[0]
+    os.environ['db_host'] = temp[1]
+
+
 def is_root_user(request: Request, cookie: str):
     try:
         if get_jwt_sub(request, cookie).split("://:")[0] == "5":

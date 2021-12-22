@@ -1,15 +1,17 @@
-import bcrypt
-import psycopg2
+from os import environ
+
+from bcrypt import checkpw
+from psycopg2 import connect as db_connection
 from fastapi import Request
 
 
 def db_connect():
     try:
-        con = psycopg2.connect(host="ec2-52-214-178-113.eu-west-1.compute.amazonaws.com",
-                               database="d843ppmbnactup",
-                               user="gdbusytrmyeoqa",
-                               port=5432,
-                               password="e01b3717ac9a5ec8a52d14f89c2483ace413784a7595d5338e72ab5701571c22")
+        con = db_connection(host=environ.get("db_host"),
+                            database=environ.get("db_name"),
+                            user=environ.get("db_user"),
+                            port=environ.get("db_port"),
+                            password=environ.get("db_psw"))
         cur = con.cursor()
         return con, cur
     except Exception as e:
@@ -101,7 +103,7 @@ def check_password(login: str, password: str):
             db_password = cursor.fetchall()[0][0]
         except IndexError:
             return None
-        if bcrypt.checkpw(password.encode("utf-8"), db_password.encode("utf-8")):
+        if checkpw(password.encode("utf-8"), db_password.encode("utf-8")):
             return True
         else:
             return False

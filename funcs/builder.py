@@ -1,12 +1,11 @@
-import os
-import time
+from os import environ
+from time import sleep
 
 from fastapi import Request
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 
-from funcs.utils import listdir
 from funcs.pages import show_not_found_page
-from funcs.utils import is_root_user, constructor, get_menu
+from funcs.utils import is_root_user, constructor, get_menu, listdir
 
 
 def handler(path: str, filename: str, request: Request, auth_psw, download, redirects=None):
@@ -14,7 +13,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
         files = listdir(path, request, auth_psw)
         if type(files) != str:
             if path == "":
-                time.sleep(5)
+                sleep(5)
                 return RedirectResponse("files")
             else:
                 if redirects is None:
@@ -26,7 +25,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
-            url = os.environ.get("server_url")
+            url = environ.get("server_url")
             if file_extension in ["txt", "py", "cs", "java", "class", "php", "html"]:
                 with open(f"temp/files{path}", "rb") as page:
                     if file_extension != "html":

@@ -1,7 +1,7 @@
-import os
-import shutil
+from os import environ
+from shutil import make_archive
 
-import dropbox
+from dropbox import Dropbox
 from dropbox.exceptions import AuthError
 from fastapi import APIRouter, Cookie, Response, Request
 from git import Repo
@@ -11,7 +11,7 @@ from funcs.database import get_users, set_permissions, delete_user
 from funcs.utils import is_root_user, log, error_log, check_cookies, clear_log
 
 router = APIRouter(prefix="/admin")
-dbx_token = "8DB7UppEmUwAAAAAAAAAAeZTbSRQ4J-Y_ZG_ZcCWIv3lh9ZFfXNsovvh2GZFX6vc"
+dbx_token = environ.get("dbx_token")
 
 
 @router.get("/dashboard")
@@ -28,12 +28,12 @@ async def admin_dashboard(request: Request, arg: bool = False, auth_psw: Optiona
                 result.append(item.a_path)
             if not arg:
                 try:
-                    dbx = dropbox.Dropbox(dbx_token)
+                    dbx = Dropbox(dbx_token)
                     backups = len(dbx.files_list_folder(path='').entries)
                 except AuthError:
                     backups = "Not found"
                 return {"res": [f"Summary",
-                                f"Current session starts in:   {os.environ.get('start_time')}",
+                                f"Current session starts in:   {environ.get('start_time')}",
                                 f"Untracked files count:       {len(result) - 1}",
                                 f"Backup archives count:       {backups}"]}
             else:
@@ -174,8 +174,8 @@ async def admin_push_files(request: Request, auth_psw: Optional[str] = Cookie(No
         except Exception as e:
             error_log(str(e))
             print("Creating archive!")
-            dbx = dropbox.Dropbox(dbx_token)
-            shutil.make_archive("backup_archive", "zip", "temp/files/7 сем")
+            dbx = Dropbox(dbx_token)
+            make_archive("backup_archive", "zip", "temp/files/7 сем")
             import random
             with open("backup_archive.zip", "rb") as archive:
                 print("Upload archive!")

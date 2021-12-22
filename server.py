@@ -1,11 +1,11 @@
-import os
-import shutil
+from os import environ, mkdir
+from shutil import make_archive
 from datetime import datetime
 from random import randint
 from secrets import token_hex
 
-import bcrypt
-import dropbox
+from bcrypt import gensalt, hashpw
+from dropbox import Dropbox
 from fastapi import FastAPI, Request, Cookie
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
@@ -17,24 +17,24 @@ from funcs.database import create_tables, check_password, create_account, get_pe
 from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
-from funcs.utils import is_root_user, log, error_log, check_cookies
+from funcs.utils import is_root_user, log, error_log, check_cookies, parse_url
 from routers import source, file, admin, folder
 
 
 swagger_url = token_hex(randint(10, 15))
-app = FastAPI(docs_url=F"/{swagger_url}", redoc_url=None)
+app = FastAPI(docs_url=f"/{swagger_url}", redoc_url=None)
 app.include_router(admin.router)
 app.include_router(source.router)
 app.include_router(folder.router)
 app.include_router(file.router)
 app.add_middleware(LimitUploadSize, max_upload_size=50_000_000)
-token = "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"
-dbx_token = "8DB7UppEmUwAAAAAAAAAAeZTbSRQ4J-Y_ZG_ZcCWIv3lh9ZFfXNsovvh2GZFX6vc"
-url = os.environ.get("server_url")
+token = environ.get("gh_token")
+dbx_token = environ.get("dbx_token")
+url = environ.get("server_url")
 
 
 class JWTSettings(BaseModel):
-    authjwt_secret_key: str = "SecreT_Auth_JWT"
+    authjwt_secret_key: str = environ.get("secret")
 
 
 @AuthJWT.load_config
@@ -87,7 +87,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None, arg
                         if ord(i) < 33 or ord(i) > 122:
                             return JSONResponse({"result": "И как ты до этого добрался? Сказано же, что нельзя "
                                                            "использовать эти символы"}, status_code=403)
-                    if create_account(arg2, str(bcrypt.hashpw(arg.encode("utf-8"), bcrypt.gensalt()))[2:-1], request):
+                    if create_account(arg2, str(hashpw(arg.encode("utf-8"), gensalt()))[2:-1], request):
                         authorize = AuthJWT()
                         response = JSONResponse({"result": True})
                         perm = get_permissions(arg2)
@@ -137,15 +137,16 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 @app.on_event("startup")
 def startup():
     try:
+        parse_url()
         with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         with open("error_log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
-        os.environ["start_time"] = str(datetime.utcnow())[:-7]
+        environ["start_time"] = str(datetime.utcnow())[:-7]
         print("Starting startup process...")
         try:
             print("Cloning repo...")
-            os.mkdir("temp")
+            mkdir("temp")
             from git.repo.base import Repo
             Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files", "temp")
             print("Cloning success!")
@@ -178,8 +179,8 @@ def shutdown():
         error_log(str(e))
         print(f"Error: {e}")
         print("Creating archive!")
-        dbx = dropbox.Dropbox(dbx_token)
-        shutil.make_archive("aboba", "zip", "temp/files/7 сем")
+        dbx = Dropbox(dbx_token)
+        make_archive("aboba", "zip", "temp/files/7 сем")
         import random
         with open("aboba.zip", "rb") as archive:
             print("Upload archive!")

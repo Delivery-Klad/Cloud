@@ -1,4 +1,4 @@
-import os
+from os import rename, listdir, remove
 from shutil import rmtree
 
 from fastapi import APIRouter, Cookie, Request
@@ -56,16 +56,16 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
             return {"res": False}
         new_path = data.path.split("/")[:-1]
         new_path = "/".join(new_path) + f"/{data.arg}"
-        os.rename(f"temp/{data.path}", f"temp/{new_path}")
-        files = os.listdir(f"temp/{new_path}")
+        rename(f"temp/{data.path}", f"temp/{new_path}")
+        files = listdir(f"temp/{new_path}")
         if "hidden" in files:
-            os.remove(f"temp/{new_path}/hidden")
+            remove(f"temp/{new_path}/hidden")
         elif "viewer" in files:
-            os.remove(f"temp/{new_path}/viewer")
+            remove(f"temp/{new_path}/viewer")
         elif "privilege" in files:
-            os.remove(f"temp/{new_path}/privilege")
+            remove(f"temp/{new_path}/privilege")
         elif "init" in files:
-            os.remove(f"temp/{new_path}/init")
+            remove(f"temp/{new_path}/init")
         if data.access == "root":
             with open(f"temp/{new_path}/hidden", "w") as access_file:
                 access_file.write("init")

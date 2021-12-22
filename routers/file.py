@@ -1,4 +1,4 @@
-import os
+from os import path as os_path, rename, remove
 from json import dump, load
 from datetime import datetime
 
@@ -32,7 +32,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
             uploaded_file.write(await data.read())
         date = datetime.now().strftime("%d-%m-%y %H:%M")
-        if os.path.exists(f"temp/{path}/{data.filename}.meta"):
+        if os_path.exists(f"temp/{path}/{data.filename}.meta"):
             with open(f"temp/{path}/{data.filename}.meta", "r") as meta_file:
                 meta_data = load(meta_file)
             with open(f"temp/{path}/{data.filename}.meta", "w") as meta_file:
@@ -46,7 +46,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
 
 
 @router.put("/")
-async def rename(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
+async def rename_file(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"PUT Request to '/file' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         try:
@@ -54,9 +54,9 @@ async def rename(request: Request, file: FileData, auth_psw: Optional[str] = Coo
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
-        os.rename(f"temp/{file.file_path}/{file.file_name}", f"temp/{file.file_path}/{file.new_name}")
+        rename(f"temp/{file.file_path}/{file.file_name}", f"temp/{file.file_path}/{file.new_name}")
         try:
-            os.rename(f"temp/{file.file_path}/{file.file_name}.meta", f"temp/{file.file_path}/{file.new_name}.meta")
+            rename(f"temp/{file.file_path}/{file.file_name}.meta", f"temp/{file.file_path}/{file.new_name}.meta")
         except FileNotFoundError:
             pass
         return {"res": True}
@@ -65,7 +65,7 @@ async def rename(request: Request, file: FileData, auth_psw: Optional[str] = Coo
 
 
 @router.delete("/")
-async def delete(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
+async def delete_file(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"DELETE Request to '/file' from '{request.client.host}' with cookies "
             f"'{check_cookies(request, auth_psw)}'")
@@ -74,9 +74,9 @@ async def delete(request: Request, file: FileData, auth_psw: Optional[str] = Coo
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
-        os.remove(f"temp/{file.file_path}")
+        remove(f"temp/{file.file_path}")
         try:
-            os.remove(f"temp/{file.file_path}.meta")
+            remove(f"temp/{file.file_path}.meta")
         except FileNotFoundError:
             pass
         return {"res": True}
@@ -88,13 +88,9 @@ async def delete(request: Request, file: FileData, auth_psw: Optional[str] = Coo
 async def get_meta(path: str, name: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/meta' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
     try:
-        size = os.path.getsize(f"temp/{path}{name}")
-        size /= 1024
-        size = round(size)
+        size = round(os_path.getsize(f"temp/{path}{name}") / 1024)
         if size > 1024:
-            size /= 1020
-            size = round(size, 1)
-            size = str(size) + " МБ"
+            size = str(round(size / 1024, 1)) + " МБ"
         else:
             size = str(size) + " КБ"
         try:

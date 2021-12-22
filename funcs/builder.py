@@ -2,10 +2,10 @@ import os
 import time
 
 from fastapi import Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 
 from funcs.utils import listdir
-from funcs.pages import *
+from funcs.pages import show_not_found_page
 from funcs.utils import is_root_user, constructor, get_menu
 
 

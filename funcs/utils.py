@@ -58,7 +58,7 @@ def error_log(text: str):
     print(text)
     with open("error_log.txt", "a") as log_file:
         log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
-    with open("templates/500.html", "r") as page:
+    with open("templates/500.html", "rb") as page:
         return HTMLResponse(page.read())
 
 

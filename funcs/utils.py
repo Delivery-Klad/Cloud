@@ -4,7 +4,7 @@ from datetime import datetime
 
 from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 
 from funcs.database import get_permissions
 
@@ -54,12 +54,6 @@ def is_authorized_user(request: Request, cookie: str):
         return False
 
 
-def fail_response(redirect: str):  # пока не используется
-    response = RedirectResponse(redirect)
-    response.delete_cookie("auth_psw")
-    return response
-
-
 def log(text: str, code: bool = False):
     with open("log.txt", "a") as log_file:
         if code:
@@ -89,7 +83,6 @@ def sort_dir_files(listdir_files):
 def create_new_folder(path, arg, access):
     if path[len(path) - 1] == "/":
         path = path[:-1]
-    print(path)
     os.mkdir(f"temp/{path}/{arg}")
     if access == "root":
         with open(f"temp/{path}/{arg}/hidden", "w") as access_file:
@@ -117,23 +110,13 @@ def listdir(directory: str, request: Request, auth_psw):
                 files = os.listdir(f"temp/files{directory}")
         files = sort_dir_files(os.listdir(f"temp/files{directory}"))
         if "hidden" in files:
-            try:
-                if not is_root_user(request, auth_psw):
-                    return "<li>Access denied</li>"
-            except AttributeError:
+            if not is_root_user(request, auth_psw):
                 return "<li>Access denied</li>"
         elif "privilege" in files:
-            try:
-                if not is_privileged_user(request, auth_psw):
-                    return "<li>Access denied</li>"
-            except AttributeError:
+            if not is_privileged_user(request, auth_psw):
                 return "<li>Access denied</li>"
         elif "viewer" in files:
-            try:
-                if not is_authorized_user(request, auth_psw):
-                    return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
-                                title="Authorization">Login or register</a>"""
-            except AttributeError:
+            if not is_authorized_user(request, auth_psw):
                 return f"""<li>Access denied</li> <a href="/auth?redirect=files{directory}" 
                             title="Authorization">Login or register</a>"""
         for i in files:

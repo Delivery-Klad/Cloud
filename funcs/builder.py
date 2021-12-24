@@ -5,21 +5,26 @@ from fastapi import Request
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 
 from funcs.pages import show_not_found_page
-from funcs.utils import is_root_user, constructor, get_menu, listdir
+from funcs.utils import is_root_user, constructor, get_menu, listdir, get_jwt_sub
 
 
-def handler(path: str, filename: str, request: Request, auth_psw, download, redirects=None):
+def handler(path: str, filename: str, request: Request, auth_psw, download, redirects: int = None):
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
             if path == "":
                 sleep(5)
-                return RedirectResponse("files")
+                response = RedirectResponse("/files")
+                if get_jwt_sub(request, auth_psw) is None:
+                    response.delete_cookie("auth_psw")
+                return response
             else:
                 if redirects is None:
-                    return show_not_found_page()
+                    return RedirectResponse(f"/files{path}?redirects=1")
                 else:
-                    return RedirectResponse(f"files/{path}?redirects={redirects + 1}")
+                    if redirects >= 10:
+                        return show_not_found_page()
+                    return RedirectResponse(f"/files{path}?redirects={redirects + 1}")
         index_of = "root" if path == "" else f"root{path}"
         return builder(request, index_of, files, auth_psw)
     except NotADirectoryError:
@@ -50,13 +55,10 @@ def builder(request: Request, index_of: str, files: str, auth_psw):
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg></a></i></h1>"""
     back_button, menu, title = "", "", ""
-    try:
-        if is_root_user(request, auth_psw):
-            icons = constructor(icons, upload_path)
-            menu = get_menu(index_of, True)
-        else:
-            menu = get_menu(index_of, False)
-    except AttributeError:
+    if is_root_user(request, auth_psw):
+        icons = constructor(icons, upload_path)
+        menu = get_menu(index_of, True)
+    else:
         menu = get_menu(index_of, False)
     index_of = index_of.replace("//", "/")
     if index_of[len(index_of) - 1] == "/":

@@ -125,11 +125,10 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
         path = request.path_params["catchall"]
         log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         name = path.split("/")
-        if redirects is None or redirects < 10:
+        if redirects is None:
             return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download)
         else:
-            if redirects < 10:
-                return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, redirects)
+            return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, redirects)
     except Exception as e:
         return error_log(str(e))
 
@@ -180,9 +179,9 @@ def shutdown():
         print(f"Error: {e}")
         print("Creating archive!")
         dbx = Dropbox(dbx_token)
-        make_archive("aboba", "zip", "temp/files/7 сем")
+        make_archive("backup_archive", "zip", "temp/files/7 сем")
         import random
-        with open("aboba.zip", "rb") as archive:
+        with open("backup_archive.zip", "rb") as archive:
             print("Upload archive!")
             dbx.files_upload(archive.read(), f"/backup{random.randint(1, 1000)}.zip")
         print("Archive uploaded!")

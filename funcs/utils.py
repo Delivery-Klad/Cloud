@@ -200,11 +200,12 @@ def get_menu(index_of, is_root):
                         </label>
                     </div>
                     <input class="button button2" type="submit" value="Upload">
-                </div></form></ul>{admin_script}"""
+                </div></form></ul><script type="text/javascript">{admin_script}</script>"""
     else:
         with open("source/context.js", "r") as data:
             script = data.read()
-        menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul>{script}"""
+        menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul><script 
+                type="text/javascript">{script}</script>"""
     return menu
 
 

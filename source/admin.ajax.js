@@ -79,9 +79,7 @@ function open_dashboard(){
                 place_holder.append(block);
             })
         }
-        if (xhr.readyState === 4 && xhr.status === 403){
-            alert(JSON.parse(xhr.responseText).res);
-        }
+        if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
     }
     xhr.send();
 }
@@ -250,9 +248,7 @@ function delete_user(user){
     {
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', "admin/user/" + user);
-        xhr.onreadystatechange = function(){
-            if (xhr.readyState === 4 && xhr.status === 200){ alert("Successful deleted!"); }
-        }
+        xhr.onreadystatechange = function(){ if (xhr.readyState === 4 && xhr.status === 200){ alert("Successful deleted!"); }}
         xhr.send();
     }
 }

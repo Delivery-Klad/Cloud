@@ -1,4 +1,3 @@
-<script type="text/javascript">
 var place_holder = document.getElementById("meta_place_holder")
 var menu_element = document.getElementById("menu_m");
 
@@ -54,4 +53,3 @@ function mouseY(evt) {
         document.documentElement.scrollTop : document.body.scrollTop); }
     else { return null; }
 }
-</script>

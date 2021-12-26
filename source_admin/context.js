@@ -1,4 +1,3 @@
-<script type="text/javascript">
 function delete_file(){
     var data = {};
     data.file_path  = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
@@ -309,4 +308,3 @@ $("form#data").submit(function(event){
         }
     });
 });
-</script>

@@ -21,15 +21,15 @@ function login(){
         create_message("User не может быть использовано в качестве логина");
         return;
     }
-    if (user_login.value === "" || user_password.value === ""){
+    else if (user_login.value === "" || user_password.value === ""){
         create_message("Не все поля заполнены");
         return;
     }
-    if (user_login.value.length < 4){
+    else if (user_login.value.length < 4){
         create_message("Логин слишком короткий");
         return;
     }
-    if (user_password.value.length < 8){
+    else if (user_password.value.length < 8){
         create_message("Пароль слишком короткий");
         return;
     }
@@ -52,9 +52,7 @@ function login(){
     xhr.send();
 }
 
-function remove_message(block){
-    block.remove();
-}
+function remove_message(block){ block.remove(); }
 
 $("form").on('submit', function (e) {
    e.preventDefault();

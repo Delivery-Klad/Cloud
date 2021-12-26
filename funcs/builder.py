@@ -31,17 +31,17 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
             url = environ.get("server_url")
-            if file_extension in ["txt", "py", "cs", "java", "class", "php", "html"]:
+            if file_extension.lower() in ["txt", "py", "cs", "java", "class", "php", "html"]:
                 with open(f"temp/files{path}", "rb") as page:
                     if file_extension != "html":
                         return HTMLResponse(content=page.read().decode("utf-8").replace("\n", "<br>"), status_code=200)
                     return HTMLResponse(content=page.read(), status_code=200)
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
-                with open("templates/img_viewer.html", "r") as html_page:
-                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
-            elif file_extension in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
-                with open("templates/viewer.html", "r") as html_page:
-                    return HTMLResponse(content=html_page.read().format(filename, f"{url}files{path}"), status_code=200)
+                with open("templates/img_viewer.html", "r") as page:
+                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
+            elif file_extension.lower() in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
+                with open("templates/viewer.html", "r") as page:
+                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
@@ -52,8 +52,7 @@ def builder(request: Request, index_of: str, files: str, auth_psw):
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg></a></i></h1>"""
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></a></i></h1>"""
     back_button, menu, title = "", "", ""
     if is_root_user(request, auth_psw):
         icons = constructor(icons, upload_path)
@@ -70,8 +69,7 @@ def builder(request: Request, index_of: str, files: str, auth_psw):
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                          stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg></a></i></h1>"""
+                        <polyline points="15 18 9 12 15 6"></polyline></svg></a></i></h1>"""
     index_of = index_of.split("/")
     for i in index_of:
         if len(i) < 10:

@@ -1,8 +1,9 @@
-from os import path as os_path, rename, remove
+from os import path as os_path, rename, remove, sep, walk
 from json import dump, load
 from datetime import datetime
 
 from fastapi import APIRouter, Cookie, Request, Query, UploadFile, File
+from fastapi.responses import HTMLResponse
 from typing import Optional
 from pydantic import BaseModel
 
@@ -16,6 +17,32 @@ class FileData(BaseModel):
     file_path: str
     file_name: Optional[str] = None
     new_name: Optional[str] = None
+
+
+@router.get("/test_path")
+async def test1(path: str):
+    print(path)
+
+
+@router.get("/test")
+async def test():
+    result = ""
+    for root, dirs, files in walk("temp/files/"):
+        level = root.replace("temp/files/", '').count(sep)
+        indent = '- ' * level
+        if os_path.basename(root) == "":
+            link = "/"
+            result += "Root<br>"
+        else:
+            link = os_path.abspath(root).split("temp\\files")[1]
+            result += f"""{indent}<a href='/file/test_path?path="{link}"'>{os_path.basename(root)}</a><br>"""
+    return HTMLResponse(f"""<head></head>
+                        <body><div>{result}</div></body>""")
+
+
+@router.patch("/")
+async def replace_file(old_path: str, new_path: str):
+    pass
 
 
 @router.post("/")

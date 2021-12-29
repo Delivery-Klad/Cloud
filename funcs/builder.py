@@ -35,13 +35,22 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
             if file_extension.lower() in ["txt", "py", "cs", "java", "class", "php", "html", "css", "js", "json", "go",
                                           "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm"]:
                 with open(f"temp/files{path}", "rb") as page:
-                    with open("source_admin/languages.json", "r") as file:
-                        lang = load(file)[file_extension.lower()]
-                    return HTMLResponse(content=f"""<head><title>Cloud - File viewer</title>
+                    try:
+                        with open("source_admin/languages.json", "r") as file:
+                            lang = load(file)[file_extension.lower()]
+                    except KeyError:
+                        lang = "json"
+                    response_text = """<head><title>Cloud - File viewer</title>
                         <link href="/source/rainbow_dark.css" rel="stylesheet" 
-                        type="text/css"></head><body><pre><code data-language="{lang}">{page.read().decode("utf-8")
-                                            .replace("<", "&lt;").replace(">", "&gt;")}</code></pre><script 
-                        src="/source/rainbow-custom.min.js"></script></body>""", status_code=200)
+                        type="text/css"></head><body><pre><code data-language="{0}">{1}</code></pre><script 
+                        src="/source/rainbow-custom.min.js"></script></body>"""
+                    try:
+                        return HTMLResponse(content=response_text.format(lang, page.read().decode("utf-8")
+                                                                         .replace("<", "&lt;").replace(">", "&gt;")),
+                                            status_code=200)
+                    except UnicodeDecodeError:
+                        return FileResponse(path=f"temp/files{path}", filename=filename,
+                                            media_type='application/octet-stream')
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)

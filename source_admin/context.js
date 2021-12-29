@@ -301,7 +301,7 @@ $("form#data").submit(function(event){
             ul_block.appendChild(new_file);
             let file_href = document.createElement("a");
             file_href.textContent = file_name;
-            file_href.href = document.getElementById("upload_path").value + file_name;
+            file_href.href = "/" + document.getElementById("upload_path").value + file_name;
             new_file.appendChild(file_href);
             file_href.setAttribute("title", file_href.href);
             file_href.className = "file";

@@ -1,0 +1,22 @@
+{
+  "py": "python",
+  "cs": "csharp",
+  "css": "css",
+  "java": "java",
+  "js": "javascript",
+  "json": "json",
+  "class": "java",
+  "php": "php",
+  "go": "go",
+  "lua": "lua",
+  "luac": "lua",
+  "r": "r",
+  "rb": "ruby",
+  "coffee": "coffeescript",
+  "c": "c",
+  "hs": "haskell",
+  "lhs": "haskell",
+  "scm": "scheme",
+  "ss": "scheme",
+  "html": "html"
+}

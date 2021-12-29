@@ -50,6 +50,8 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
                       auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/upload/{data.filename}' from '{request.client.host}' "
         f"with cookies '{check_cookies(request, auth_psw)}'")
+    if data.filename == "":
+        return HTMLResponse(status_code=403)
     try:
         try:
             if not is_root_user(request, auth_psw):
@@ -67,7 +69,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         else:
             with open(f"temp/{path}/{data.filename}.meta", "w") as meta_file:
                 dump({"create": str(date), "modif": str(date)}, meta_file)
-        return True
+        return HTMLResponse(status_code=201)
     except Exception as er:
         return error_log(str(er))
 

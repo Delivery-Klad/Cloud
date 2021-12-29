@@ -1,4 +1,5 @@
 from os import environ
+from json import load
 from time import sleep
 
 from fastapi import Request
@@ -31,11 +32,16 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
             url = environ.get("server_url")
-            if file_extension.lower() in ["txt", "py", "cs", "java", "class", "php", "html"]:
+            if file_extension.lower() in ["txt", "py", "cs", "java", "class", "php", "html", "css", "js", "json", "go",
+                                          "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm"]:
                 with open(f"temp/files{path}", "rb") as page:
-                    if file_extension != "html":
-                        return HTMLResponse(content=page.read().decode("utf-8").replace("\n", "<br>"), status_code=200)
-                    return HTMLResponse(content=page.read(), status_code=200)
+                    with open("source_admin/languages.json", "r") as file:
+                        lang = load(file)[file_extension.lower()]
+                    return HTMLResponse(content=f"""<head><title>Cloud - File viewer</title>
+                        <link href="/source/rainbow_dark.css" rel="stylesheet" 
+                        type="text/css"></head><body><pre><code data-language="{lang}">{page.read().decode("utf-8")
+                                            .replace("<", "&lt;").replace(">", "&gt;")}</code></pre><script 
+                        src="/source/rainbow-custom.min.js"></script></body>""", status_code=200)
             elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)

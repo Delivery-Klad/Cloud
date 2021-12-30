@@ -1,11 +1,11 @@
 {
   "py": "python",
   "cs": "csharp",
+  "resx": "csharp",
   "css": "css",
   "java": "java",
   "js": "javascript",
   "json": "json",
-  "class": "java",
   "php": "php",
   "go": "go",
   "lua": "lua",
@@ -18,5 +18,8 @@
   "lhs": "haskell",
   "scm": "scheme",
   "ss": "scheme",
-  "html": "html"
+  "html": "html",
+  "xml": "html",
+  "config": "html",
+  "settings": "html"
 }

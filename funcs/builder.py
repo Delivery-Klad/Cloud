@@ -32,8 +32,15 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
             url = environ.get("server_url")
-            if file_extension.lower() in ["txt", "py", "cs", "java", "class", "php", "html", "css", "js", "json", "go",
-                                          "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm"]:
+            if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
+                with open("templates/img_viewer.html", "r") as page:
+                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
+            elif file_extension.lower() in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
+                with open("templates/viewer.html", "r") as page:
+                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
+            elif file_extension.lower() in ["txt", "py", "cs", "java", "php", "html", "css", "js", "json",
+                                            "go", "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm",
+                                            "resx", "config", "xml", "settings"]:
                 with open(f"temp/files{path}", "rb") as page:
                     try:
                         with open("source_admin/languages.json", "r") as file:
@@ -42,21 +49,16 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                         lang = "json"
                     response_text = """<head><title>Cloud - File viewer</title>
                         <link href="/source/rainbow_dark.css" rel="stylesheet" 
-                        type="text/css"></head><body><pre><code data-language="{0}">{1}</code></pre><script 
+                        type="text/css"></head><body><a href="/files{0}?download=true">Download</a><pre>
+                        <code data-language="{1}">{2}</code></pre><script 
                         src="/source/rainbow-custom.min.js"></script></body>"""
                     try:
-                        return HTMLResponse(content=response_text.format(lang, page.read().decode("utf-8")
+                        return HTMLResponse(content=response_text.format(path, lang, page.read().decode("utf-8")
                                                                          .replace("<", "&lt;").replace(">", "&gt;")),
                                             status_code=200)
                     except UnicodeDecodeError:
                         return FileResponse(path=f"temp/files{path}", filename=filename,
                                             media_type='application/octet-stream')
-            elif file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
-                with open("templates/img_viewer.html", "r") as page:
-                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
-            elif file_extension.lower() in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
-                with open("templates/viewer.html", "r") as page:
-                    return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 
@@ -90,7 +92,10 @@ def builder(request: Request, index_of: str, files: str, auth_psw):
         if len(i) < 10:
             title += i
         else:
-            title += i[:10] + "..."
+            if len(i) < 12:
+                title += i
+            else:
+                title += i[:10] + "..."
         title += "/"
     with open("templates/files.html", "r") as html_content:
         return HTMLResponse(content=html_content.read().format(back_button, title, icons, files, menu), status_code=200)

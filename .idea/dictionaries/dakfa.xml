@@ -2,8 +2,12 @@
   <dictionary name="dakfa">
     <words>
       <w>authjwt</w>
+      <w>coffeescript</w>
+      <w>csharp</w>
       <w>docx</w>
       <w>klad</w>
+      <w>luac</w>
+      <w>resx</w>
       <w>untracked</w>
       <w>useragent</w>
       <w>uvicorn</w>

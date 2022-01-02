@@ -28,6 +28,8 @@ async def get_access(request: Request, auth_psw: Optional[str] = Cookie(None)):
             return {"res": False}
         path = request.path_params["catchall"]
         return get_folder_access_level(path)
+    except NotADirectoryError:
+        return {"res": False}
     except AttributeError:
         return {"res": False}
     except FileNotFoundError:
@@ -91,7 +93,10 @@ async def delete_folder(data: DeleteFolder, request: Request, auth_psw: Optional
         if not is_root_user(request, auth_psw):
             return {"res": False}
         rmtree(f"temp{data.file_path}")
-        return
+        return {"res": True}
+    except NotADirectoryError:
+        remove(f"temp{data.file_path}")
+        return {"res": True}
     except AttributeError:
         return {"res": False}
     except Exception as er:

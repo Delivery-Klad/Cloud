@@ -1,4 +1,4 @@
-from os import path as os_path, rename, remove, sep, walk
+from os import path as os_path, rename, remove, sep, walk, listdir
 from json import dump, load
 from datetime import datetime
 
@@ -58,7 +58,16 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
-        with open(f"temp/{path}/{data.filename}", "wb") as uploaded_file:
+        file_path = f"temp/{path}/{data.filename}"
+        if data.filename in listdir(f"temp/{path}"):
+            new_name = data.filename.split(".")
+            if len(new_name) < 1:
+                file_extension = new_name[len(new_name) - 1]
+                new_name = ".".join(new_name[:-1]) + "(1)"
+                file_path = f"temp/{path}/{new_name}.{file_extension}"
+            else:
+                file_path = f"temp/{path}/{data.filename + '(1)'}"
+        with open(file_path, "wb") as uploaded_file:
             uploaded_file.write(await data.read())
         date = datetime.now().strftime("%d-%m-%y %H:%M")
         if os_path.exists(f"temp/{path}/{data.filename}.meta"):

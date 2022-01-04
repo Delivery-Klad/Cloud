@@ -1,4 +1,4 @@
-import os
+from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
 import re
 from datetime import datetime
 
@@ -10,17 +10,17 @@ from funcs.database import get_permissions
 
 
 def parse_url():
-    url = os.environ.get("DATABASE_URL")
+    url = environ.get("DATABASE_URL")
     url = url.split("://")[1]
-    os.environ['db_name'] = url.split("/")[1]
+    environ['db_name'] = url.split("/")[1]
     url = url.split("/")[0]
     temp = url.split(":")
-    os.environ['db_port'] = temp[2]
-    os.environ['db_user'] = temp[0]
+    environ['db_port'] = temp[2]
+    environ['db_user'] = temp[0]
     url = temp[1]
     temp = url.split("@")
-    os.environ['db_psw'] = temp[0]
-    os.environ['db_host'] = temp[1]
+    environ['db_psw'] = temp[0]
+    environ['db_host'] = temp[1]
 
 
 def is_root_user(request: Request, cookie: str):
@@ -83,7 +83,7 @@ def sort_dir_files(listdir_files):
 def create_new_folder(path, arg, access):
     if path[len(path) - 1] == "/":
         path = path[:-1]
-    os.mkdir(f"temp/{path}/{arg}")
+    mkdir(f"temp/{path}/{arg}")
     if access == "root":
         with open(f"temp/{path}/{arg}/hidden", "w") as access_file:
             access_file.write("init")
@@ -104,11 +104,11 @@ def create_new_folder(path, arg, access):
 def listdir(directory: str, request: Request, auth_psw):
     local_files = ""
     try:
-        files = os.listdir(f"temp/files{directory}")
+        files = os_listdir(f"temp/files{directory}")
         if directory == "":
             while "7 сем" not in files or "Other" not in files:
-                files = os.listdir(f"temp/files{directory}")
-        files = sort_dir_files(os.listdir(f"temp/files{directory}"))
+                files = os_listdir(f"temp/files{directory}")
+        files = sort_dir_files(os_listdir(f"temp/files{directory}"))
         if "hidden" in files:
             if not is_root_user(request, auth_psw):
                 return "<li>Access denied</li>"
@@ -123,12 +123,15 @@ def listdir(directory: str, request: Request, auth_psw):
             if i == "hidden" or i == "init" or i == "viewer" or i == "privilege" or (".meta" in i):
                 continue
             if len(i.split(".")) == 1:
-                file_class = "folder"
+                if os_path.isdir(f"temp/files{directory}/{i}"):
+                    file_class = "folder"
+                else:
+                    file_class = "file"
             else:
                 file_type = i.split(".")
                 file_type = file_type[len(file_type) - 1]
                 if file_type.lower() in ["png", "jpg", "bmp", "gif", "jpeg", "heic"]:
-                    file_class = "png"
+                    file_class = "image"
                 else:
                     file_class = "file"
             local_files += f"""<li id="{i}">
@@ -141,7 +144,7 @@ def listdir(directory: str, request: Request, auth_psw):
 
 def get_folder_access_level(path: str):
     try:
-        files = os.listdir(f"temp/{path}")
+        files = os_listdir(f"temp/{path}")
         if "hidden" in files:
             return {"res": 1}
         elif "viewer" in files:
@@ -177,6 +180,7 @@ def get_menu(index_of, is_root):
             admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
                 <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
+                <div><input onclick="replace_path();" value="Replace" id="replace_btn" class="button button2"></div>
                 <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
                 <div id="access_holder"></div></form>
                 </ul>
@@ -207,6 +211,14 @@ def get_menu(index_of, is_root):
         menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul><script 
                 type="text/javascript">{script}</script>"""
     return menu
+
+
+def delete_full_file(path: str):
+    remove(f"temp/{path}")
+    try:
+        remove(f"temp/{path}.meta")
+    except FileNotFoundError:
+        pass
 
 
 def check_cookies(request: Request, cookie: str):

@@ -32,6 +32,11 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
             url = environ.get("server_url")
+            response_text = """<head><title>Cloud - File viewer</title>
+                                    <link href="/source/rainbow_dark.css" rel="stylesheet" 
+                                    type="text/css"></head><body><a href="/files{0}?download=true">Download</a><pre>
+                                    <code data-language="{1}">{2}</code></pre><script 
+                                    src="/source/rainbow-custom.min.js"></script></body>"""
             if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
                 with open("templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
@@ -47,15 +52,18 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                             lang = load(file)[file_extension.lower()]
                     except KeyError:
                         lang = "json"
-                    response_text = """<head><title>Cloud - File viewer</title>
-                        <link href="/source/rainbow_dark.css" rel="stylesheet" 
-                        type="text/css"></head><body><a href="/files{0}?download=true">Download</a><pre>
-                        <code data-language="{1}">{2}</code></pre><script 
-                        src="/source/rainbow-custom.min.js"></script></body>"""
                     try:
                         return HTMLResponse(content=response_text.format(path, lang, page.read().decode("utf-8")
                                                                          .replace("<", "&lt;").replace(">", "&gt;")),
                                             status_code=200)
+                    except UnicodeDecodeError:
+                        return FileResponse(path=f"temp/files{path}", filename=filename,
+                                            media_type='application/octet-stream')
+            elif len(filename.split(".")) == 1:
+                with open(f"temp/files{path}", "rb") as page:
+                    try:
+                        return HTMLResponse(content=response_text.format(path, "json", page.read().decode("utf-8"),
+                                                                         status_code=200))
                     except UnicodeDecodeError:
                         return FileResponse(path=f"temp/files{path}", filename=filename,
                                             media_type='application/octet-stream')

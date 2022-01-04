@@ -5,7 +5,8 @@ from fastapi import APIRouter, Cookie, Request
 from typing import Optional
 from pydantic import BaseModel
 
-from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level
+from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
+    delete_full_file
 
 router = APIRouter(prefix="/folder")
 
@@ -68,18 +69,17 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
             remove(f"temp/{new_path}/privilege")
         elif "init" in files:
             remove(f"temp/{new_path}/init")
+        file_name = ""
         if data.access == "root":
-            with open(f"temp/{new_path}/hidden", "w") as access_file:
-                access_file.write("init")
+            file_name = "hidden"
         elif data.access == "auth":
-            with open(f"temp/{new_path}/viewer", "w") as access_file:
-                access_file.write("init")
+            file_name = "viewer"
         elif data.access == "privilege":
-            with open(f"temp/{new_path}/privilege", "w") as access_file:
-                access_file.write("init")
+            file_name = "privilege"
         else:
-            with open(f"temp/{new_path}/init", "w") as access_file:
-                access_file.write("init")
+            file_name = "init"
+        with open(f"temp/{new_path}/{file_name}", "w") as access_file:
+            access_file.write("init")
         return {"res": True}
     except AttributeError:
         return {"res": False}
@@ -95,7 +95,7 @@ async def delete_folder(data: DeleteFolder, request: Request, auth_psw: Optional
         rmtree(f"temp{data.file_path}")
         return {"res": True}
     except NotADirectoryError:
-        remove(f"temp{data.file_path}")
+        delete_full_file(data.file_path)
         return {"res": True}
     except AttributeError:
         return {"res": False}

@@ -9,9 +9,7 @@ function delete_file(){
         var data = JSON.parse(xhr.responseText);
         if (xhr.readyState == 4 && xhr.status == 200) {
             document.getElementById(document.getElementById("file_name").value).remove();
-        } else {
-            console.log(data);
-        }
+        } else { console.log(data); }
     }
     xhr.send(json);
 }
@@ -39,11 +37,13 @@ function rename_file(){
             li_href.setAttribute("title", document.getElementById("file_path").value + "/" + new_name);
             li_href.setAttribute("class", "file");
             li_block.appendChild(li_href);
-        } else {
-            console.log(data);
-        }
+        } else { console.log(data); }
     }
     xhr.send(json);
+}
+
+function replace_path(){
+    document.location.href = "/file/tree?path=" + document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
 }
 
 function delete_folder(){
@@ -58,9 +58,7 @@ function delete_folder(){
         var data = JSON.parse(xhr.responseText);
         if (xhr.readyState == 4 && xhr.status == 200) {
             document.getElementById(document.getElementById("file_name").value).remove();
-        } else {
-            console.log(data);
-        }
+        } else { console.log(data); }
     }
     xhr.send(json);
 }
@@ -160,9 +158,38 @@ $(document).ready(function() {
                 rename_btn.setAttribute("onclick", "rename_file();");
                 var delete_btn = document.getElementById("delete_btn");
                 delete_btn.setAttribute("onclick", "delete_file();");
-            } catch {
-                //pass
+            } catch {}
+            setFocusToTextBox();
+            window.event.returnValue = false;
+        });
+        $('body').on('contextmenu', 'a.image', function() {
+            var xhr = new XMLHttpRequest();
+            var text = $(this).contents()[0].nodeValue.trim();
+            xhr.open('GET', '/file/meta?path=' + document.getElementById("file_path").value + '&name=/' + text);
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    var arr = JSON.parse(xhr.responseText).res;
+                    place_holder.textContent = "";
+                    arr.forEach((element) => {
+                        let block = document.createElement('div');
+                        block.textContent += element;
+                        place_holder.append(block);
+                    })
+                }
             }
+            xhr.send()
+            scnd_menu.className = "hide";
+            menu_element.className = "show";
+            document.getElementById('file_name').value = text;
+            menu_element.style.top = mouseY(event) + 'px';
+            menu_element.style.left = mouseX(event) + 'px';
+            try{
+                document.getElementById("access_holder").textContent = "";
+                var rename_btn = document.getElementById("rename_btn");
+                rename_btn.setAttribute("onclick", "rename_file();");
+                var delete_btn = document.getElementById("delete_btn");
+                delete_btn.setAttribute("onclick", "delete_file();");
+            } catch {}
             setFocusToTextBox();
             window.event.returnValue = false;
         });

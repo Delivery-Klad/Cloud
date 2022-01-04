@@ -1,4 +1,4 @@
-from os import path as os_path, rename, remove, sep, walk, listdir
+from os import path as os_path, rename, sep, walk, listdir, replace
 from json import dump, load
 from datetime import datetime
 
@@ -8,7 +8,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from funcs.pages import show_forbidden_page
-from funcs.utils import is_root_user, log, error_log, check_cookies
+from funcs.utils import is_root_user, log, error_log, check_cookies, delete_full_file
 
 router = APIRouter(prefix="/file")
 
@@ -19,14 +19,16 @@ class FileData(BaseModel):
     new_name: Optional[str] = None
 
 
-@router.get("/test_path")
-async def test1(path: str):
-    print(path)
+class ReplaceFile(BaseModel):
+    old_path: str
+    new_path: str
 
 
-@router.get("/test")
-async def test():
+@router.get("/tree")
+async def get_tree_view(path: str):
     result = ""
+    with open("source_admin/replace.js", "r") as data:
+        admin_script = data.read()
     for root, dirs, files in walk("temp/files/"):
         level = root.replace("temp/files/", '').count(sep)
         indent = '- ' * level
@@ -34,15 +36,23 @@ async def test():
             link = "/"
             result += "Root<br>"
         else:
-            link = os_path.abspath(root).split("temp\\files")[1]
-            result += f"""{indent}<a href='/file/test_path?path="{link}"'>{os_path.basename(root)}</a><br>"""
-    return HTMLResponse(f"""<head></head>
-                        <body><div>{result}</div></body>""")
+            link = os_path.abspath(root).split("temp\\files")[1].replace("\\", "/")
+            result += f"""{indent}<a href='javascript:replace_file("{path}", "/files{link}");'>
+                        {os_path.basename(root)}</a><br>"""
+    return HTMLResponse(f"""<head><title>Cloud - Tree view</title></head>
+                        <body><div>{result}</div><script type="text/javascript">{admin_script}</script></body>""")
 
 
 @router.patch("/")
-async def replace_file(old_path: str, new_path: str):
-    pass
+async def replace_file(data: ReplaceFile):
+    file_name = data.old_path.split("/")
+    file_name = file_name[len(file_name) - 1]
+    replace(f"temp{data.old_path}", f"temp{data.new_path}/{file_name}")
+    try:
+        replace(f"temp{data.old_path}.meta", f"temp{data.new_path}/{file_name}.meta")
+    except FileNotFoundError:
+        pass
+    return {"res": True}
 
 
 @router.post("/")
@@ -112,11 +122,7 @@ async def delete_file(request: Request, file: FileData, auth_psw: Optional[str] 
                 return show_forbidden_page()
         except AttributeError:
             return show_forbidden_page()
-        remove(f"temp/{file.file_path}")
-        try:
-            remove(f"temp/{file.file_path}.meta")
-        except FileNotFoundError:
-            pass
+        delete_full_file(file.file_path)
         return {"res": True}
     except Exception as e:
         return error_log(str(e))

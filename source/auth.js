@@ -2,7 +2,7 @@ var alert_box = document.getElementById("alert-box");
 
 function create_message(text){
     var block = document.createElement("div");
-    block.setAttribute("style", "background-color: #D70000; margin: 5px; padding: 10px; font: 12pt sans-serif;");
+    block.setAttribute("class", "error");
     block.textContent = text;
     alert_box.appendChild(block);
     setTimeout(remove_message, 5000, block);
@@ -35,19 +35,14 @@ function login(){
     }
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/auth?arg2=' + user_login.value + "&arg=" + user_password.value);
-
     xhr.onreadystatechange = function(){
         console.log(xhr.status);
         if(xhr.readyState === 4 && xhr.status === 200){
             var redirect = document.getElementById("redir").value;
-            if (redirect.slice(-1) === "/"){
-                redirect = redirect.slice(0, -1);
-            }
+            if (redirect.slice(-1) === "/"){ redirect = redirect.slice(0, -1); }
             document.location.href = redirect;
         }
-        if(xhr.readyState === 4 && xhr.status === 403){
-            create_message(JSON.parse(xhr.responseText).result);
-        }
+        if(xhr.readyState === 4 && xhr.status === 403){ create_message(JSON.parse(xhr.responseText).result); }
     }
     xhr.send();
 }

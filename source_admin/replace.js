@@ -1,10 +1,10 @@
-function replace_file(old_path, new_path){
+function replace(old_path, new_path){
     var data = {};
     data.old_path = old_path;
     data.new_path = new_path;
     var json = JSON.stringify(data);
     var xhr = new XMLHttpRequest();
-    xhr.open("PATCH", "/file/", true);
+    xhr.open("PUT", "/" + document.getElementById("type").value + "/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
     xhr.onload = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {

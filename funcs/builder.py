@@ -37,7 +37,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                                     type="text/css"></head><body><a href="/files{0}?download=true">Download</a><pre>
                                     <code data-language="{1}">{2}</code></pre><script 
                                     src="/source/rainbow-custom.min.js"></script></body>"""
-            if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "bmp ico", "png ico"]:
+            if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "ico"]:
                 with open("templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension.lower() in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:

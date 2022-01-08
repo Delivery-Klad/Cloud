@@ -1,4 +1,4 @@
-from os import path as os_path, rename, sep, walk, listdir, replace
+from os import path as os_path, rename, listdir, replace
 from json import dump, load
 from datetime import datetime
 
@@ -24,41 +24,10 @@ class ReplaceFile(BaseModel):
     new_path: str
 
 
-@router.get("/tree")
-async def get_tree_view(path: str):
-    result = ""
-    with open("source_admin/replace.js", "r") as data:
-        admin_script = data.read()
-    for root, dirs, files in walk("temp/files/"):
-        level = root.replace("temp/files/", '').count(sep)
-        indent = '- ' * level
-        if os_path.basename(root) == "":
-            link = "/"
-            result += "Root<br>"
-        else:
-            link = os_path.abspath(root).split("temp\\files")[1].replace("\\", "/")
-            result += f"""{indent}<a href='javascript:replace_file("{path}", "/files{link}");'>
-                        {os_path.basename(root)}</a><br>"""
-    return HTMLResponse(f"""<head><title>Cloud - Tree view</title></head>
-                        <body><div>{result}</div><script type="text/javascript">{admin_script}</script></body>""")
-
-
-@router.patch("/")
-async def replace_file(data: ReplaceFile):
-    file_name = data.old_path.split("/")
-    file_name = file_name[len(file_name) - 1]
-    replace(f"temp{data.old_path}", f"temp{data.new_path}/{file_name}")
-    try:
-        replace(f"temp{data.old_path}.meta", f"temp{data.new_path}/{file_name}.meta")
-    except FileNotFoundError:
-        pass
-    return {"res": True}
-
-
 @router.post("/")
 async def upload_file(request: Request, path: Optional[str] = Query(None), data: UploadFile = File(...),
                       auth_psw: Optional[str] = Cookie(None)):
-    log(f"POST Request to '/upload/{data.filename}' from '{request.client.host}' "
+    log(f"POST Request to '/file/{data.filename}' from '{request.client.host}' "
         f"with cookies '{check_cookies(request, auth_psw)}'")
     if data.filename == "":
         return HTMLResponse(status_code=403)
@@ -93,10 +62,10 @@ async def upload_file(request: Request, path: Optional[str] = Query(None), data:
         return error_log(str(er))
 
 
-@router.put("/")
+@router.patch("/")
 async def rename_file(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
     try:
-        log(f"PUT Request to '/file' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+        log(f"PATCH Request to '/file/' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
         try:
             if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
@@ -112,10 +81,31 @@ async def rename_file(request: Request, file: FileData, auth_psw: Optional[str] 
         return error_log(str(e))
 
 
+@router.put("/")
+async def replace_file(request: Request, data: ReplaceFile, auth_psw: Optional[str] = Cookie(None)):
+    log(f"PUT Request to '/file/' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+    try:
+        try:
+            if not is_root_user(request, auth_psw):
+                return show_forbidden_page()
+        except AttributeError:
+            return show_forbidden_page()
+        file_name = data.old_path.split("/")
+        file_name = file_name[len(file_name) - 1]
+        replace(f"temp{data.old_path}", f"temp{data.new_path}/{file_name}")
+        try:
+            replace(f"temp{data.old_path}.meta", f"temp{data.new_path}/{file_name}.meta")
+        except FileNotFoundError:
+            pass
+        return {"res": True}
+    except Exception as er:
+        return error_log(str(er))
+
+
 @router.delete("/")
 async def delete_file(request: Request, file: FileData, auth_psw: Optional[str] = Cookie(None)):
     try:
-        log(f"DELETE Request to '/file' from '{request.client.host}' with cookies "
+        log(f"DELETE Request to '/file/' from '{request.client.host}' with cookies "
             f"'{check_cookies(request, auth_psw)}'")
         try:
             if not is_root_user(request, auth_psw):

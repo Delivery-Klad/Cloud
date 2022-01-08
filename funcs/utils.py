@@ -128,18 +128,38 @@ def listdir(directory: str, request: Request, auth_psw):
                 else:
                     file_class = "file"
             else:
-                file_type = i.split(".")
-                file_type = file_type[len(file_type) - 1]
-                if file_type.lower() in ["png", "jpg", "bmp", "gif", "jpeg", "heic"]:
-                    file_class = "image"
+                if os_path.isdir(f"temp/files{directory}/{i}"):
+                    file_class = "folder"
                 else:
-                    file_class = "file"
+                    file_type = i.split(".")
+                    file_type = file_type[len(file_type) - 1]
+                    if file_type.lower() in ["png", "jpg", "bmp", "gif", "heic", "svg", "psd", "tif", "tiff", "ico"]:
+                        file_class = "image"
+                    else:
+                        file_class = "file"
             local_files += f"""<li id="{i}">
                 <a href="/files{directory}/{i}" title="{i}" 
                 class="{file_class}">{i}</a></li>"""
         return local_files
     except FileNotFoundError:
         return HTMLResponse(status_code=404)
+
+
+def tree_view(folder, html, _path, i):
+    link = os_path.abspath(folder).replace("\\", "/").split("temp/files")[1]
+    folder_name = ["", "files"] if link == "" else link.split("/")
+    href = f"""<a href='javascript:replace("{_path}", "/files{link}");' class="text">
+            {folder_name[len(folder_name) - 1]}</a>"""
+    details = " open" if folder_name[1] == "files" else ""
+    html += f"""<div>{href}<details{details}><summary></summary>"""
+    for file in os_listdir(folder):
+        i = 0
+        path = os_path.join(folder, file)
+        if os_path.isdir(path):
+            i += 1
+            html = tree_view(path, html, _path, 0)
+    html += "</details></div>"
+    return html
 
 
 def get_folder_access_level(path: str):

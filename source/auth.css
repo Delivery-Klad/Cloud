@@ -176,3 +176,23 @@ body {
     width: 300px;
     z-index: 999;
 }
+.error {
+    background-color: #D70000;
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: sans-serif;
+    border-radius: 100px 15px 100px 15px;
+    animation-duration: 3s;
+    animation-name: slide_left;
+}
+@keyframes slide_left {
+  from {
+    margin-left: 100%;
+    width: 300%;
+  }
+  to {
+    margin-left: 5px;
+    width: 90%;
+  }
+}

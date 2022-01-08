@@ -1,0 +1,29 @@
+.treeHTML { line-height: normal; }
+.treeHTML details { display: block; }
+.treeHTML div {
+  position: relative;
+  margin: 0 0 0 .5em;
+  padding: 0 0 0 1.2em;
+}
+.treeHTML div:not(:last-child) { border-left: 1px solid #ccc; }
+.treeHTML div:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1.1em;
+  height: .5em;
+  border-bottom: 1px solid #ccc;
+}
+.treeHTML div:last-child:before { border-left: 1px solid #ccc; }
+.treeHTML summary {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+.treeHTML details[open] summary { outline: none; }
+a.text:active, a.text:hover, a.text {
+  text-decoration: none;
+  color: #000000;
+}

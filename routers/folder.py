@@ -1,10 +1,11 @@
 from os import rename, listdir, remove
-from shutil import rmtree
+from shutil import rmtree, move
 
 from fastapi import APIRouter, Cookie, Request
 from typing import Optional
 from pydantic import BaseModel
 
+from funcs.pages import show_forbidden_page
 from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
     delete_full_file
 
@@ -15,6 +16,11 @@ class Folder(BaseModel):
     path: str
     arg: str
     access: str
+
+
+class ReplaceFolder(BaseModel):
+    old_path: str
+    new_path: str
 
 
 class DeleteFolder(BaseModel):
@@ -83,6 +89,21 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
         return {"res": True}
     except AttributeError:
         return {"res": False}
+    except Exception as er:
+        return error_log(str(er))
+
+
+@router.put("/")
+async def replace_folder(request: Request, data: ReplaceFolder, auth_psw: Optional[str] = Cookie(None)):
+    log(f"PUT Request to '/folder/' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+    try:
+        try:
+            if not is_root_user(request, auth_psw):
+                return show_forbidden_page()
+        except AttributeError:
+            return show_forbidden_page()
+        move(f"temp{data.old_path}", f"temp{data.new_path}")
+        return {"res": True}
     except Exception as er:
         return error_log(str(er))
 

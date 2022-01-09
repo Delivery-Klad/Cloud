@@ -119,6 +119,16 @@ function create_new_folder(){
     xhr.send(json);
 }
 
+function create_message(text){
+    var block = document.createElement("div");
+    block.setAttribute("class", "error");
+    block.textContent = text;
+    alert_box.appendChild(block);
+    setTimeout(remove_message, 5000, block);
+}
+
+function remove_message(block){ block.remove(); }
+
 var place_holder = document.getElementById("meta_place_holder")
 var menu_element = document.getElementById("menu_m");
 var scnd_menu = document.getElementById("scnd_menu");

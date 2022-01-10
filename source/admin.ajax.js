@@ -1,5 +1,6 @@
 var place_holder = document.getElementById("place_holder1");
 var sidebar1 = document.getElementById("sidebar");
+var alert_box = document.getElementById("alert-box");
 
 function create_arrow(up, user){
     var a_block = document.createElement("a");
@@ -62,11 +63,11 @@ function set_table_header(table){
 }
 
 function open_dashboard(){
+    toggle_menu(1);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/');
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(1);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             arr.forEach((element) => {
@@ -79,17 +80,17 @@ function open_dashboard(){
                 place_holder.append(block);
             })
         }
-        if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
+        if (xhr.readyState === 4 && xhr.status === 403){ create_message(JSON.parse(xhr.responseText).res, "error"); }
     }
     xhr.send();
 }
 
 function untracked(){
+    toggle_menu(2);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/?arg=true');
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(2);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             arr.forEach((element) => {
@@ -102,20 +103,18 @@ function untracked(){
                 place_holder.append(block);
             })
         }
-        if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(JSON.parse(xhr.responseText).res, "error"); }
     }
     xhr.send();
 }
 
 function logs(){
+    toggle_menu(3);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/logs');
     xhr.onreadystatechange = function(){
-        if (xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(3);
-			fill_placeholder(xhr.responseText, "javascript:clear_logs();")
-        }
-        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
+        if (xhr.readyState === 4 && xhr.status === 200){ fill_placeholder(xhr.responseText, "javascript:clear_logs();") }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(xhr.responseText, "error"); }
     }
     xhr.send();
 }
@@ -124,21 +123,24 @@ function clear_logs(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/admin/clear_logs');
     xhr.onreadystatechange = function(){
-        if (xhr.readyState === 4 && xhr.status === 200){ fill_placeholder(xhr.responseText, "javascript:clear_logs();") }
-        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
+        if (xhr.readyState === 4 && xhr.status === 200){
+            fill_placeholder(xhr.responseText, "javascript:clear_logs();");
+            create_message("Лог очищен!", "info");
+        }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(xhr.responseText, "error"); }
     }
     xhr.send();
 }
 
 function errors(){
+    toggle_menu(4);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/errors');
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(4);
 			fill_placeholder(xhr.responseText, "javascript:clear_errors();")
         }
-        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(xhr.responseText, "error"); }
     }
     xhr.send();
 }
@@ -147,18 +149,21 @@ function clear_errors(){
     var xhr = new XMLHttpRequest();
     xhr.open('DELETE', '/admin/clear_errors');
     xhr.onreadystatechange = function(){
-        if (xhr.readyState === 4 && xhr.status === 200){ fill_placeholder(xhr.responseText, "javascript:clear_errors();") }
-        else if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
+        if (xhr.readyState === 4 && xhr.status === 200){
+            fill_placeholder(xhr.responseText, "javascript:clear_errors();")
+            create_message("Лог ошибок очищен!", "info");
+        }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(xhr.responseText, "error"); }
     }
     xhr.send();
 }
 
 function users(){
+    toggle_menu(5);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/users');
     xhr.onreadystatechange = function(){
         if(xhr.readyState === 4 && xhr.status === 200){
-            toggle_menu(5);
             var arr = JSON.parse(xhr.responseText).res;
             place_holder.textContent = "";
             var table = document.createElement("TABLE");
@@ -195,7 +200,7 @@ function users(){
             });
             place_holder.append(table);
         }
-        else if (xhr.readyState === 4 && xhr.status === 403){ alert(JSON.parse(xhr.responseText).res); }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(JSON.parse(xhr.responseText).res, "error"); }
     }
     xhr.send();
 }
@@ -204,8 +209,8 @@ function push_files(){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/admin/');
     xhr.onreadystatechange = function(){
-        if (xhr.readyState === 4 && xhr.status === 200){ alert(xhr.responseText); }
-        if (xhr.readyState === 4 && xhr.status === 403){ alert(xhr.responseText); }
+        if (xhr.readyState === 4 && xhr.status === 200){ create_message(xhr.responseText, "info"); }
+        else if (xhr.readyState === 4 && xhr.status === 403){ create_message(xhr.responseText, "error"); }
     }
     xhr.send();
 }
@@ -237,7 +242,7 @@ function set_permissions(up, user){
         var xhr = new XMLHttpRequest();
         xhr.open('PATCH', "admin/permissions/?up=" + up + "&user=" + user);
         xhr.onreadystatechange = function(){
-            if (xhr.readyState === 4 && xhr.status === 200){ alert("Current permissions: " + xhr.responseText); }
+            if (xhr.readyState === 4 && xhr.status === 200){ create_message("Current permissions: " + xhr.responseText, "info"); }
         }
         xhr.send();
     }
@@ -248,10 +253,20 @@ function delete_user(user){
     {
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', "admin/user/" + user);
-        xhr.onreadystatechange = function(){ if (xhr.readyState === 4 && xhr.status === 200){ alert("Successful deleted!"); }}
+        xhr.onreadystatechange = function(){ if (xhr.readyState === 4 && xhr.status === 200){ create_message("Successful deleted!", "info"); }}
         xhr.send();
     }
 }
+
+function create_message(text, class_name){
+    var block = document.createElement("div");
+    block.setAttribute("class", class_name);
+    block.textContent = text;
+    alert_box.appendChild(block);
+    setTimeout(remove_message, 8000, block);
+}
+
+function remove_message(block){ block.remove(); }
 
 $(document).ready(function() {
     page = localStorage.getItem("current_page")

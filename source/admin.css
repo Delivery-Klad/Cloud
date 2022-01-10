@@ -18,3 +18,43 @@ td, th {
 tr:nth-child(even) {
   background-color: #dddddd;
 }
+.alert-box {
+    position: absolute;
+    left:5px;
+    bottom:12px;
+    text-align: center;
+    width: 300px;
+    z-index: 999;
+}
+.error {
+    color: #000000;
+    background-color: #D70000;
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: sans-serif;
+    border-radius: 100px 15px 100px 15px;
+    animation-duration: 5s;
+    animation-name: slide_left;
+}
+.info {
+    color: #000000;
+    background-color: #228B22;
+    margin: 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-family: sans-serif;
+    border-radius: 100px 15px 100px 15px;
+    animation-duration: 5s;
+    animation-name: slide_left;
+}
+@keyframes slide_left {
+  from {
+    margin-left: 100%;
+    width: 300%;
+  }
+  to {
+    margin-left: 5px;
+    width: 97%;
+  }
+}

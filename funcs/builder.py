@@ -67,6 +67,16 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                     except UnicodeDecodeError:
                         return FileResponse(path=f"temp/files{path}", filename=filename,
                                             media_type='application/octet-stream')
+            elif file_extension.lower() in ["mp4", "avi"]:
+                try:
+                    response_text = """<head><title>Cloud - Video viewer</title></head><body>
+                            <link href="/source/rainbow_dark.css" rel="stylesheet" type="text/css">
+                            <a href="/files{0}?download=true">Download</a><div><video height="50%" 
+                            controls><source src="/files{0}?download=true" type="video/mp4"></video><div></body>"""
+                    return HTMLResponse(response_text.format(path))
+                except Exception as e:
+                    print(e)
+                    return
         return FileResponse(path=f"temp/files{path}", filename=filename, media_type='application/octet-stream')
 
 

@@ -21,3 +21,8 @@ def show_forbidden_page():
 def show_not_found_page():
     with open("templates/404.html", "r") as page:
         return HTMLResponse(content=page.read(), status_code=404)
+
+
+def show_error_page():
+    with open("templates/500.html", "r") as page:
+        return HTMLResponse(content=page.read(), status_code=500)

@@ -5,11 +5,12 @@ from time import sleep
 from fastapi import Request
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 
-from funcs.pages import show_not_found_page
+from funcs.pages import show_not_found_page, show_error_page
 from funcs.utils import is_root_user, constructor, get_menu, listdir, get_jwt_sub
 
 
-def handler(path: str, filename: str, request: Request, auth_psw, download, redirects: int = None):
+def handler(path: str, filename: str, request: Request, auth_psw, download, redirects: int = None,
+            preview: bool = None):
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
@@ -34,9 +35,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
             url = environ.get("server_url")
             response_text = """<head><title>Cloud - File viewer</title>
                                     <link href="/source/rainbow_dark.css" rel="stylesheet" 
-                                    type="text/css"></head><body><a href="/files{0}?download=true">Download</a><pre>
-                                    <code data-language="{1}">{2}</code></pre><script 
-                                    src="/source/rainbow-custom.min.js"></script></body>"""
+                                    type="text/css"></head><body><a href="/files{0}?download=true">Download</a>"""
             if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "ico"]:
                 with open("templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
@@ -47,6 +46,18 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                                             "go", "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm",
                                             "resx", "config", "xml", "settings"]:
                 with open(f"temp/files{path}", "rb") as page:
+                    if file_extension.lower() == "html":
+                        response_text += """ <a href="/files{0}?preview=true">Preview</a><pre>
+                                            <code data-language="{1}">{2}</code></pre><script 
+                                            src="/source/rainbow-custom.min.js"></script></body>"""
+                    else:
+                        response_text += """<pre><code data-language="{1}">{2}</code></pre><script 
+                                            src="/source/rainbow-custom.min.js"></script></body>"""
+                    if preview:
+                        try:
+                            return HTMLResponse(page.read())
+                        except UnicodeEncodeError:
+                            return show_error_page()
                     try:
                         with open("source_admin/languages.json", "r") as file:
                             lang = load(file)[file_extension.lower()]
@@ -62,12 +73,14 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
             elif len(filename.split(".")) == 1:
                 with open(f"temp/files{path}", "rb") as page:
                     try:
-                        return HTMLResponse(content=response_text.format(path, "json", page.read().decode("utf-8"),
-                                                                         status_code=200))
+                        response_text += """<pre><code data-language="{1}">{2}</code></pre><script 
+                                            src="/source/rainbow-custom.min.js"></script></body>"""
+                        return HTMLResponse(content=response_text.format(path, "json", page.read().decode("utf-8")),
+                                            status_code=200)
                     except UnicodeDecodeError:
                         return FileResponse(path=f"temp/files{path}", filename=filename,
                                             media_type='application/octet-stream')
-            elif file_extension.lower() in ["mp4", "avi"]:
+            elif file_extension.lower() in ["mp4", "avi", "mov", "wmv", "webm", "mkv", "flv", "avchd"]:
                 try:
                     response_text = """<head><title>Cloud - Video viewer</title></head><body>
                             <link href="/source/rainbow_dark.css" rel="stylesheet" type="text/css">

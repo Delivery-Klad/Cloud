@@ -20,6 +20,7 @@ function toggle_menu(num){
     document.getElementById("sidebar4").className = "sidebar-item";
     document.getElementById("sidebar5").className = "sidebar-item";
     document.getElementById("sidebar6").className = "sidebar-item";
+    document.getElementById("sidebar7").className = "sidebar-item";
     document.getElementById("sidebar" + num).className = "sidebar-item active";
 }
 
@@ -231,6 +232,59 @@ function swagger(){
     place_holder.append(docs_page);
 }
 
+function heroku(){
+    toggle_menu(7);
+    place_holder.textContent = "";
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/heroku/', true);
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            JSON.parse(xhr.responseText).res.forEach((element) => {
+                var div_block = document.createElement("p");
+                var h_block = document.createElement("h");
+                h_block.textContent = element.email;
+                h_block.className = "email";
+                div_block.appendChild(h_block);
+                element.apps.forEach((app) => {
+                    var li_block = document.createElement("ul")
+                    li_block.setAttribute("style", "text-size: 16px;");
+                    li_block.textContent = app.name + " (" + app.type + ")"
+                    var label = document.createElement("label");
+                    label.className = "switch";
+                    var checkbox = document.createElement("input");
+                    checkbox.setAttribute("type", "checkbox");
+                    checkbox.setAttribute("onclick", "enable_project(this, " + app.args + ")");
+                    if (app.enable === "ON") {
+                        checkbox.setAttribute("checked", "");
+                    }
+                    var span = document.createElement("span");
+                    span.className = "slider round";
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    li_block.appendChild(label);
+                    div_block.appendChild(li_block);
+                });
+                place_holder.appendChild(div_block);
+            });
+        }
+    }
+    xhr.send();
+}
+
+function enable_project(check, key, app){
+    var xhr = new XMLHttpRequest();
+    xhr.open('PATCH', "heroku/?enable=" + check.checked + "&key=" + key + "&app=" + app);
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            create_message(JSON.parse(xhr.responseText).res, "info");
+        }
+        else if (xhr.readyState === 4 && xhr.status === 404) {
+            create_message(JSON.parse(xhr.responseText).res, "error");
+        }
+    }
+    xhr.send();
+}
+
 function hide_sidebar(){
     if (sidebar1.className === "sidebar js-sidebar"){ sidebar1.className = "sidebar js-sidebar collapsed"; }
     else{ sidebar1.className = "sidebar js-sidebar"; }
@@ -277,5 +331,6 @@ $(document).ready(function() {
         else if (page === "4") { errors(); }
         else if (page === "5") { users(); }
         else if (page === "6") { swagger(); }
+        else if (page == 7) { heroku(); }
     }
 });

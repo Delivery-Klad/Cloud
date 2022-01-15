@@ -18,12 +18,13 @@ from funcs.builder import handler
 from funcs.content_length import LimitUploadSize
 from funcs.pages import *
 from funcs.utils import is_root_user, log, error_log, check_cookies, parse_url
-from routers import source, file, admin, folder
+from routers import source, file, admin, folder, heroku
 
 
 swagger_url = token_hex(randint(10, 15))
 app = FastAPI(docs_url=f"/{swagger_url}", redoc_url=None)
 app.include_router(admin.router)
+app.include_router(heroku.router)
 app.include_router(source.router)
 app.include_router(folder.router)
 app.include_router(file.router)

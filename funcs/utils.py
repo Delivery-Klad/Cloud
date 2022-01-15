@@ -1,7 +1,8 @@
-from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
 import re
+from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
 from datetime import datetime
 
+import heroku3
 from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import HTMLResponse
@@ -68,6 +69,28 @@ def error_log(text: str):
         log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
     with open("templates/500.html", "rb") as page:
         return HTMLResponse(page.read())
+
+
+def get_heroku_projects(keys):
+    result = []
+    for i in range(len(keys)):
+        cloud = heroku3.from_key(keys[i])
+        print(cloud.account().email)
+        temp = []
+        apps = cloud.apps()
+        for j in range(len(apps)):
+            enable = "ON"
+            if not apps[j].process_formation():
+                dyn_type = "database"
+            elif "web" in apps[j].process_formation():
+                dyn_type = "web"
+            elif "worker" in apps[j].process_formation():
+                dyn_type = "bot"
+            if len(apps[j].dynos()) == 0:
+                enable = "OFF"
+            temp.append({"name": apps[j].name, "type": dyn_type, "enable": enable, "args": f"{i}, {j}"})
+        result.append({"email": cloud.account().email, "apps": temp})
+    return result
 
 
 def clear_log(table: str):

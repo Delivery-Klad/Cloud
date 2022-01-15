@@ -5,35 +5,11 @@ from fastapi import APIRouter, Request, Cookie
 from fastapi.responses import JSONResponse
 from typing import Optional
 
-from funcs.utils import error_log, log, check_cookies, is_root_user
+from funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects
 
 
 router = APIRouter(prefix="/heroku")
-
 keys = environ.get("keys").split(", ")
-
-
-def get_test_projects():
-    result = []
-    for i in range(len(keys)):
-        cloud = heroku3.from_key(keys[i])
-        print(cloud.account().email)
-        temp = []
-        apps = cloud.apps()
-        for j in range(len(apps)):
-            enable = "ON"
-            if not apps[j].process_formation():
-                dyn_type = "database"
-            elif "web" in apps[j].process_formation():
-                dyn_type = "web"
-            elif "worker" in apps[j].process_formation():
-                dyn_type = "bot"
-            if len(apps[j].dynos()) == 0:
-                enable = "OFF"
-            temp.append({"name": apps[j].name, "type": dyn_type, "enable": enable, "args": f"{i}, {j}"})
-        result.append({"email": cloud.account().email, "apps": temp})
-    return result
-# app.process_formation()['web'].scale(1)
 
 
 @router.get("/")
@@ -42,9 +18,9 @@ async def get_projects(request: Request, auth_psw: Optional[str] = Cookie(None))
         f"'{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(request, auth_psw):
-            return {"res": get_test_projects()}
+            return {"res": get_heroku_projects(keys)}
         else:
-            return {"res": "Failed"}
+            return JSONResponse({"res": "Access denied"}, status_code=403)
     except Exception as e:
         return error_log(str(e))
 

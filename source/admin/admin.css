@@ -72,3 +72,25 @@ input:checked + .slider:before {
 .slider.round:before { border-radius: 50%; }
 .content h { font-weight: bold; font-size: 18px; color: #222e3c; background-color: #222e3c; }
 .content h:hover { color: white; }
+.loader {
+  border: 8px solid #a3a3a3;
+  border-radius: 50%;
+  border-top: 8px solid #3498db;
+  width: 60px;
+  height: 60px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.console {
+  border: 2px solid #222e3c;
+  border-radius: 5px;
+}

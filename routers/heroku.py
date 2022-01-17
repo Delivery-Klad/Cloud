@@ -1,15 +1,21 @@
+import urllib3
 from os import environ
+from datetime import datetime
 
 import heroku3
 from fastapi import APIRouter, Request, Cookie
 from fastapi.responses import JSONResponse
 from typing import Optional
 
-from funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects
+from funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects, get_app_logs, get_app_vars
 
-
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 router = APIRouter(prefix="/heroku")
 keys = environ.get("keys").split(", ")
+
+
+def project_controller():
+    print(datetime.now())
 
 
 @router.get("/")
@@ -19,6 +25,38 @@ async def get_projects(request: Request, auth_psw: Optional[str] = Cookie(None))
     try:
         if is_root_user(request, auth_psw):
             return {"res": get_heroku_projects(keys)}
+        else:
+            return JSONResponse({"res": "Access denied"}, status_code=403)
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.get("/logs")
+async def get_project_logs(key: int, app: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/heroku/logs' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+    try:
+        if is_root_user(request, auth_psw):
+            logs = get_app_logs(keys, key, app)
+            if len(logs) > 0:
+                return {"res": logs}
+            else:
+                return JSONResponse({"res": "Not found"}, status_code=404)
+        else:
+            return JSONResponse({"res": "Access denied"}, status_code=403)
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.get("/vars")
+async def get_project_vars(key: int, app: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/heroku/vars' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+    try:
+        if is_root_user(request, auth_psw):
+            var = get_app_vars(keys, key, app)
+            if len(var) > 0:
+                return {"res": var}
+            else:
+                return JSONResponse({"res": "Not found"}, status_code=404)
         else:
             return JSONResponse({"res": "Access denied"}, status_code=403)
     except Exception as e:
@@ -36,7 +74,7 @@ async def enable_project(enable: bool, key: int, app: int, request: Request, aut
             if "web" in app.process_formation() or "worker" in app.process_formation():
                 if "web" in app.process_formation():
                     dyn_type = "web"
-                if "worker" in app.process_formation():
+                elif "worker" in app.process_formation():
                     dyn_type = "worker"
                 if enable:
                     scale = 1
@@ -47,6 +85,6 @@ async def enable_project(enable: bool, key: int, app: int, request: Request, aut
             else:
                 return JSONResponse({"res": "Project have no worker or web!"}, status_code=404)
         else:
-            return {"res": "Failed"}
+            return JSONResponse({"res": "Access denied"}, status_code=403)
     except Exception as e:
         return error_log(str(e))

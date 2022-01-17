@@ -71,11 +71,27 @@ def error_log(text: str):
         return HTMLResponse(page.read())
 
 
+def get_app_logs(keys, key: int, app: int):
+    cloud = heroku3.from_key(keys[key])
+    app = cloud.apps()[app]
+    return app.get_log(lines=10).split("\n")
+
+
+def get_app_vars(keys, key: int, app: int):
+    result = []
+    cloud = heroku3.from_key(keys[key])
+    app = cloud.apps()[app]
+    config = app.config().to_dict()
+    for i in config.keys():
+        result.append(f"{i}: {config[i]}")
+    return result
+
+
 def get_heroku_projects(keys):
     result = []
     for i in range(len(keys)):
         cloud = heroku3.from_key(keys[i])
-        print(cloud.account().email)
+        print(f"{cloud.account().email} {cloud.ratelimit_remaining()}")
         temp = []
         apps = cloud.apps()
         for j in range(len(apps)):
@@ -219,7 +235,7 @@ def get_menu(index_of, is_root):
                       <input type="hidden" id="file_path" name="path" value="/{index_of.replace("root", "files")}">
                       <input type="hidden" id="file_name" name="del_name" value="empty">"""
     if is_root:
-        with open("source_admin/context.js", "r") as data:
+        with open("source/admin/context.js", "r") as data:
             admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
                 <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>

@@ -59,7 +59,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                         except UnicodeEncodeError:
                             return show_error_page()
                     try:
-                        with open("source_admin/languages.json", "r") as file:
+                        with open("source/admin/languages.json", "r") as file:
                             lang = load(file)[file_extension.lower()]
                     except KeyError:
                         lang = "json"

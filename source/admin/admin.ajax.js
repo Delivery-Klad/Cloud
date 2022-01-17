@@ -6,8 +6,8 @@ function create_arrow(up, user){
     var a_block = document.createElement("a");
     a_block.setAttribute("href", "javascript:set_permissions(" + up + "," + user + ");");
     var arrow = document.createElement("img");
-    if (up === true){ arrow.setAttribute("src", "source/up_arrow.svg"); }
-    else{ arrow.setAttribute("src", "source/down_arrow.svg"); }
+    if (up === true){ arrow.setAttribute("src", "source/images/up.svg"); }
+    else{ arrow.setAttribute("src", "source/images/down.svg"); }
     a_block.appendChild(arrow);
     return a_block;
 }
@@ -22,6 +22,13 @@ function toggle_menu(num){
     document.getElementById("sidebar6").className = "sidebar-item";
     document.getElementById("sidebar7").className = "sidebar-item";
     document.getElementById("sidebar" + num).className = "sidebar-item active";
+}
+
+function show_loader(parent){
+    parent.textContent = "";
+    var loading = document.createElement("div");
+    loading.className = "loader";
+    parent.appendChild(loading);
 }
 
 function fill_placeholder(response, func){
@@ -65,6 +72,7 @@ function set_table_header(table){
 
 function open_dashboard(){
     toggle_menu(1);
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/');
     xhr.onreadystatechange = function(){
@@ -88,6 +96,7 @@ function open_dashboard(){
 
 function untracked(){
     toggle_menu(2);
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/dashboard/?arg=true');
     xhr.onreadystatechange = function(){
@@ -111,6 +120,7 @@ function untracked(){
 
 function logs(){
     toggle_menu(3);
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/logs');
     xhr.onreadystatechange = function(){
@@ -135,6 +145,7 @@ function clear_logs(){
 
 function errors(){
     toggle_menu(4);
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/errors');
     xhr.onreadystatechange = function(){
@@ -161,6 +172,7 @@ function clear_errors(){
 
 function users(){
     toggle_menu(5);
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/admin/users');
     xhr.onreadystatechange = function(){
@@ -218,12 +230,15 @@ function push_files(){
 
 function swagger(){
     toggle_menu(6);
-    place_holder.textContent = "";
-    var docs_page = document.createElement("iframe");
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/swagger/');
+    var docs_page = document.createElement("iframe");
     xhr.onreadystatechange = function(){
-        if (xhr.readyState === 4 && xhr.status === 200){ docs_page.setAttribute("src", JSON.parse(xhr.responseText).res); }
+        if (xhr.readyState === 4 && xhr.status === 200){
+            place_holder.removeChild(document.getElementsByClassName('loader')[0]);
+            docs_page.setAttribute("src", JSON.parse(xhr.responseText).res);
+        }
     }
     xhr.send();
     docs_page.setAttribute("width", "100%");
@@ -234,11 +249,12 @@ function swagger(){
 
 function heroku(){
     toggle_menu(7);
-    place_holder.textContent = "";
+    show_loader(place_holder)
     var xhr = new XMLHttpRequest();
     xhr.open('GET', '/heroku/', true);
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
+            place_holder.textContent = "";
             JSON.parse(xhr.responseText).res.forEach((element) => {
                 var div_block = document.createElement("p");
                 var h_block = document.createElement("h");
@@ -261,7 +277,28 @@ function heroku(){
                     span.className = "slider round";
                     label.appendChild(checkbox);
                     label.appendChild(span);
+                    var logs_but = document.createElement("a");
+                    logs_but.setAttribute("title", "Application logs");
+                    logs_but.setAttribute("onclick", "heroku_logs('" + app.name + "', " + app.args + ");");
+                    var log_img = document.createElement("img");
+                    log_img.setAttribute("src", "source/images/log.svg");
+                    log_img.setAttribute("width", "20");
+                    log_img.setAttribute("height", "20");
+                    logs_but.appendChild(log_img);
+                    var vars_but = document.createElement("a");
+                    vars_but.setAttribute("title", "Application variables");
+                    vars_but.setAttribute("onclick", "heroku_vars('" + app.name + "', " + app.args + ");");
+                    var vars_img = document.createElement("img");
+                    vars_img.setAttribute("src", "source/images/vars.svg");
+                    vars_img.setAttribute("width", "20");
+                    vars_img.setAttribute("height", "20");
+                    vars_but.appendChild(vars_img);
                     li_block.appendChild(label);
+                    li_block.appendChild(logs_but);
+                    li_block.appendChild(vars_but);
+                    var empty_div = document.createElement("div");
+                    empty_div.setAttribute("id", app.name);
+                    li_block.appendChild(empty_div);
                     div_block.appendChild(li_block);
                 });
                 place_holder.appendChild(div_block);
@@ -269,6 +306,56 @@ function heroku(){
         }
     }
     xhr.send();
+}
+
+function heroku_logs(block, key, app){
+    var parent = document.getElementById(block);
+    if (parent.textContent == ""){
+        show_loader(parent)
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/heroku/logs?key=' + key + "&app=" + app, true);
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState === 4 && xhr.status === 200){
+                parent.className = "console";
+                parent.textContent = "";
+                JSON.parse(xhr.responseText).res.forEach((element) => {
+                    var console_line = document.createElement("div");
+                    console_line.textContent = element;
+                    parent.appendChild(console_line);
+                });
+            }
+            else if (xhr.readyState === 4 && xhr.status != 200){
+                parent.className = ""; parent.textContent = "";
+            }
+        }
+        xhr.send();
+    }
+    else { parent.className = ""; parent.textContent = ""; }
+}
+
+function heroku_vars(block, key, app){
+    var parent = document.getElementById(block);
+    if (parent.textContent == ""){
+        show_loader(parent)
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState === 4 && xhr.status === 200){
+                parent.className = "console";
+                parent.textContent = "";
+                JSON.parse(xhr.responseText).res.forEach((element) => {
+                    var console_line = document.createElement("div");
+                    console_line.textContent = element;
+                    parent.appendChild(console_line);
+                });
+            }
+            else if (xhr.readyState === 4 && xhr.status != 200){
+                parent.className = ""; parent.textContent = "";
+            }
+        }
+        xhr.send();
+    }
+    else { parent.className = ""; parent.textContent = ""; }
 }
 
 function enable_project(check, key, app){
@@ -279,6 +366,7 @@ function enable_project(check, key, app){
             create_message(JSON.parse(xhr.responseText).res, "info");
         }
         else if (xhr.readyState === 4 && xhr.status === 404) {
+            check.checked = false;
             create_message(JSON.parse(xhr.responseText).res, "error");
         }
     }

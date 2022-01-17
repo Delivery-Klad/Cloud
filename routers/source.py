@@ -14,10 +14,7 @@ router = APIRouter(prefix="/source")
 async def get_tree_view(request: Request, path: str, auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/source/tree' from '{request.client.host}' "
         f"with cookies '{check_cookies(request, auth_psw)}'")
-    try:
-        if not is_root_user(request, auth_psw):
-            return show_forbidden_page()
-    except AttributeError:
+    if not is_root_user(request, auth_psw):
         return show_forbidden_page()
     html = ""
     if os_path.isdir(f"temp{path}"):
@@ -25,7 +22,7 @@ async def get_tree_view(request: Request, path: str, auth_psw: Optional[str] = C
     else:
         replace_type = "file"
     with open("templates/tree.html", "r") as file:
-        with open("source_admin/replace.js") as script:
+        with open("source/admin/replace.js") as script:
             return HTMLResponse(file.read().format(tree_view("temp/files", html, path, 0), replace_type, script.read()))
 
 
@@ -33,6 +30,28 @@ async def get_tree_view(request: Request, path: str, auth_psw: Optional[str] = C
 async def get_source(name: str, request: Request):
     try:
         return FileResponse(f"source/{name}")
+    except FileNotFoundError:
+        return show_not_found_page()
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.get("/images/{name}")
+async def get_source_image(name: str, request: Request):
+    try:
+        return FileResponse(f"source/images/{name}")
+    except FileNotFoundError:
+        return show_not_found_page()
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.get("/admin/{name}")
+async def get_source_admin(name: str, request: Request, auth_psw: Optional[str] = Cookie(None)):
+    try:
+        if is_root_user(request, auth_psw):
+            return FileResponse(f"source/admin/{name}")
+        return show_forbidden_page()
     except FileNotFoundError:
         return show_not_found_page()
     except Exception as e:

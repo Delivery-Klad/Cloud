@@ -138,11 +138,11 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 def startup():
     try:
         parse_url()
-        heroku.project_controller()
         with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         with open("error_log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
+        heroku.project_controller()
         environ["start_time"] = str(datetime.utcnow())[:-7]
         print("Starting startup process...")
         try:

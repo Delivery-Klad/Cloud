@@ -18,10 +18,10 @@ keys = environ.get("keys").split(", ")
 
 def project_controller():
     day = str(datetime.now().day)
-    print(f"Today {day}")
     log(f"Today {day}")
     try:
         if get_controller() == 0:
+            log("Start project controller")
             with open("source/admin/schedule.json", "r") as file:
                 schedule = load(file)[day]
                 for i in schedule:

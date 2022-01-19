@@ -27,7 +27,13 @@ def create_tables():
                        "password TEXT NOT NULL,"
                        "useragent TEXT NOT NULL,"
                        "permissions INTEGER NOT NULL)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS controller(enable INTEGER)")
         connect.commit()
+        cursor.execute("SELECT COUNT(*) FROM controller")
+        res = cursor.fetchall()[0][0]
+        if res == 0:
+            cursor.execute("INSERT INTO controller VALUES(0)")
+            connect.commit()
     except Exception as e:
         print(e)
         return None
@@ -36,10 +42,26 @@ def create_tables():
         connect.close()
 
 
+def get_controller():
+    connect, cursor = db_connect()
+    cursor.execute(f"SELECT * FROM controller")
+    return cursor.fetchall()[0][0]
+
+
+def set_controller(value: int):
+    connect, cursor = db_connect()
+    cursor.execute(f"UPDATE controller SET enable={value}")
+    connect.commit()
+    cursor.close()
+    connect.close()
+
+
 def delete_user(user_id: int):
     connect, cursor = db_connect()
     cursor.execute(f"DELETE FROM users WHERE id={user_id}")
     connect.commit()
+    cursor.close()
+    connect.close()
 
 
 def get_permissions(login: str):

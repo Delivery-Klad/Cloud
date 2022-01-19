@@ -265,40 +265,42 @@ function heroku(){
                     var li_block = document.createElement("ul")
                     li_block.setAttribute("style", "text-size: 16px;");
                     li_block.textContent = app.name + " (" + app.type + ")"
-                    var label = document.createElement("label");
-                    label.className = "switch";
-                    var checkbox = document.createElement("input");
-                    checkbox.setAttribute("type", "checkbox");
-                    checkbox.setAttribute("onclick", "enable_project(this, " + app.args + ")");
-                    if (app.enable === "ON") {
-                        checkbox.setAttribute("checked", "");
+                    if (app.type != "database") {
+                        var label = document.createElement("label");
+                        label.className = "switch";
+                        var checkbox = document.createElement("input");
+                        checkbox.setAttribute("type", "checkbox");
+                        checkbox.setAttribute("onclick", "enable_project(this, " + app.args + ")");
+                        if (app.enable === "ON") {
+                            checkbox.setAttribute("checked", "");
+                        }
+                        var span = document.createElement("span");
+                        span.className = "slider round";
+                        label.appendChild(checkbox);
+                        label.appendChild(span);
+                        var logs_but = document.createElement("a");
+                        logs_but.setAttribute("title", "Application logs");
+                        logs_but.setAttribute("onclick", "heroku_logs('" + app.name + "', " + app.args + ");");
+                        var log_img = document.createElement("img");
+                        log_img.setAttribute("src", "source/images/log.svg");
+                        log_img.setAttribute("width", "20");
+                        log_img.setAttribute("height", "20");
+                        logs_but.appendChild(log_img);
+                        var vars_but = document.createElement("a");
+                        vars_but.setAttribute("title", "Application variables");
+                        vars_but.setAttribute("onclick", "heroku_vars('" + app.name + "', " + app.args + ");");
+                        var vars_img = document.createElement("img");
+                        vars_img.setAttribute("src", "source/images/vars.svg");
+                        vars_img.setAttribute("width", "20");
+                        vars_img.setAttribute("height", "20");
+                        vars_but.appendChild(vars_img);
+                        li_block.appendChild(label);
+                        li_block.appendChild(logs_but);
+                        li_block.appendChild(vars_but);
+                        var empty_div = document.createElement("div");
+                        empty_div.setAttribute("id", app.name);
+                        li_block.appendChild(empty_div);
                     }
-                    var span = document.createElement("span");
-                    span.className = "slider round";
-                    label.appendChild(checkbox);
-                    label.appendChild(span);
-                    var logs_but = document.createElement("a");
-                    logs_but.setAttribute("title", "Application logs");
-                    logs_but.setAttribute("onclick", "heroku_logs('" + app.name + "', " + app.args + ");");
-                    var log_img = document.createElement("img");
-                    log_img.setAttribute("src", "source/images/log.svg");
-                    log_img.setAttribute("width", "20");
-                    log_img.setAttribute("height", "20");
-                    logs_but.appendChild(log_img);
-                    var vars_but = document.createElement("a");
-                    vars_but.setAttribute("title", "Application variables");
-                    vars_but.setAttribute("onclick", "heroku_vars('" + app.name + "', " + app.args + ");");
-                    var vars_img = document.createElement("img");
-                    vars_img.setAttribute("src", "source/images/vars.svg");
-                    vars_img.setAttribute("width", "20");
-                    vars_img.setAttribute("height", "20");
-                    vars_but.appendChild(vars_img);
-                    li_block.appendChild(label);
-                    li_block.appendChild(logs_but);
-                    li_block.appendChild(vars_but);
-                    var empty_div = document.createElement("div");
-                    empty_div.setAttribute("id", app.name);
-                    li_block.appendChild(empty_div);
                     div_block.appendChild(li_block);
                 });
                 place_holder.appendChild(div_block);

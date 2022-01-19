@@ -19,22 +19,24 @@ keys = environ.get("keys").split(", ")
 def project_controller():
     try:
         day = str(datetime.now().day)
+        print(f"Today {day}")
         if get_controller() == 0:
             with open("source/admin/schedule.json", "r") as file:
                 schedule = load(file)[day]
                 for i in schedule:
-                    print(i)
                     cloud = heroku3.from_key(keys[i["key"]])
                     app = cloud.apps()[i["app"]]
                     if "web" in app.process_formation():
                         dyn_type = "web"
                     elif "worker" in app.process_formation():
                         dyn_type = "worker"
+                    log(f"{app.name} ({dyn_type}) - scale={i['scale']}")
                     app.process_formation()[dyn_type].scale(i["scale"])
             set_controller(1)
         if day != "1" and day != "21":
             set_controller(0)
     except KeyError:
+        log("Skip project controller")
         set_controller(0)
 
 

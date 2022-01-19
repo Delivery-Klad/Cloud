@@ -91,6 +91,16 @@ input:checked + .slider:before {
   100% { transform: rotate(360deg); }
 }
 .console {
+  display: table;
   border: 2px solid #222e3c;
   border-radius: 5px;
+}
+.console_title {
+  white-space: nowrap;
+  display: table-cell;
+  color: #f38900;
+}
+.console_body {
+  display: table-cell;
+  color: #000000;
 }

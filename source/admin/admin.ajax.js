@@ -297,9 +297,12 @@ function heroku(){
                         li_block.appendChild(label);
                         li_block.appendChild(logs_but);
                         li_block.appendChild(vars_but);
-                        var empty_div = document.createElement("div");
-                        empty_div.setAttribute("id", app.name);
-                        li_block.appendChild(empty_div);
+                        var console_div = document.createElement("div");
+                        console_div.setAttribute("id", app.name + "_console");
+                        li_block.appendChild(console_div);
+                        var vars_div = document.createElement("div");
+                        vars_div.setAttribute("id", app.name + "_vars");
+                        li_block.appendChild(vars_div);
                     }
                     div_block.appendChild(li_block);
                 });
@@ -311,7 +314,7 @@ function heroku(){
 }
 
 function heroku_logs(block, key, app){
-    var parent = document.getElementById(block);
+    var parent = document.getElementById(block + "_console");
     if (parent.textContent == ""){
         show_loader(parent)
         var xhr = new XMLHttpRequest();
@@ -322,7 +325,14 @@ function heroku_logs(block, key, app){
                 parent.textContent = "";
                 JSON.parse(xhr.responseText).res.forEach((element) => {
                     var console_line = document.createElement("div");
-                    console_line.textContent = element;
+                    var title_div = document.createElement("div");
+                    title_div.className = "console_title";
+                    title_div.textContent = element.title;
+                    var body_div = document.createElement("div");
+                    body_div.className = "console_body";
+                    body_div.textContent = element.body;
+                    console_line.appendChild(title_div);
+                    console_line.appendChild(body_div);
                     parent.appendChild(console_line);
                 });
             }
@@ -336,7 +346,7 @@ function heroku_logs(block, key, app){
 }
 
 function heroku_vars(block, key, app){
-    var parent = document.getElementById(block);
+    var parent = document.getElementById(block + "_vars");
     if (parent.textContent == ""){
         show_loader(parent)
         var xhr = new XMLHttpRequest();
@@ -347,7 +357,14 @@ function heroku_vars(block, key, app){
                 parent.textContent = "";
                 JSON.parse(xhr.responseText).res.forEach((element) => {
                     var console_line = document.createElement("div");
-                    console_line.textContent = element;
+                    var title_div = document.createElement("div");
+                    title_div.className = "console_title";
+                    title_div.textContent = element.title;
+                    var body_div = document.createElement("div");
+                    body_div.className = "console_body";
+                    body_div.textContent = element.body;
+                    console_line.appendChild(title_div);
+                    console_line.appendChild(body_div);
                     parent.appendChild(console_line);
                 });
             }

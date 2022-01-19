@@ -56,6 +56,7 @@ def is_authorized_user(request: Request, cookie: str):
 
 
 def log(text: str, code: bool = False):
+    print(text)
     with open("log.txt", "a") as log_file:
         if code:
             log_file.write(f" - {text}")
@@ -74,7 +75,16 @@ def error_log(text: str):
 def get_app_logs(keys, key: int, app: int):
     cloud = heroku3.from_key(keys[key])
     app = cloud.apps()[app]
-    return app.get_log(lines=10).split("\n")
+    result = []
+    for i in app.get_log(lines=10).split("\n"):
+        if i == "":
+            continue
+        i = i.split(": ")
+        if len(i) > 1:
+            result.append({"title": f"{i[0]}: ", "body": i[1]})
+        else:
+            result.append({"title": f"{i[0]}: ", "body": ""})
+    return result
 
 
 def get_app_vars(keys, key: int, app: int):
@@ -83,7 +93,7 @@ def get_app_vars(keys, key: int, app: int):
     app = cloud.apps()[app]
     config = app.config().to_dict()
     for i in config.keys():
-        result.append(f"{i}: {config[i]}")
+        result.append({"title": f"{i}: ", "body": config[i]})
     return result
 
 
@@ -219,7 +229,7 @@ def get_folder_access_level(path: str):
 
 
 def constructor(icons, upload_path):
-    icons += f"""<h1><i><a href="/admin?arg=files{upload_path}" title="Folder settings">
+    icons += f"""<h1><i><a href="/admin?arg=files{upload_path}" title="Admin panel">
                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" 
                   fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" 
                   stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>

@@ -101,7 +101,7 @@ def get_heroku_projects(keys):
     result = []
     for i in range(len(keys)):
         cloud = heroku3.from_key(keys[i])
-        print(f"{cloud.account().email} {cloud.ratelimit_remaining()}")
+        print(f"{cloud.account().email}")
         temp = []
         apps = cloud.apps()
         for j in range(len(apps)):

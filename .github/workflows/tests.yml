@@ -11,17 +11,41 @@ on:
 
 jobs:
   test:
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
+      server_url: http://localhost/
+      dbx_token: fake-token
+      gh_token: fake-token
+      secret: fake-secret
+      keys: fake-key
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.9
         uses: actions/setup-python@v2
         with:
           python-version: 3.9
-      - name: Install dependencies
+      - name: Install requirements
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Run migrations
+        run: |
+          alembic revision --autogenerate
+          alembic upgrade head
       - name: Test with pytest
         run: |
           pytest

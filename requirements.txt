@@ -22,3 +22,4 @@ XlsxWriter
 SQLAlchemy==1.4.22
 alembic==1.7.5
 python-dotenv==0.19.0
+pytest==6.2.4

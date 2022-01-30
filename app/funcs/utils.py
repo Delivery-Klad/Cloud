@@ -281,7 +281,8 @@ def get_menu(index_of, is_root):
     else:
         with open("app/source/context.js", "r") as data:
             script = data.read()
-        menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul><script 
+        menu += f"""<input type="hidden" id="new_name" 
+                name="new_name" size="27"></form></ul><script 
                 type="text/javascript">{script}</script>"""
     return menu
 
@@ -308,7 +309,8 @@ def check_cookies(request: Request, cookie: str):
 
 
 def get_jwt_sub(request: Request, cookie: str):
-    request.headers.__dict__["_list"].append(("authorization".encode(), f"Bearer {cookie}".encode()))
+    request.headers.__dict__["_list"]\
+        .append(("authorization".encode(), f"Bearer {cookie}".encode()))
     authorize = AuthJWT(request)
     try:
         return authorize.get_jwt_subject()

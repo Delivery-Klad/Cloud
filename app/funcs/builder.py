@@ -8,6 +8,10 @@ from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 from app.funcs.pages import show_not_found_page, show_error_page
 from app.funcs.utils import is_root_user, constructor, get_menu, listdir,\
     get_jwt_sub
+from app.dependencies import get_settings
+
+
+settings = get_settings()
 
 
 def handler(path: str, filename: str, request: Request, auth_psw, download,
@@ -33,7 +37,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download,
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
-            url = environ.get("server_url")
+            url = settings.server_url
             response_text = """<head><title>Cloud - File viewer</title>
                                 <link href="/source/rainbow_dark.css" 
                                 rel="stylesheet" 

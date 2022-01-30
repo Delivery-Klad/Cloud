@@ -7,11 +7,15 @@ from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import HTMLResponse
 
-from funcs.database import get_permissions
+from app.funcs.database import get_permissions
+from app.dependencies import get_db, get_settings
+
+
+settings = get_settings()
 
 
 def parse_url():
-    url = environ.get("DATABASE_URL")
+    url = settings.DATABASE_URL
     url = url.split("://")[1]
     environ['db_name'] = url.split("/")[1]
     url = url.split("/")[0]
@@ -68,7 +72,7 @@ def error_log(text: str):
     print(text)
     with open("error_log.txt", "a") as log_file:
         log_file.write(f"\n{str(datetime.utcnow())[:-7]} - {text}")
-    with open("templates/500.html", "rb") as page:
+    with open("app/templates/500.html", "rb") as page:
         return HTMLResponse(page.read())
 
 
@@ -197,8 +201,8 @@ def listdir(directory: str, request: Request, auth_psw):
 def tree_view(folder, html, _path, i):
     link = os_path.abspath(folder).replace("\\", "/").split("temp/files")[1]
     folder_name = ["", "files"] if link == "" else link.split("/")
-    href = f"""<a href='javascript:replace("{_path}", "/files{link}");' class="text">
-            {folder_name[len(folder_name) - 1]}</a>"""
+    href = f"""<a href='javascript:replace("{_path}", "/files{link}");' 
+            class="text">{folder_name[len(folder_name) - 1]}</a>"""
     details = " open" if folder_name[1] == "files" else ""
     html += f"""<div>{href}<details{details}><summary></summary>"""
     for file in os_listdir(folder):
@@ -245,7 +249,7 @@ def get_menu(index_of, is_root):
                       <input type="hidden" id="file_path" name="path" value="/{index_of.replace("root", "files")}">
                       <input type="hidden" id="file_name" name="del_name" value="empty">"""
     if is_root:
-        with open("source/admin/context.js", "r") as data:
+        with open("app/source/admin/context.js", "r") as data:
             admin_script = data.read()
         menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
                 <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
@@ -275,7 +279,7 @@ def get_menu(index_of, is_root):
                     <input class="button button2" type="submit" value="Upload">
                 </div></form></ul><script type="text/javascript">{admin_script}</script>"""
     else:
-        with open("source/context.js", "r") as data:
+        with open("app/source/context.js", "r") as data:
             script = data.read()
         menu += f"""<input type="hidden" id="new_name" name="new_name" size="27"></form></ul><script 
                 type="text/javascript">{script}</script>"""

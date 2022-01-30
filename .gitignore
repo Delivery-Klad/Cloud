@@ -5,8 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
-test.py
-main.py
+*/config.py
+app/config.py
 aboba.zip
 log.txt
 error_log.txt

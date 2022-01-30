@@ -7,8 +7,8 @@ from fastapi.responses import HTMLResponse
 from typing import Optional
 from pydantic import BaseModel
 
-from funcs.pages import show_forbidden_page
-from funcs.utils import is_root_user, log, error_log, check_cookies, delete_full_file
+from app.funcs.pages import show_forbidden_page
+from app.funcs.utils import is_root_user, log, error_log, check_cookies, delete_full_file
 
 router = APIRouter(prefix="/file")
 

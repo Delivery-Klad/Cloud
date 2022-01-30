@@ -1,5 +1,4 @@
 import urllib3
-from os import environ
 from json import load
 from datetime import datetime
 
@@ -8,12 +7,15 @@ from fastapi import APIRouter, Request, Cookie
 from fastapi.responses import JSONResponse
 from typing import Optional
 
-from funcs.database import get_controller, set_controller
-from funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects, get_app_logs, get_app_vars
+from app.funcs.database import get_controller, set_controller
+from app.funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects, get_app_logs, get_app_vars
+from app.dependencies import get_db, get_settings
 
+
+settings = get_settings()
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 router = APIRouter(prefix="/heroku")
-keys = environ.get("keys").split(", ")
+keys = settings.keys.split(", ")
 
 
 def project_controller():
@@ -22,7 +24,7 @@ def project_controller():
     try:
         if get_controller() == 0:
             log("Start project controller")
-            with open("source/admin/schedule.json", "r") as file:
+            with open("app/source/admin/schedule.json", "r") as file:
                 schedule = load(file)[day]
                 for i in schedule:
                     cloud = heroku3.from_key(keys[i["key"]])
@@ -55,8 +57,10 @@ async def get_projects(request: Request, auth_psw: Optional[str] = Cookie(None))
 
 
 @router.get("/logs")
-async def get_project_logs(key: int, app: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/heroku/logs' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+async def get_project_logs(key: int, app: int, request: Request,
+                           auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/heroku/logs' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(request, auth_psw):
             logs = get_app_logs(keys, key, app)
@@ -71,8 +75,10 @@ async def get_project_logs(key: int, app: int, request: Request, auth_psw: Optio
 
 
 @router.get("/vars")
-async def get_project_vars(key: int, app: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/heroku/vars' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+async def get_project_vars(key: int, app: int, request: Request,
+                           auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/heroku/vars' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(request, auth_psw):
             var = get_app_vars(keys, key, app)
@@ -87,14 +93,17 @@ async def get_project_vars(key: int, app: int, request: Request, auth_psw: Optio
 
 
 @router.patch("/")
-async def enable_project(enable: bool, key: int, app: int, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"PATCH Request to '/heroku/' from '{request.client.host}' with cookies "
+async def enable_project(enable: bool, key: int, app: int,request: Request,
+                         auth_psw: Optional[str] = Cookie(None)):
+    log(f"PATCH Request to '/heroku/' from '{request.client.host}' with "
+        f"cookies "
         f"'{check_cookies(request, auth_psw)}'")
     try:
         if is_root_user(request, auth_psw):
             cloud = heroku3.from_key(keys[key])
             app = cloud.apps()[app]
-            if "web" in app.process_formation() or "worker" in app.process_formation():
+            if "web" in app.process_formation() or "worker" \
+                    in app.process_formation():
                 if "web" in app.process_formation():
                     dyn_type = "web"
                 elif "worker" in app.process_formation():
@@ -104,9 +113,11 @@ async def enable_project(enable: bool, key: int, app: int, request: Request, aut
                 else:
                     scale = 0
                 app.process_formation()[dyn_type].scale(scale)
-                return JSONResponse({"res": "Project successfully scaled!"}, status_code=200)
+                return JSONResponse({"res": "Project successfully scaled!"},
+                                    status_code=200)
             else:
-                return JSONResponse({"res": "Project have no worker or web!"}, status_code=404)
+                return JSONResponse({"res": "Project have no worker or web!"},
+                                    status_code=404)
         else:
             return JSONResponse({"res": "Access denied"}, status_code=403)
     except Exception as e:

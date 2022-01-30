@@ -5,8 +5,8 @@ from fastapi import APIRouter, Cookie, Request
 from typing import Optional
 from pydantic import BaseModel
 
-from funcs.pages import show_forbidden_page
-from funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
+from app.funcs.pages import show_forbidden_page
+from app.funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
     delete_full_file
 
 router = APIRouter(prefix="/folder")

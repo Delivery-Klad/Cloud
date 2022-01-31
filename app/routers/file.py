@@ -5,23 +5,12 @@ from datetime import datetime
 from fastapi import APIRouter, Cookie, Request, Query, UploadFile, File
 from fastapi.responses import HTMLResponse
 from typing import Optional
-from pydantic import BaseModel
 
+from app.database import schemas
 from app.funcs.pages import show_forbidden_page
 from app.funcs.utils import is_root_user, log, error_log, check_cookies, delete_full_file
 
 router = APIRouter(prefix="/file")
-
-
-class FileData(BaseModel):
-    file_path: str
-    file_name: Optional[str] = None
-    new_name: Optional[str] = None
-
-
-class ReplaceFile(BaseModel):
-    old_path: str
-    new_path: str
 
 
 @router.post("/")
@@ -64,7 +53,7 @@ async def upload_file(request: Request, path: Optional[str] = Query(None),
 
 
 @router.patch("/")
-async def rename_file(request: Request, file: FileData,
+async def rename_file(request: Request, file: schemas.FileData,
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"PATCH Request to '/file/' from '{request.client.host}' with "
@@ -87,7 +76,7 @@ async def rename_file(request: Request, file: FileData,
 
 
 @router.put("/")
-async def replace_file(request: Request, data: ReplaceFile,
+async def replace_file(request: Request, data: schemas.ReplaceFile,
                        auth_psw: Optional[str] = Cookie(None)):
     log(f"PUT Request to '/file/' from '{request.client.host}' with "
         f"cookies '{check_cookies(request, auth_psw)}'")
@@ -111,7 +100,7 @@ async def replace_file(request: Request, data: ReplaceFile,
 
 
 @router.delete("/")
-async def delete_file(request: Request, file: FileData,
+async def delete_file(request: Request, file: schemas.FileData,
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"DELETE Request to '/file/' from '{request.client.host}' with "

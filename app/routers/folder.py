@@ -3,8 +3,8 @@ from shutil import rmtree, move
 
 from fastapi import APIRouter, Cookie, Request
 from typing import Optional
-from pydantic import BaseModel
 
+from app.database import schemas
 from app.funcs.pages import show_forbidden_page
 from app.funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
     delete_full_file
@@ -12,24 +12,11 @@ from app.funcs.utils import is_root_user, log, error_log, check_cookies, create_
 router = APIRouter(prefix="/folder")
 
 
-class Folder(BaseModel):
-    path: str
-    arg: str
-    access: str
-
-
-class ReplaceFolder(BaseModel):
-    old_path: str
-    new_path: str
-
-
-class DeleteFolder(BaseModel):
-    file_path: str
-
-
 @router.get("/{catchall:path}")
-async def get_access(request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"GET Request to '/folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+async def get_access(request: Request,
+                     auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/folder' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw)}'")
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}
@@ -44,8 +31,10 @@ async def get_access(request: Request, auth_psw: Optional[str] = Cookie(None)):
 
 
 @router.post("/")
-async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] = Cookie(None)):
-    log(f"POST Request to '/folder' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+async def create_folder(data: schemas.Folder, request: Request,
+                        auth_psw: Optional[str] = Cookie(None)):
+    log(f"POST Request to '/folder' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw)}'")
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}
@@ -59,7 +48,8 @@ async def create_folder(data: Folder, request: Request, auth_psw: Optional[str] 
 
 
 @router.patch("/")
-async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] = Cookie(None)):
+async def config_folder(request: Request, data: schemas.Folder,
+                        auth_psw: Optional[str] = Cookie(None)):
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}
@@ -94,8 +84,10 @@ async def config_folder(request: Request, data: Folder, auth_psw: Optional[str] 
 
 
 @router.put("/")
-async def replace_folder(request: Request, data: ReplaceFolder, auth_psw: Optional[str] = Cookie(None)):
-    log(f"PUT Request to '/folder/' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+async def replace_folder(request: Request, data: schemas.ReplaceFolder,
+                         auth_psw: Optional[str] = Cookie(None)):
+    log(f"PUT Request to '/folder/' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw)}'")
     try:
         try:
             if not is_root_user(request, auth_psw):
@@ -109,7 +101,8 @@ async def replace_folder(request: Request, data: ReplaceFolder, auth_psw: Option
 
 
 @router.delete("/")
-async def delete_folder(data: DeleteFolder, request: Request, auth_psw: Optional[str] = Cookie(None)):
+async def delete_folder(data: schemas.DeleteFolder, request: Request,
+                        auth_psw: Optional[str] = Cookie(None)):
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}

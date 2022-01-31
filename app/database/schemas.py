@@ -1,16 +1,28 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
-class MessageBase(BaseModel):
-    message: str
+class Folder(BaseModel):
+    path: str
+    arg: str
+    access: str
 
 
-class MessageCreate(MessageBase):
-    pass
+class ReplaceFolder(BaseModel):
+    old_path: str
+    new_path: str
 
 
-class MessageDB(MessageBase):
-    id: int
+class DeleteFolder(BaseModel):
+    file_path: str
 
-    class Config:
-        orm_mode = True
+
+class FileData(BaseModel):
+    file_path: str
+    file_name: Optional[str] = None
+    new_name: Optional[str] = None
+
+
+class ReplaceFile(BaseModel):
+    old_path: str
+    new_path: str

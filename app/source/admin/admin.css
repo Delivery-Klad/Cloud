@@ -73,6 +73,8 @@ input:checked + .slider:before {
 .content h { font-weight: bold; font-size: 18px; color: #222e3c; background-color: #222e3c; }
 .content h:hover { color: white; }
 .loader {
+  margin-left: auto;
+  margin-right: auto;
   border: 8px solid #a3a3a3;
   border-radius: 50%;
   border-top: 8px solid #3498db;
@@ -96,7 +98,6 @@ input:checked + .slider:before {
   border-radius: 5px;
 }
 .console_title {
-  white-space: nowrap;
   display: table-cell;
   color: #f38900;
 }

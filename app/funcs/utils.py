@@ -3,11 +3,12 @@ from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
 from datetime import datetime
 
 import heroku3
+from sqlalchemy.orm import Session
 from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import HTMLResponse
 
-from app.funcs.database import get_permissions
+from app.database import crud
 from app.dependencies import get_db, get_settings
 
 
@@ -295,9 +296,9 @@ def delete_full_file(path: str):
         pass
 
 
-def check_cookies(request: Request, cookie: str):
+def check_cookies(request: Request, cookie: str, db: Session):
     try:
-        permissions = get_permissions(get_jwt_sub(request, cookie).split("://:")[1])
+        permissions = crud.get_permissions(get_jwt_sub(request, cookie).split("://:")[1], db)
         if permissions == 5:
             return "Administrator"
         elif permissions is None:

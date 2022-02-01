@@ -2,13 +2,15 @@ from os import path as os_path, rename, listdir, replace
 from json import dump, load
 from datetime import datetime
 
-from fastapi import APIRouter, Cookie, Request, Query, UploadFile, File
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Cookie, Request, Query, UploadFile, File, Depends
 from fastapi.responses import HTMLResponse
 from typing import Optional
 
 from app.database import schemas
 from app.funcs.pages import show_forbidden_page
 from app.funcs.utils import is_root_user, log, error_log, check_cookies, delete_full_file
+from app.dependencies import get_db
 
 router = APIRouter(prefix="/file")
 
@@ -16,9 +18,10 @@ router = APIRouter(prefix="/file")
 @router.post("/")
 async def upload_file(request: Request, path: Optional[str] = Query(None),
                       data: UploadFile = File(...),
-                      auth_psw: Optional[str] = Cookie(None)):
+                      auth_psw: Optional[str] = Cookie(None),
+                      db: Session = Depends(get_db),):
     log(f"POST Request to '/file/{data.filename}' from '{request.client.host}' "
-        f"with cookies '{check_cookies(request, auth_psw)}'")
+        f"with cookies '{check_cookies(request, auth_psw, db)}'")
     if data.filename == "":
         return HTMLResponse(status_code=403)
     try:
@@ -54,10 +57,11 @@ async def upload_file(request: Request, path: Optional[str] = Query(None),
 
 @router.patch("/")
 async def rename_file(request: Request, file: schemas.FileData,
+                      db: Session = Depends(get_db),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"PATCH Request to '/file/' from '{request.client.host}' with "
-            f"cookies '{check_cookies(request, auth_psw)}'")
+            f"cookies '{check_cookies(request, auth_psw, db)}'")
         try:
             if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
@@ -77,9 +81,10 @@ async def rename_file(request: Request, file: schemas.FileData,
 
 @router.put("/")
 async def replace_file(request: Request, data: schemas.ReplaceFile,
+                       db: Session = Depends(get_db),
                        auth_psw: Optional[str] = Cookie(None)):
     log(f"PUT Request to '/file/' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         try:
             if not is_root_user(request, auth_psw):
@@ -101,10 +106,11 @@ async def replace_file(request: Request, data: schemas.ReplaceFile,
 
 @router.delete("/")
 async def delete_file(request: Request, file: schemas.FileData,
+                      db: Session = Depends(get_db),
                       auth_psw: Optional[str] = Cookie(None)):
     try:
         log(f"DELETE Request to '/file/' from '{request.client.host}' with "
-            f"cookies '{check_cookies(request, auth_psw)}'")
+            f"cookies '{check_cookies(request, auth_psw, db)}'")
         try:
             if not is_root_user(request, auth_psw):
                 return show_forbidden_page()
@@ -118,9 +124,10 @@ async def delete_file(request: Request, file: schemas.FileData,
 
 @router.get("/meta")
 async def get_meta(path: str, name: str, request: Request,
+                   db: Session = Depends(get_db),
                    auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/meta' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         size = round(os_path.getsize(f"temp/{path}{name}") / 1024)
         if size > 1024:

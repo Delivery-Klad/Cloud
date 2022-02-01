@@ -1,22 +1,25 @@
 from os import rename, listdir, remove
 from shutil import rmtree, move
 
-from fastapi import APIRouter, Cookie, Request
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Cookie, Request, Depends
 from typing import Optional
 
 from app.database import schemas
 from app.funcs.pages import show_forbidden_page
 from app.funcs.utils import is_root_user, log, error_log, check_cookies, create_new_folder, get_folder_access_level, \
     delete_full_file
+from app.dependencies import get_db
 
 router = APIRouter(prefix="/folder")
 
 
 @router.get("/{catchall:path}")
 async def get_access(request: Request,
+                     db: Session = Depends(get_db),
                      auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/folder' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}
@@ -32,9 +35,10 @@ async def get_access(request: Request,
 
 @router.post("/")
 async def create_folder(data: schemas.Folder, request: Request,
+                        db: Session = Depends(get_db),
                         auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/folder' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if not is_root_user(request, auth_psw):
             return {"res": False}
@@ -85,9 +89,10 @@ async def config_folder(request: Request, data: schemas.Folder,
 
 @router.put("/")
 async def replace_folder(request: Request, data: schemas.ReplaceFolder,
+                         db: Session = Depends(get_db),
                          auth_psw: Optional[str] = Cookie(None)):
     log(f"PUT Request to '/folder/' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         try:
             if not is_root_user(request, auth_psw):

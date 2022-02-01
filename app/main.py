@@ -17,7 +17,6 @@ from git import Repo
 
 from app.funcs.pages import show_auth_page, show_admin_index,\
     show_not_found_page
-from app.funcs.database import check_password, create_account, get_permissions, set_permissions
 from app.funcs.builder import handler
 from app.funcs.content_length import LimitUploadSize
 from app.funcs.utils import is_root_user, log, error_log, check_cookies,\
@@ -74,11 +73,6 @@ async def swagger(request: Request):
     return {"res": swagger_url}
 
 
-@app.get("/test")
-async def some_test(db: Session = Depends(get_db)):
-    return crud.get_controller(db)
-
-
 @app.get("/")
 async def homepage(request: Request):
     try:
@@ -94,9 +88,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
                      auth_psw: Optional[str] = Cookie(None),
                      download: Optional[bool] = None,
                      redirect: Optional[str] = None,
-                     preview: Optional[bool] = None):
+                     preview: Optional[bool] = None,
+                     db: Session = Depends(get_db)):
     log(f"GET Request to '/{path}' from '{request.client.host}' with "
-        f"cookies '{check_cookies(request, auth_psw)}'")
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if path == "files":
             return handler("", "", request, auth_psw, download,
@@ -105,11 +100,11 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
             if arg is None or arg2 is None:
                 return show_auth_page(redirect)
             else:
-                result = check_password(arg2, arg)
+                result = crud.check_password(arg2, arg, db)
                 if result:
                     authorize = AuthJWT()
                     response = JSONResponse({"result": True})
-                    perm = get_permissions(arg2)
+                    perm = crud.get_permissions(arg2, db)
                     response.set_cookie(key="auth_psw",
                                         value=authorize
                                         .create_refresh_token(f"{perm}://:"
@@ -123,10 +118,10 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
                         if ord(i) < 33 or ord(i) > 122:
                             return JSONResponse({"result": "И как ты до этого добрался? Сказано же, что нельзя "
                                                            "использовать эти символы"}, status_code=403)
-                    if create_account(arg2, str(hashpw(arg.encode("utf-8"), gensalt()))[2:-1], request):
+                    if crud.create_user(arg2, str(hashpw(arg.encode("utf-8"), gensalt()))[2:-1], request, db):
                         authorize = AuthJWT()
                         response = JSONResponse({"result": True})
-                        perm = get_permissions(arg2)
+                        perm = crud.get_permissions(arg2, db)
                         response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
                         return response
                     else:
@@ -155,11 +150,16 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
 
 
 @app.get("/files/{catchall:path}")
-async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), download: Optional[bool] = None,
-                    redirects: Optional[int] = None, preview: Optional[bool] = None):
+async def get_files(request: Request,
+                    auth_psw: Optional[str] = Cookie(None),
+                    download: Optional[bool] = None,
+                    redirects: Optional[int] = None,
+                    preview: Optional[bool] = None,
+                    db: Session = Depends(get_db)):
     try:
         path = request.path_params["catchall"]
-        log(f"GET Request to '/{path}' from '{request.client.host}' with cookies '{check_cookies(request, auth_psw)}'")
+        log(f"GET Request to '/{path}' from '{request.client.host}' with "
+            f"cookies '{check_cookies(request, auth_psw, db)}'")
         name = path.split("/")
         if redirects is None:
             return handler(f"/{path}", name[len(name) - 1], request, auth_psw, download, preview=preview)
@@ -180,7 +180,7 @@ def startup():
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         with open("error_log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
-        heroku.project_controller()
+        heroku.project_controller(db)
         environ["start_time"] = str(datetime.utcnow())[:-7]
         print("Starting startup process...")
         try:

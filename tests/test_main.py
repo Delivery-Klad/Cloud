@@ -14,4 +14,4 @@ def test_get_files():
 def test_get_controller():
     response = client.get("/test/")
     assert response.status_code == 200
-    assert response.json() == {"enable": 0}
+    assert response.json() == 0

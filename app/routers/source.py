@@ -1,21 +1,24 @@
 from os import path as os_path
 
-from fastapi import APIRouter, Request, Cookie
+from sqlalchemy.orm import Session
+from fastapi import APIRouter, Request, Cookie, Depends
 from fastapi.responses import FileResponse, HTMLResponse
 from typing import Optional
 
 from app.funcs.pages import show_not_found_page, show_forbidden_page
 from app.funcs.utils import error_log, tree_view, log, check_cookies,\
     is_root_user
+from app.dependencies import get_db
 
 router = APIRouter(prefix="/source")
 
 
 @router.get("/tree")
 async def get_tree_view(request: Request, path: str,
+                        db: Session = Depends(get_db),
                         auth_psw: Optional[str] = Cookie(None)):
     log(f"GET Request to '/source/tree' from '{request.client.host}' "
-        f"with cookies '{check_cookies(request, auth_psw)}'")
+        f"with cookies '{check_cookies(request, auth_psw, db)}'")
     if not is_root_user(request, auth_psw):
         return show_forbidden_page()
     html = ""

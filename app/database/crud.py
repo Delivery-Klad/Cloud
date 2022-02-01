@@ -13,4 +13,4 @@ def set_default_parameters(db: Session):
 
 def get_controller(db: Session):
     db_data = db.query(models.Controller).first()
-    return db_data
+    return db_data.enable

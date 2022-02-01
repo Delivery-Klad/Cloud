@@ -3,19 +3,14 @@ from sqlalchemy.orm import Session
 from app.database import schemas, models
 
 
-def create_message(db: Session, new_message: schemas.MessageCreate):
-    db_message = models.Message(**new_message.dict())
-    db.add(db_message)
-    db.commit()
-    db.refresh(db_message)
-    return
+def set_default_parameters(db: Session):
+    db_data = db.query(models.Controller).first()
+    if db_data is None:
+        data = models.Controller(enable=0)
+        db.add(data)
+        db.commit()
 
 
-def get_messages(db: Session):
-    return db.query(models.Message).all()
-
-
-def delete_message_by_id(db: Session, id: int):
-    _ = db.query(models.Message).filter(models.Message.id == id).delete()
-    db.commit()
-    return
+def get_controller(db: Session):
+    db_data = db.query(models.Controller).first()
+    return db_data

@@ -6,7 +6,8 @@ from secrets import token_hex
 
 from bcrypt import gensalt, hashpw
 from dropbox import Dropbox
-from fastapi import FastAPI, Request, Cookie
+from sqlalchemy.orm import Session
+from fastapi import FastAPI, Request, Cookie, Depends, Response
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from fastapi.responses import RedirectResponse, JSONResponse
@@ -24,12 +25,14 @@ from app.funcs.utils import is_root_user, log, error_log, check_cookies,\
     parse_url
 from app.routers import source, file
 from app.routers import heroku, folder, admin
+from app.database import crud, models
+from app.database.database import engine, SessionLocal
 from app.dependencies import get_db, get_settings
 
 
 settings = get_settings()
 swagger_url = token_hex(randint(10, 15))
-app = FastAPI(docs_url=f"/{swagger_url}", redoc_url=None)
+app = FastAPI(docs_url=f"/{swagger_url}", redoc_url=None, dependencies=[Depends(get_db)])
 app.include_router(admin.router)
 app.include_router(heroku.router)
 app.include_router(source.router)
@@ -56,9 +59,25 @@ def authjwt_exception_handler(request: Request, exc: AuthJWTException):
                         content={"detail": exc.message})
 
 
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = Response("Internal server error", status_code=500)
+    try:
+        request.state.db = SessionLocal()
+        response = await call_next(request)
+    finally:
+        request.state.db.close()
+    return response
+
+
 @app.get("/swagger")
 async def swagger(request: Request):
     return {"res": swagger_url}
+
+
+@app.get("/test")
+async def some_test(db: Session = Depends(get_db)):
+    return crud.get_controller(db)
 
 
 @app.get("/")
@@ -153,11 +172,14 @@ async def get_files(request: Request, auth_psw: Optional[str] = Cookie(None), do
 
 @app.on_event("startup")
 def startup():
+    models.DataBase.metadata.create_all(bind=engine)
+    with Session(engine) as db:
+        crud.set_default_parameters(db)
     try:
         parse_url()
-        with open("../log.txt", "w") as log_file:
+        with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
-        with open("../error_log.txt", "w") as log_file:
+        with open("error_log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         heroku.project_controller()
         environ["start_time"] = str(datetime.utcnow())[:-7]
@@ -167,7 +189,7 @@ def startup():
             mkdir("../temp")
             from git.repo.base import Repo
             Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files",
-                            "../temp")
+                            "temp")
             print("Cloning success!")
         except FileExistsError:
             pass

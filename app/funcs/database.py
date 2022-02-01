@@ -19,29 +19,6 @@ def db_connect():
         return None
 
 
-def create_tables():
-    connect, cursor = db_connect()
-    try:
-        cursor.execute("CREATE TABLE IF NOT EXISTS users(id SERIAL NOT NULL UNIQUE PRIMARY KEY,"
-                       "login TEXT NOT NULL UNIQUE,"
-                       "password TEXT NOT NULL,"
-                       "useragent TEXT NOT NULL,"
-                       "permissions INTEGER NOT NULL)")
-        cursor.execute("CREATE TABLE IF NOT EXISTS controller(enable INTEGER)")
-        connect.commit()
-        cursor.execute("SELECT COUNT(*) FROM controller")
-        res = cursor.fetchall()[0][0]
-        if res == 0:
-            cursor.execute("INSERT INTO controller VALUES(0)")
-            connect.commit()
-    except Exception as e:
-        print(e)
-        return None
-    finally:
-        cursor.close()
-        connect.close()
-
-
 def get_controller():
     connect, cursor = db_connect()
     cursor.execute(f"SELECT * FROM controller")

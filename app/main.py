@@ -17,8 +17,7 @@ from git import Repo
 
 from app.funcs.pages import show_auth_page, show_admin_index,\
     show_not_found_page
-from app.funcs.database import create_tables, check_password, create_account,\
-    get_permissions
+from app.funcs.database import check_password, create_account, get_permissions, set_permissions
 from app.funcs.builder import handler
 from app.funcs.content_length import LimitUploadSize
 from app.funcs.utils import is_root_user, log, error_log, check_cookies,\
@@ -175,8 +174,8 @@ def startup():
     models.DataBase.metadata.create_all(bind=engine)
     with Session(engine) as db:
         crud.set_default_parameters(db)
+    parse_url()
     try:
-        parse_url()
         with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")
         with open("error_log.txt", "w") as log_file:
@@ -193,7 +192,6 @@ def startup():
             print("Cloning success!")
         except FileExistsError:
             pass
-        create_tables()
         print("Startup complete!")
     except Exception as e:
         return error_log(str(e))

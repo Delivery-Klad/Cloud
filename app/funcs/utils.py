@@ -15,20 +15,6 @@ from app.dependencies import get_db, get_settings
 settings = get_settings()
 
 
-def parse_url():
-    url = settings.DATABASE_URL
-    url = url.split("://")[1]
-    environ['db_name'] = url.split("/")[1]
-    url = url.split("/")[0]
-    temp = url.split(":")
-    environ['db_port'] = temp[2]
-    environ['db_user'] = temp[0]
-    url = temp[1]
-    temp = url.split("@")
-    environ['db_psw'] = temp[0]
-    environ['db_host'] = temp[1]
-
-
 def is_root_user(request: Request, cookie: str):
     try:
         if get_jwt_sub(request, cookie).split("://:")[0] == "5":

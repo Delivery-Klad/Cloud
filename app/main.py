@@ -19,8 +19,7 @@ from app.funcs.pages import show_auth_page, show_admin_index,\
     show_not_found_page
 from app.funcs.builder import handler
 from app.funcs.content_length import LimitUploadSize
-from app.funcs.utils import is_root_user, log, error_log, check_cookies,\
-    parse_url
+from app.funcs.utils import is_root_user, log, error_log, check_cookies
 from app.routers import source, file
 from app.routers import heroku, folder, admin
 from app.database import crud, models
@@ -174,7 +173,6 @@ def startup():
     models.DataBase.metadata.create_all(bind=engine)
     with Session(engine) as db:
         crud.set_default_parameters(db)
-    parse_url()
     try:
         with open("log.txt", "w") as log_file:
             log_file.write(f"{str(datetime.utcnow())[:-7]} - Application startup")

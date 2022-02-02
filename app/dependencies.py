@@ -1,12 +1,14 @@
 from fastapi import Request
 from functools import lru_cache
 
-from . import config
+from app.config import Settings
 
 
 @lru_cache()
 def get_settings():
-    return config.Settings()
+    settings = Settings()
+    settings.DATABASE_URL = settings.DATABASE_URL.replace("postgres://", "postgresql://")
+    return settings
 
 
 def get_db(request: Request):

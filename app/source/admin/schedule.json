@@ -11,7 +11,9 @@
   ],
   "21": [
     {"key": 9, "app": 1, "scale": 0},
+    {"key": 6, "app": 0, "scale": 0},
     {"key": 5, "app": 0, "scale": 1},
+    {"key": 5, "app": 2, "scale": 1},
     {"key": 0, "app": 0, "scale": 0},
     {"key": 1, "app": 0, "scale": 0},
     {"key": 2, "app": 0, "scale": 1},

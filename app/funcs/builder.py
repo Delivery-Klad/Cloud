@@ -5,12 +5,17 @@ from time import sleep
 from fastapi import Request
 from fastapi.responses import FileResponse, RedirectResponse, HTMLResponse
 
-from funcs.pages import show_not_found_page, show_error_page
-from funcs.utils import is_root_user, constructor, get_menu, listdir, get_jwt_sub
+from app.funcs.pages import show_not_found_page, show_error_page
+from app.funcs.utils import is_root_user, constructor, get_menu, listdir,\
+    get_jwt_sub
+from app.dependencies import get_settings
 
 
-def handler(path: str, filename: str, request: Request, auth_psw, download, redirects: int = None,
-            preview: bool = None):
+settings = get_settings()
+
+
+def handler(path: str, filename: str, request: Request, auth_psw, download,
+            redirects: int = None, preview: bool = None):
     try:
         files = listdir(path, request, auth_psw)
         if type(files) != str:
@@ -32,15 +37,18 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
     except NotADirectoryError:
         file_extension = filename.split(".")[len(filename.split(".")) - 1]
         if not download:
-            url = environ.get("server_url")
+            url = settings.server_url
             response_text = """<head><title>Cloud - File viewer</title>
-                                    <link href="/source/rainbow_dark.css" rel="stylesheet" 
-                                    type="text/css"></head><body><a href="/files{0}?download=true">Download</a>"""
-            if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg", "bmp", "ico"]:
-                with open("templates/img_viewer.html", "r") as page:
+                                <link href="/source/rainbow_dark.css" 
+                                rel="stylesheet" 
+                                type="text/css"></head><body><a 
+                                href="/files{0}?download=true">Download</a>"""
+            if file_extension.lower() in ["png", "jpg", "gif", "jpeg", "svg",
+                                          "bmp", "ico"]:
+                with open("app/templates/img_viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension.lower() in ["docx", "doc", "pptx", "ppt", "xls", "xlsx", "pdf"]:
-                with open("templates/viewer.html", "r") as page:
+                with open("app/templates/viewer.html", "r") as page:
                     return HTMLResponse(content=page.read().format(filename, f"{url}files{path}"), status_code=200)
             elif file_extension.lower() in ["txt", "py", "cs", "java", "php", "html", "css", "js", "json",
                                             "go", "lua", "luac", "r", "rb", "c", "coffee", "hs", "lhs", "ss", "scm",
@@ -59,7 +67,7 @@ def handler(path: str, filename: str, request: Request, auth_psw, download, redi
                         except UnicodeEncodeError:
                             return show_error_page()
                     try:
-                        with open("source/admin/languages.json", "r") as file:
+                        with open("app/source/admin/languages.json", "r") as file:
                             lang = load(file)[file_extension.lower()]
                     except KeyError:
                         lang = "json"
@@ -128,5 +136,5 @@ def builder(request: Request, index_of: str, files: str, auth_psw):
             else:
                 title += i[:10] + "..."
         title += "/"
-    with open("templates/files.html", "r") as html_content:
+    with open("app/templates/files.html", "r") as html_content:
         return HTMLResponse(content=html_content.read().format(back_button, title, icons, files, menu), status_code=200)

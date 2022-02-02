@@ -183,7 +183,7 @@ def startup():
         print("Starting startup process...")
         try:
             print("Cloning repo...")
-            mkdir("../temp")
+            mkdir("temp")
             from git.repo.base import Repo
             Repo.clone_from(f"https://{token}:x-oauth-basic@github.com/Delivery-Klad/files",
                             "temp")

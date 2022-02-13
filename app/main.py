@@ -130,7 +130,7 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
         elif path == "admin":
             if is_root_user(request, auth_psw):
                 content = ""
-                temp = await admin.admin_dashboard(request, auth_psw=auth_psw)
+                temp = await admin.admin_dashboard(request, db=db, auth_psw=auth_psw)
                 for i in temp['res']:
                     if i == "Summary":
                         content += f"""<div style="font-weight: bold; font-size: 20px;">{i}</div>"""

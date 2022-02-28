@@ -107,7 +107,8 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
                     response.set_cookie(key="auth_psw",
                                         value=authorize
                                         .create_refresh_token(f"{perm}://:"
-                                                              f"{arg2}"))
+                                                              f"{arg2}"),
+                                        secure=True)
                     return response
                 elif result is None:
                     if len(arg2) < 4 or len(arg) < 8:
@@ -121,7 +122,11 @@ async def other_page(path: str, request: Request, arg: Optional[str] = None,
                         authorize = AuthJWT()
                         response = JSONResponse({"result": True})
                         perm = crud.get_permissions(arg2, db)
-                        response.set_cookie(key="auth_psw", value=authorize.create_refresh_token(f"{perm}://:{arg2}"))
+                        response.set_cookie(key="auth_psw",
+                                            value=authorize
+                                            .create_refresh_token(f"{perm}://:"
+                                                                  f"{arg2}"),
+                                            secure=True)
                         return response
                     else:
                         return JSONResponse({"result": "Что-то пошло не так"}, status_code=403)

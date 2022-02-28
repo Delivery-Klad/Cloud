@@ -88,6 +88,15 @@ def get_app_vars(keys, key: int, app: int):
     return result
 
 
+def get_app_addon(keys, key: int, app: int):
+    result = []
+    cloud = heroku3.from_key(keys[key])
+    app = cloud.apps()[app]
+    for i in app.addons():
+        result.append({"title": "Addon: ", "body": str(i)[8:-2]})
+    return result
+
+
 def get_heroku_projects(keys):
     result = []
     for i in range(len(keys)):

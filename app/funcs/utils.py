@@ -1,5 +1,5 @@
 import re
-from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
+from os import listdir as os_listdir, path as os_path, remove, mkdir
 from datetime import datetime
 
 import heroku3
@@ -8,8 +8,8 @@ from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import HTMLResponse
 
-from app.database import crud
-from app.dependencies import get_db, get_settings
+from app.database import crud, schemas
+from app.dependencies import get_settings
 
 
 settings = get_settings()
@@ -86,6 +86,18 @@ def get_app_vars(keys, key: int, app: int):
     for i in config.keys():
         result.append({"title": f"{i}: ", "body": config[i]})
     return result
+
+
+def update_app_var(keys, data: schemas.UpdateVar):
+    try:
+        cloud = heroku3.from_key(keys[data.key])
+        app = cloud.apps()[data.app]
+        config = app.config()
+        config[data.var_name] = data.var_value
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 def get_app_addon(keys, key: int, app: int):

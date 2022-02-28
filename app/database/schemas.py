@@ -26,3 +26,10 @@ class FileData(BaseModel):
 class ReplaceFile(BaseModel):
     old_path: str
     new_path: str
+
+
+class UpdateVar(BaseModel):
+    app: int
+    key: int
+    var_name: str
+    var_value: str

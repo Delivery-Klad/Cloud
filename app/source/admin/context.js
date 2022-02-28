@@ -1,6 +1,6 @@
 function delete_file(){
     var data = {};
-    data.file_path  = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
+    data.file_path = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
     var json = JSON.stringify(data);
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/file/", true);

@@ -288,6 +288,7 @@ function heroku(){
                         logs_but.appendChild(log_img);
                         var vars_but = document.createElement("a");
                         vars_but.setAttribute("title", "Application variables");
+                        vars_but.setAttribute("href", "#openModal");
                         vars_but.setAttribute("onclick", "heroku_vars('" + app.name + "', " + app.args + ");");
                         var vars_img = document.createElement("img");
                         vars_img.setAttribute("src", "source/images/vars.svg");
@@ -311,9 +312,6 @@ function heroku(){
                         var console_div = document.createElement("div");
                         console_div.setAttribute("id", app.name + "_console");
                         li_block.appendChild(console_div);
-                        var vars_div = document.createElement("div");
-                        vars_div.setAttribute("id", app.name + "_vars");
-                        li_block.appendChild(vars_div);
                     }
                     var addon_div = document.createElement("div");
                     addon_div.setAttribute("id", app.name + "_addon");
@@ -360,35 +358,118 @@ function heroku_logs(block, key, app){
 }
 
 function heroku_vars(block, key, app){
-    var parent = document.getElementById(block + "_vars");
-    if (parent.textContent == ""){
-        show_loader(parent)
+    document.getElementById("modal-title").textContent = "Variables";
+    var parent = document.getElementById("modal-body");
+    show_loader(parent)
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            parent.textContent = "";
+            JSON.parse(xhr.responseText).res.forEach((element) => {
+                var console_line = document.createElement("div");
+                var title = document.createElement("label");
+                title.setAttribute("style", "width: 100%;");
+                title.textContent = element.title;
+                var body = document.createElement("input");
+                body.setAttribute("style", "width: 90%;");
+                body.setAttribute("id",  element.title);
+                body.value = element.body;
+                var confirm = document.createElement("a");
+                var confirm_img = document.createElement("img");
+                confirm_img.setAttribute("src", "source/images/confirm.svg");
+                confirm_img.setAttribute("width", "20");
+                confirm_img.setAttribute("height", "20");
+                confirm.appendChild(confirm_img);
+                confirm.setAttribute("onclick", "update_var('" + element.title + "'," + app + "," + key +");");
+                console_line.appendChild(title);
+                console_line.appendChild(body);
+                console_line.appendChild(confirm);
+                parent.appendChild(console_line);
+            });
+            var console_line = document.createElement("div");
+            console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+            var body = document.createElement("a");
+            body.setAttribute("id", "add_new_var");
+            body.textContent = "+";
+            body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+            console_line.appendChild(body);
+            parent.appendChild(console_line);
+        }
+        else if (xhr.readyState === 4 && xhr.status != 200){
+            var console_line = document.createElement("div");
+            console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+            var body = document.createElement("a");
+            body.setAttribute("id", "add_new_var");
+            body.textContent = "+";
+            body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+            console_line.appendChild(body);
+            parent.appendChild(console_line);
+        }
+    }
+    xhr.send();
+}
+
+function add_var(app, key){
+    $("#add_new_var").remove()
+    var parent = document.getElementById("modal-body");
+    var div_block = document.createElement("div");
+    var var_name = document.createElement("input");
+    var_name.setAttribute("id", "new_var");
+    var var_value = document.createElement("input");
+    var_value.setAttribute("id", "new_var_value");
+    var confirm = document.createElement("a");
+    var confirm_img = document.createElement("img");
+    confirm_img.setAttribute("src", "source/images/confirm.svg");
+    confirm_img.setAttribute("width", "20");
+    confirm_img.setAttribute("height", "20");
+    confirm.appendChild(confirm_img);
+    confirm.setAttribute("onclick", "update_var('new_var');");
+    div_block.appendChild(var_name);
+    div_block.appendChild(var_value);
+    div_block.appendChild(confirm);
+    parent.appendChild(div_block);
+    var console_line = document.createElement("div");
+    console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+    var body = document.createElement("a");
+    body.setAttribute("id", "add_new_var");
+    body.textContent = "+";
+    body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+    console_line.appendChild(body);
+    parent.appendChild(console_line);
+}
+
+function update_var(title, app, key){
+    var data = {};
+    if (title != "new_var") {
+        var input_block = document.getElementById(title);
+        data.app = app;
+        data.key = key;
+        data.var_name = title;
+        data.var_value = input_block.value;
+        var json = JSON.stringify(data);
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
+        xhr.open('PATCH', "/heroku/var/");
         xhr.onreadystatechange = function(){
             if (xhr.readyState === 4 && xhr.status === 200){
-                parent.className = "console";
-                parent.textContent = "";
-                JSON.parse(xhr.responseText).res.forEach((element) => {
-                    var console_line = document.createElement("div");
-                    var title_div = document.createElement("div");
-                    title_div.className = "console_title";
-                    title_div.textContent = element.title;
-                    var body_div = document.createElement("div");
-                    body_div.className = "console_body";
-                    body_div.textContent = element.body;
-                    console_line.appendChild(title_div);
-                    console_line.appendChild(body_div);
-                    parent.appendChild(console_line);
-                });
+                create_message(JSON.parse(xhr.responseText).res, "info");
             }
-            else if (xhr.readyState === 4 && xhr.status != 200){
-                parent.className = ""; parent.textContent = "";
+            else if (xhr.readyState === 4 && xhr.status === 404) {
+                check.checked = false;
+                create_message(JSON.parse(xhr.responseText).res, "error");
             }
         }
-        xhr.send();
+        xhr.send(json);
     }
-    else { parent.className = ""; parent.textContent = ""; }
+    else{
+        var name_block = document.getElementById("new_var");
+        var value_block = document.getElementById("new_var_value");
+        # todo
+    }
+}
+
+function delete_var(title){
+
 }
 
 function heroku_addon(block, key, app){

@@ -8,9 +8,9 @@ from fastapi import APIRouter, Request, Cookie, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional
 
-from app.database import crud
-from app.funcs.utils import error_log, log, check_cookies, is_root_user,\
-    get_heroku_projects, get_app_logs, get_app_vars, get_app_addon
+from app.database import crud, schemas
+from app.funcs.utils import error_log, log, check_cookies, is_root_user, \
+    get_heroku_projects, get_app_logs, get_app_vars, get_app_addon, update_app_var
 from app.dependencies import get_db, get_settings
 
 settings = get_settings()
@@ -107,6 +107,26 @@ async def get_project_addon(key: int, app: int, request: Request,
             result = get_app_addon(keys, key, app)
             if len(result) > 0:
                 return {"res": result}
+            else:
+                return JSONResponse({"res": "Not found"}, status_code=404)
+        else:
+            return JSONResponse({"res": "Access denied"}, status_code=403)
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.patch("/var")
+async def update_var(data: schemas.UpdateVar, request: Request,
+                     db: Session = Depends(get_db),
+                     auth_psw: Optional[str] = Cookie(None)):
+    log(f"PATCH Request to '/heroku/var' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
+    data.var_name = data.var_name[:-2]
+    try:
+        if is_root_user(request, auth_psw):
+            result = update_app_var(keys, data)
+            if result is True:
+                return {"res": "Variable successfully set"}
             else:
                 return JSONResponse({"res": "Not found"}, status_code=404)
         else:

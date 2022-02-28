@@ -9,7 +9,8 @@ from fastapi.responses import JSONResponse
 from typing import Optional
 
 from app.database import crud
-from app.funcs.utils import error_log, log, check_cookies, is_root_user, get_heroku_projects, get_app_logs, get_app_vars
+from app.funcs.utils import error_log, log, check_cookies, is_root_user,\
+    get_heroku_projects, get_app_logs, get_app_vars, get_app_addon
 from app.dependencies import get_db, get_settings
 
 settings = get_settings()
@@ -65,9 +66,9 @@ async def get_project_logs(key: int, app: int, request: Request,
         f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            logs = get_app_logs(keys, key, app)
-            if len(logs) > 0 and logs != ['']:
-                return {"res": logs}
+            result = get_app_logs(keys, key, app)
+            if len(result) > 0 and result != ['']:
+                return {"res": result}
             else:
                 return JSONResponse({"res": "Not found"}, status_code=404)
         else:
@@ -84,9 +85,28 @@ async def get_project_vars(key: int, app: int, request: Request,
         f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            var = get_app_vars(keys, key, app)
-            if len(var) > 0:
-                return {"res": var}
+            result = get_app_vars(keys, key, app)
+            if len(result) > 0:
+                return {"res": result}
+            else:
+                return JSONResponse({"res": "Not found"}, status_code=404)
+        else:
+            return JSONResponse({"res": "Access denied"}, status_code=403)
+    except Exception as e:
+        return error_log(str(e))
+
+
+@router.get("/addon")
+async def get_project_addon(key: int, app: int, request: Request,
+                            db: Session = Depends(get_db),
+                            auth_psw: Optional[str] = Cookie(None)):
+    log(f"GET Request to '/heroku/addon' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
+    try:
+        if is_root_user(request, auth_psw):
+            result = get_app_addon(keys, key, app)
+            if len(result) > 0:
+                return {"res": result}
             else:
                 return JSONResponse({"res": "Not found"}, status_code=404)
         else:

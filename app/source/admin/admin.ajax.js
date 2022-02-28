@@ -297,6 +297,17 @@ function heroku(){
                         li_block.appendChild(label);
                         li_block.appendChild(logs_but);
                         li_block.appendChild(vars_but);
+                    }
+                    var addon_but = document.createElement("a");
+                    addon_but.setAttribute("title", "Application addons");
+                    addon_but.setAttribute("onclick", "heroku_addon('" + app.name + "', " + app.args + ");");
+                    var addon_img = document.createElement("img");
+                    addon_img.setAttribute("src", "source/images/addon.svg");
+                    addon_img.setAttribute("width", "20");
+                    addon_img.setAttribute("height", "20");
+                    addon_but.appendChild(addon_img);
+                    li_block.appendChild(addon_but);
+                    if (app.type != "database") {
                         var console_div = document.createElement("div");
                         console_div.setAttribute("id", app.name + "_console");
                         li_block.appendChild(console_div);
@@ -304,6 +315,9 @@ function heroku(){
                         vars_div.setAttribute("id", app.name + "_vars");
                         li_block.appendChild(vars_div);
                     }
+                    var addon_div = document.createElement("div");
+                    addon_div.setAttribute("id", app.name + "_addon");
+                    li_block.appendChild(addon_div);
                     div_block.appendChild(li_block);
                 });
                 place_holder.appendChild(div_block);
@@ -351,6 +365,38 @@ function heroku_vars(block, key, app){
         show_loader(parent)
         var xhr = new XMLHttpRequest();
         xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
+        xhr.onreadystatechange = function(){
+            if (xhr.readyState === 4 && xhr.status === 200){
+                parent.className = "console";
+                parent.textContent = "";
+                JSON.parse(xhr.responseText).res.forEach((element) => {
+                    var console_line = document.createElement("div");
+                    var title_div = document.createElement("div");
+                    title_div.className = "console_title";
+                    title_div.textContent = element.title;
+                    var body_div = document.createElement("div");
+                    body_div.className = "console_body";
+                    body_div.textContent = element.body;
+                    console_line.appendChild(title_div);
+                    console_line.appendChild(body_div);
+                    parent.appendChild(console_line);
+                });
+            }
+            else if (xhr.readyState === 4 && xhr.status != 200){
+                parent.className = ""; parent.textContent = "";
+            }
+        }
+        xhr.send();
+    }
+    else { parent.className = ""; parent.textContent = ""; }
+}
+
+function heroku_addon(block, key, app){
+    var parent = document.getElementById(block + "_addon");
+    if (parent.textContent == ""){
+        show_loader(parent)
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', '/heroku/addon?key=' + key + "&app=" + app, true);
         xhr.onreadystatechange = function(){
             if (xhr.readyState === 4 && xhr.status === 200){
                 parent.className = "console";

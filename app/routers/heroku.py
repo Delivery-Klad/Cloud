@@ -10,7 +10,7 @@ from typing import Optional
 
 from app.database import crud, schemas
 from app.funcs.utils import error_log, log, check_cookies, is_root_user, \
-    get_heroku_projects, get_app_logs, get_app_vars, get_app_addon, update_app_var
+    get_heroku_projects, get_app_logs, get_app_vars, get_app_addon, update_app_var, delete_app_var
 from app.dependencies import get_db, get_settings
 
 settings = get_settings()
@@ -121,7 +121,8 @@ async def update_var(data: schemas.UpdateVar, request: Request,
                      auth_psw: Optional[str] = Cookie(None)):
     log(f"PATCH Request to '/heroku/var' from '{request.client.host}' with "
         f"cookies '{check_cookies(request, auth_psw, db)}'")
-    data.var_name = data.var_name[:-2]
+    if data.var_name[-2:] == ": ":
+        data.var_name = data.var_name[:-2]
     try:
         if is_root_user(request, auth_psw):
             result = update_app_var(keys, data)
@@ -135,8 +136,28 @@ async def update_var(data: schemas.UpdateVar, request: Request,
         return error_log(str(e))
 
 
+@router.delete("/var")
+async def delete_var(data: schemas.DeleteVar, request: Request,
+                     db: Session = Depends(get_db),
+                     auth_psw: Optional[str] = Cookie(None)):
+    log(f"DELETE Request to '/heroku/var' from '{request.client.host}' with "
+        f"cookies '{check_cookies(request, auth_psw, db)}'")
+    data.title = data.title[:-2]
+    try:
+        if is_root_user(request, auth_psw):
+            result = delete_app_var(keys, data)
+            if result is True:
+                return {"res": "Variable successfully delete"}
+            else:
+                return JSONResponse({"res": "Not found"}, status_code=404)
+        else:
+            return JSONResponse({"res": "Access denied"}, status_code=403)
+    except Exception as e:
+        return error_log(str(e))
+
+
 @router.patch("/")
-async def enable_project(enable: bool, key: int, app: int,
+async def enable_project(data: schemas.ProjectController,
                          request: Request,
                          auth_psw: Optional[str] = Cookie(None),
                          db: Session = Depends(get_db)):
@@ -144,18 +165,15 @@ async def enable_project(enable: bool, key: int, app: int,
         f"cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            cloud = heroku3.from_key(keys[key])
-            app = cloud.apps()[app]
+            cloud = heroku3.from_key(keys[data.key])
+            app = cloud.apps()[data.app]
             if "web" in app.process_formation() or "worker" \
                     in app.process_formation():
                 if "web" in app.process_formation():
                     dyn_type = "web"
                 elif "worker" in app.process_formation():
                     dyn_type = "worker"
-                if enable:
-                    scale = 1
-                else:
-                    scale = 0
+                scale = 1 if data.enable else 0
                 app.process_formation()[dyn_type].scale(scale)
                 return JSONResponse({"res": "Project successfully scaled!"},
                                     status_code=200)

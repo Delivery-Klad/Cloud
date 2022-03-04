@@ -1,7 +1,6 @@
 function delete_file(){
     var data = {};
     data.file_path = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
-    var json = JSON.stringify(data);
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/file/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
@@ -11,7 +10,7 @@ function delete_file(){
             document.getElementById(document.getElementById("file_name").value).remove();
         } else { console.log(data); }
     }
-    xhr.send(json);
+    xhr.send(JSON.stringify(data));
 }
 
 function rename_file(){
@@ -19,7 +18,6 @@ function rename_file(){
     data.file_path  = document.getElementById("file_path").value;
     data.file_name = document.getElementById("file_name").value;
     data.new_name = document.getElementById("new_name").value;
-    var json = JSON.stringify(data);
     console.log(data);
     var xhr = new XMLHttpRequest();
     xhr.open("PATCH", "/file/", true);
@@ -39,7 +37,7 @@ function rename_file(){
             li_block.appendChild(li_href);
         } else { console.log(data); }
     }
-    xhr.send(json);
+    xhr.send(JSON.stringify(data));
 }
 
 function replace_path(){
@@ -50,7 +48,6 @@ function delete_folder(){
     var data = {};
     var local_path = document.getElementById("file_path").value;
     data.file_path  = local_path + "/" + document.getElementById("file_name").value;
-    var json = JSON.stringify(data);
     var xhr = new XMLHttpRequest();
     xhr.open("DELETE", "/folder/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
@@ -60,7 +57,7 @@ function delete_folder(){
             document.getElementById(document.getElementById("file_name").value).remove();
         } else { console.log(data); }
     }
-    xhr.send(json);
+    xhr.send(JSON.stringify(data));
 }
 
 function rename_folder(){
@@ -68,8 +65,6 @@ function rename_folder(){
     data.path  = document.getElementById("file_path").value + "/" + document.getElementById("file_name").value;
     data.arg = document.getElementById("new_name").value;
     data.access = document.querySelector('input[name="access"]:checked').value;
-    var json = JSON.stringify(data);
-    console.log(data);
     var xhr = new XMLHttpRequest();
     xhr.open("PATCH", "/folder/", true);
     xhr.setRequestHeader('Content-type','application/json; charset=utf-8');
@@ -88,7 +83,7 @@ function rename_folder(){
             li_block.appendChild(li_href);
         } else { console.log(data); }
     }
-    xhr.send(json);
+    xhr.send(JSON.stringify(data));
 }
 
 function create_new_folder(){

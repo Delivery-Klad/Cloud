@@ -33,3 +33,20 @@ class UpdateVar(BaseModel):
     key: int
     var_name: str
     var_value: str
+
+
+class DeleteVar(BaseModel):
+    app: int
+    key: int
+    title: str
+
+
+class ProjectController(BaseModel):
+    enable: bool
+    key: int
+    app: int
+
+
+class UserPermissions(BaseModel):
+    up: bool
+    user: int

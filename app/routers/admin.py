@@ -1,5 +1,6 @@
 from os import environ
 from shutil import make_archive
+from datetime import datetime
 
 from sqlalchemy.orm import Session
 from dropbox import Dropbox
@@ -8,7 +9,7 @@ from fastapi import APIRouter, Cookie, Response, Request, Depends
 from git import Repo
 from typing import Optional
 
-from app.database import crud
+from app.database import crud, schemas
 from app.funcs.utils import is_root_user, log, error_log, check_cookies, \
     clear_log
 from app.dependencies import get_db, get_settings
@@ -59,9 +60,8 @@ async def admin_logs(request: Request, db: Session = Depends(get_db),
         f"with cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            with open("log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            with open("log.txt", "r") as file:
+                return {"res": file.read().split("\n")}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -72,14 +72,10 @@ async def admin_logs(request: Request, db: Session = Depends(get_db),
 async def admin_clear_logs(request: Request,
                            db: Session = Depends(get_db),
                            auth_psw: Optional[str] = Cookie(None)):
-    log(f"DELETE Request to '/admin/clear_logs' from '{request.client.host}' "
-        f"with cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
             clear_log("log.txt")
-            with open("log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            return {"res": [f"Log cleared {str(datetime.utcnow())[:-7]}"]}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -94,9 +90,8 @@ async def admin_errors(request: Request,
         f"with cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            with open("error_log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            with open("error_log.txt", "r") as file:
+                return {"res": file.read().split("\n")}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -107,14 +102,10 @@ async def admin_errors(request: Request,
 async def admin_clear_errors(request: Request,
                              db: Session = Depends(get_db),
                              auth_psw: Optional[str] = Cookie(None)):
-    log(f"DELETE Request to '/admin/clear_errors' from '{request.client.host}'"
-        f" with cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
             clear_log("error_log.txt")
-            with open("error_log.txt", "r") as log_file:
-                result = log_file.read()
-            return {"res": result.split("\n")}
+            return {"res": [f"Log cleared {str(datetime.utcnow())[:-7]}"]}
         else:
             return {"res": "Failed"}
     except Exception as e:
@@ -148,22 +139,22 @@ async def admin_users(request: Request,
         if is_root_user(request, auth_psw):
             for i in crud.get_users(db):
                 result.append([i.id, i.login, "Password hash", i.useragent, i.permissions])
+            return {"res": result}
         else:
             return {"res": "Failed"}
     except Exception as e:
         return error_log(str(e))
-    return {"res": result}
 
 
 @router.patch("/permissions")
-async def admin_permissions(request: Request, up: bool, user: int,
+async def admin_permissions(request: Request, data: schemas.UserPermissions,
                             db: Session = Depends(get_db),
                             auth_psw: Optional[str] = Cookie(None)):
     log(f"PATCH Request to '/admin/users' from '{request.client.host}' "
         f"with cookies '{check_cookies(request, auth_psw, db)}'")
     try:
         if is_root_user(request, auth_psw):
-            return crud.set_permissions(user, up, db)
+            return crud.set_permissions(data.user, data.up, db)
         else:
             return "fck u"
     except Exception as e:
@@ -171,7 +162,7 @@ async def admin_permissions(request: Request, up: bool, user: int,
 
 
 @router.post("/")
-async def admin_push_files(request: Request,db: Session = Depends(get_db),
+async def admin_push_files(request: Request, db: Session = Depends(get_db),
                            auth_psw: Optional[str] = Cookie(None)):
     log(f"POST Request to '/admin/push_files' from '{request.client.host}' "
         f"with cookies '{check_cookies(request, auth_psw, db)}'")
@@ -203,9 +194,8 @@ async def admin_push_files(request: Request,db: Session = Depends(get_db),
             import random
             with open("backup_archive.zip", "rb") as archive:
                 print("Upload archive!")
-                dbx.files_upload(archive.read(), f"/backu"
-                                                 f"p{random.randint(1, 1000)}"
-                                                 f".zip")
+                dbx.files_upload(archive.read(),
+                                 f"/backup{random.randint(1, 1000)}.zip")
             print("Archive uploaded!")
         return Response(content="Push files complete!", status_code=200)
     else:

@@ -1,5 +1,5 @@
 import re
-from os import listdir as os_listdir, path as os_path, remove, environ, mkdir
+from os import listdir as os_listdir, path as os_path, remove, mkdir
 from datetime import datetime
 
 import heroku3
@@ -8,8 +8,8 @@ from fastapi import Request
 from fastapi_jwt_auth import AuthJWT
 from fastapi.responses import HTMLResponse
 
-from app.database import crud
-from app.dependencies import get_db, get_settings
+from app.database import crud, schemas
+from app.dependencies import get_settings
 
 
 settings = get_settings()
@@ -86,6 +86,31 @@ def get_app_vars(keys, key: int, app: int):
     for i in config.keys():
         result.append({"title": f"{i}: ", "body": config[i]})
     return result
+
+
+def update_app_var(keys, data: schemas.UpdateVar):
+    try:
+        cloud = heroku3.from_key(keys[data.key])
+        app = cloud.apps()[data.app]
+        config = app.config()
+        config[data.var_name] = data.var_value
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
+def delete_app_var(keys, data: schemas.DeleteVar):
+    try:
+        cloud = heroku3.from_key(keys[data.key])
+        app = cloud.apps()[data.app]
+        config = app.config()
+        del config[data.title]
+        config[data.title] = None
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
 def get_app_addon(keys, key: int, app: int):
@@ -245,41 +270,11 @@ def get_menu(index_of, is_root):
                       <input type="hidden" id="file_path" name="path" value="/{index_of.replace("root", "files")}">
                       <input type="hidden" id="file_name" name="del_name" value="empty">"""
     if is_root:
-        with open("app/source/admin/context.js", "r") as data:
-            admin_script = data.read()
-        menu += f"""<div><input id="new_name" name="new_name" size="27"></div>
-                <div><input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2"></div>
-                <div><input onclick="replace_path();" value="Replace" id="replace_btn" class="button button2"></div>
-                <div><input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2"></div>
-                <div id="access_holder"></div></form>
-                </ul>
-                <ul class="hide" id=scnd_menu style="top: 22px; left:179px;"><div>
-                <div><input id="folder_name" name="folder_name" size="27"></div>
-                <div><input type="hidden" id="folder_path" value="/{index_of.replace("root", "files")}"></div>
-                <div><input onclick="create_new_folder();" value="Create" class="button button2"></div>
-                <div id="access_holder">
-                <div><input id="radio-1" type="radio" name="folder_access" 
-                value="root"><label for="radio-1">Root</label></div><div><input id="radio-2" type="radio" 
-                name="folder_access" value="auth"><label for="radio-2">Authorized
-                </label></div><div><input id="radio-3" type="radio" name="folder_access" value="all" checked><label 
-                for="radio-3">All users</label></div><div><input id="radio-4" type="radio" name="folder_access" 
-                value="privilege"><label for="radio-4">Privileged</label></div></div>
-                <form id="data" enctype="multipart/form-data" 
-                method="post">
-                    <div class="upload">
-                        <label class="label">
-                          <input id="upload_path" type="hidden" value="{index_of.replace("root", "files")}/">
-                          <input type="file" name="data">
-                        </label>
-                    </div>
-                    <input class="button button2" type="submit" value="Upload">
-                </div></form></ul><script type="text/javascript">{admin_script}</script>"""
+        with open("app/templates/menu.html", "r") as data:
+            menu += data.read().format(index_of.replace("root", "files"))
     else:
-        with open("app/source/context.js", "r") as data:
-            script = data.read()
-        menu += f"""<input type="hidden" id="new_name" 
-                name="new_name" size="27"></form></ul><script 
-                type="text/javascript">{script}</script>"""
+        menu += """<input type="hidden" id="new_name" name="new_name" size="27"></form></ul>
+                <script src="source/context.js"></script>"""
     return menu
 
 

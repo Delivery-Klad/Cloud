@@ -1,4 +1,3 @@
-from os import environ
 from json import load
 from time import sleep
 
@@ -9,7 +8,6 @@ from app.funcs.pages import show_not_found_page, show_error_page
 from app.funcs.utils import is_root_user, constructor, get_menu, listdir,\
     get_jwt_sub
 from app.dependencies import get_settings
-
 
 settings = get_settings()
 

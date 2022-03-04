@@ -1,0 +1,56 @@
+        <div>
+            <input id="new_name" name="new_name" size="27">
+        </div>
+        <div>
+            <input onclick="rename_file();" value="Rename" id="rename_btn" class="button button2">
+        </div>
+        <div>
+            <input onclick="replace_path();" value="Replace" id="replace_btn" class="button button2">
+        </div>
+        <div>
+            <input onclick="delete_file();" value="Delete" id="delete_btn" class="button button2">
+        </div>
+        <div id="access_holder"></div>
+    </form>
+</ul>
+<ul class="hide" id=scnd_menu style="top: 22px; left:179px;">
+    <div>
+        <div>
+            <input id="folder_name" name="folder_name" size="27">
+        </div>
+        <div>
+            <input type="hidden" id="folder_path" value="/{0}">
+        </div>
+        <div>
+            <input onclick="create_new_folder();" value="Create" class="button button2">
+        </div>
+        <div id="access_holder">
+            <div>
+                <input id="radio-1" type="radio" name="folder_access" value="root">
+                <label for="radio-1">Root</label>
+            </div>
+            <div>
+                <input id="radio-2" type="radio" name="folder_access" value="auth">
+                <label for="radio-2">Authorized</label>
+            </div>
+            <div>
+                <input id="radio-3" type="radio" name="folder_access" value="all" checked>
+                <label for="radio-3">All users</label>
+            </div>
+            <div>
+                <input id="radio-4" type="radio" name="folder_access" value="privilege">
+                <label for="radio-4">Privileged</label>
+            </div>
+        </div>
+        <form id="data" enctype="multipart/form-data" method="post">
+            <div class="upload">
+                <label class="label">
+                    <input id="upload_path" type="hidden" value="{0}/">
+                    <input type="file" name="data">
+                </label>
+            </div>
+            <input class="button button2" type="submit" value="Upload">
+        </form>
+    </div>
+</ul>
+<script src="source/admin/context.js"></script>

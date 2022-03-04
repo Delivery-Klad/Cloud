@@ -288,6 +288,7 @@ function heroku(){
                         logs_but.appendChild(log_img);
                         var vars_but = document.createElement("a");
                         vars_but.setAttribute("title", "Application variables");
+                        vars_but.setAttribute("href", "#openModal");
                         vars_but.setAttribute("onclick", "heroku_vars('" + app.name + "', " + app.args + ");");
                         var vars_img = document.createElement("img");
                         vars_img.setAttribute("src", "source/images/vars.svg");
@@ -311,9 +312,6 @@ function heroku(){
                         var console_div = document.createElement("div");
                         console_div.setAttribute("id", app.name + "_console");
                         li_block.appendChild(console_div);
-                        var vars_div = document.createElement("div");
-                        vars_div.setAttribute("id", app.name + "_vars");
-                        li_block.appendChild(vars_div);
                     }
                     var addon_div = document.createElement("div");
                     addon_div.setAttribute("id", app.name + "_addon");
@@ -360,35 +358,189 @@ function heroku_logs(block, key, app){
 }
 
 function heroku_vars(block, key, app){
-    var parent = document.getElementById(block + "_vars");
-    if (parent.textContent == ""){
-        show_loader(parent)
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
-        xhr.onreadystatechange = function(){
-            if (xhr.readyState === 4 && xhr.status === 200){
-                parent.className = "console";
-                parent.textContent = "";
-                JSON.parse(xhr.responseText).res.forEach((element) => {
-                    var console_line = document.createElement("div");
-                    var title_div = document.createElement("div");
-                    title_div.className = "console_title";
-                    title_div.textContent = element.title;
-                    var body_div = document.createElement("div");
-                    body_div.className = "console_body";
-                    body_div.textContent = element.body;
-                    console_line.appendChild(title_div);
-                    console_line.appendChild(body_div);
-                    parent.appendChild(console_line);
-                });
-            }
-            else if (xhr.readyState === 4 && xhr.status != 200){
-                parent.className = ""; parent.textContent = "";
+    document.getElementById("modal-title").textContent = "Variables";
+    var parent = document.getElementById("modal-body");
+    show_loader(parent)
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/heroku/vars?key=' + key + "&app=" + app, true);
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            parent.textContent = "";
+            JSON.parse(xhr.responseText).res.forEach((element) => {
+                var console_line = document.createElement("div");
+                console_line.setAttribute("id", element.title + "full_line");
+                var title = document.createElement("label");
+                title.setAttribute("style", "width: 100%;");
+                title.textContent = element.title;
+                var body = document.createElement("input");
+                body.setAttribute("style", "width: 90%;");
+                body.setAttribute("id",  element.title);
+                body.value = element.body;
+                var confirm = document.createElement("a");
+                var confirm_img = document.createElement("img");
+                confirm_img.setAttribute("src", "source/images/confirm.svg");
+                confirm_img.setAttribute("width", "20");
+                confirm_img.setAttribute("height", "20");
+                confirm.appendChild(confirm_img);
+                confirm.setAttribute("onclick", "update_var('" + element.title + "'," + app + "," + key +");");
+                var remove = document.createElement("a");
+                var remove_img = document.createElement("img");
+                remove_img.setAttribute("src", "source/images/trash.svg");
+                remove_img.setAttribute("width", "20");
+                remove_img.setAttribute("height", "20");
+                remove.appendChild(remove_img);
+                remove.setAttribute("onclick", "delete_var('" + element.title + "'," + app + "," + key +");");
+                console_line.appendChild(title);
+                console_line.appendChild(body);
+                console_line.appendChild(confirm);
+                console_line.appendChild(remove);
+                parent.appendChild(console_line);
+            });
+            var console_line = document.createElement("div");
+            console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+            var body = document.createElement("a");
+            body.setAttribute("id", "add_new_var");
+            body.textContent = "+";
+            body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+            console_line.appendChild(body);
+            parent.appendChild(console_line);
+        }
+        else if (xhr.readyState === 4 && xhr.status != 200){
+            var console_line = document.createElement("div");
+            console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+            var body = document.createElement("a");
+            body.setAttribute("id", "add_new_var");
+            body.textContent = "+";
+            body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+            console_line.appendChild(body);
+            parent.appendChild(console_line);
+        }
+    }
+    xhr.send();
+}
+
+function add_var(app, key){
+    $("#add_new_var").remove()
+    var parent = document.getElementById("modal-body");
+    var div_block = document.createElement("div");
+    div_block.setAttribute("id", "new_var_block");
+    var var_name = document.createElement("input");
+    var_name.setAttribute("id", "new_var");
+    var var_value = document.createElement("input");
+    var_value.setAttribute("id", "new_var_value");
+    var confirm = document.createElement("a");
+    var confirm_img = document.createElement("img");
+    confirm_img.setAttribute("src", "source/images/confirm.svg");
+    confirm_img.setAttribute("width", "20");
+    confirm_img.setAttribute("height", "20");
+    confirm.appendChild(confirm_img);
+    confirm.setAttribute("onclick", "update_var('new_var'," + app + "," + key +");");
+    div_block.appendChild(var_name);
+    div_block.appendChild(var_value);
+    div_block.appendChild(confirm);
+    parent.appendChild(div_block);
+    var console_line = document.createElement("div");
+    console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+    var body = document.createElement("a");
+    body.setAttribute("id", "add_new_var");
+    body.textContent = "+";
+    body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+    console_line.appendChild(body);
+    parent.appendChild(console_line);
+}
+
+function update_var(title, app, key){
+    var data = {};
+    data.app = app;
+    data.key = key;
+    if (title != "new_var") {
+        var input_block = document.getElementById(title);
+        data.var_name = title;
+        data.var_value = input_block.value;
+    }
+    else{
+        var name_block = document.getElementById("new_var");
+        var value_block = document.getElementById("new_var_value");
+        data.var_name = name_block.value;
+        data.var_value = value_block.value;
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open('PATCH', "/heroku/var/");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            create_message(JSON.parse(xhr.responseText).res, "info");
+            if (title != "new_var") {
+                var block = document.getElementById("new_var_block");
+                block.remove();
+                $("#add_new_var").remove()
+                var parent = document.getElementById("modal-body");
+                var console_line = document.createElement("div");
+                console_line.setAttribute("id", data.var_name + "full_line");
+                var title = document.createElement("label");
+                title.setAttribute("style", "width: 100%;");
+                title.textContent = data.var_name;
+                var body = document.createElement("input");
+                body.setAttribute("style", "width: 90%;");
+                body.setAttribute("id",  data.var_name);
+                body.value = data.var_value;
+                var confirm = document.createElement("a");
+                var confirm_img = document.createElement("img");
+                confirm_img.setAttribute("src", "source/images/confirm.svg");
+                confirm_img.setAttribute("width", "20");
+                confirm_img.setAttribute("height", "20");
+                confirm.appendChild(confirm_img);
+                confirm.setAttribute("onclick", "update_var('" + data.var_name + "'," + app + "," + key +");");
+                var remove = document.createElement("a");
+                var remove_img = document.createElement("img");
+                remove_img.setAttribute("src", "source/images/trash.svg");
+                remove_img.setAttribute("width", "20");
+                remove_img.setAttribute("height", "20");
+                remove.appendChild(remove_img);
+                remove.setAttribute("onclick", "delete_var('" + data.var_name + "'," + app + "," + key +");");
+                console_line.appendChild(title);
+                console_line.appendChild(body);
+                console_line.appendChild(confirm);
+                console_line.appendChild(remove);
+                parent.appendChild(console_line);
+                var console_line = document.createElement("div");
+                console_line.setAttribute("style", "text-align: center; font-size: 25px;");
+                var body = document.createElement("a");
+                body.setAttribute("id", "add_new_var");
+                body.textContent = "+";
+                body.setAttribute("onclick", "add_var(" + app + "," + key +");")
+                console_line.appendChild(body);
+                parent.appendChild(console_line);
             }
         }
-        xhr.send();
+        else if (xhr.readyState === 4 && xhr.status === 404) {
+            check.checked = false;
+            create_message(JSON.parse(xhr.responseText).res, "error");
+        }
     }
-    else { parent.className = ""; parent.textContent = ""; }
+    xhr.send(JSON.stringify(data));
+}
+
+function delete_var(title, app, key){
+    var block = document.getElementById(title + "full_line");
+    block.remove();
+    var data = {};
+    data.app = app;
+    data.key = key;
+    data.title = title;
+    var xhr = new XMLHttpRequest();
+    xhr.open('DELETE', "/heroku/var/");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState === 4 && xhr.status === 200){
+            create_message(JSON.parse(xhr.responseText).res, "info");
+        }
+        else if (xhr.readyState === 4 && xhr.status === 404) {
+            check.checked = false;
+            create_message(JSON.parse(xhr.responseText).res, "error");
+        }
+    }
+    xhr.send(JSON.stringify(data));
 }
 
 function heroku_addon(block, key, app){
@@ -424,8 +576,13 @@ function heroku_addon(block, key, app){
 }
 
 function enable_project(check, key, app){
+    var data = {}
     var xhr = new XMLHttpRequest();
-    xhr.open('PATCH', "heroku/?enable=" + check.checked + "&key=" + key + "&app=" + app);
+    data.enable = check.checked;
+    data.key = key;
+    data.app = app;
+    xhr.open('PATCH', "/heroku/");
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
             create_message(JSON.parse(xhr.responseText).res, "info");
@@ -435,7 +592,7 @@ function enable_project(check, key, app){
             create_message(JSON.parse(xhr.responseText).res, "error");
         }
     }
-    xhr.send();
+    xhr.send(JSON.stringify(data));
 }
 
 function hide_sidebar(){
@@ -446,12 +603,16 @@ function hide_sidebar(){
 function set_permissions(up, user){
     if (window.confirm('Are you sure?'))
     {
+        var data = {}
+        data.up = up;
+        data.user = user;
         var xhr = new XMLHttpRequest();
-        xhr.open('PATCH', "admin/permissions/?up=" + up + "&user=" + user);
+        xhr.open('PATCH', "/admin/permissions/");
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
         xhr.onreadystatechange = function(){
             if (xhr.readyState === 4 && xhr.status === 200){ create_message("Current permissions: " + xhr.responseText, "info"); }
         }
-        xhr.send();
+        xhr.send(JSON.stringify(data));
     }
 }
 
@@ -459,7 +620,7 @@ function delete_user(user){
     if (window.confirm('Are you sure?'))
     {
         var xhr = new XMLHttpRequest();
-        xhr.open('DELETE', "admin/user/" + user);
+        xhr.open('DELETE', "/admin/user/" + user);
         xhr.onreadystatechange = function(){ if (xhr.readyState === 4 && xhr.status === 200){ create_message("Successful deleted!", "info"); }}
         xhr.send();
     }
@@ -477,13 +638,13 @@ function remove_message(block){ block.remove(); }
 
 $(document).ready(function() {
     page = localStorage.getItem("current_page")
-    if (page == null){ localStorage.setItem("current_page", 1); }
+    if (page == null){ localStorage.setItem("current_page", "1"); }
     else{
         if (page === "2") { untracked(); }
         else if (page === "3") { logs(); }
         else if (page === "4") { errors(); }
         else if (page === "5") { users(); }
         else if (page === "6") { swagger(); }
-        else if (page == 7) { heroku(); }
+        else if (page === "7") { heroku(); }
     }
 });

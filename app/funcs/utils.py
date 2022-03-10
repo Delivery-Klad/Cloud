@@ -274,7 +274,7 @@ def get_menu(index_of, is_root):
             menu += data.read().format(index_of.replace("root", "files"))
     else:
         menu += """<input type="hidden" id="new_name" name="new_name" size="27"></form></ul>
-                <script src="source/context.js"></script>"""
+                <script src="/source/context.js"></script>"""
     return menu
 
 

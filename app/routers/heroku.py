@@ -28,14 +28,17 @@ def project_controller(db: Session):
             with open("app/source/admin/schedule.json", "r") as file:
                 schedule = load(file)[day]
                 for i in schedule:
-                    cloud = heroku3.from_key(keys[i["key"]])
-                    app = cloud.apps()[i["app"]]
-                    if "web" in app.process_formation():
-                        dyn_type = "web"
-                    elif "worker" in app.process_formation():
-                        dyn_type = "worker"
-                    log(f"{app.name} ({dyn_type}) - scale={i['scale']}")
-                    app.process_formation()[dyn_type].scale(i["scale"])
+                    try:
+                        cloud = heroku3.from_key(keys[i["key"]])
+                        app = cloud.apps()[i["app"]]
+                        if "web" in app.process_formation():
+                            dyn_type = "web"
+                        elif "worker" in app.process_formation():
+                            dyn_type = "worker"
+                        log(f"{app.name} ({dyn_type}) - scale={i['scale']}")
+                        app.process_formation()[dyn_type].scale(i["scale"])
+                    except Exception as e:
+                        pass
             crud.set_controller(1, db)
         if day != "1" and day != "21":
             crud.set_controller(0, db)

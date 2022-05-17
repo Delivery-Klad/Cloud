@@ -125,22 +125,25 @@ def get_app_addon(keys, key: int, app: int):
 def get_heroku_projects(keys):
     result = []
     for i in range(len(keys)):
-        cloud = heroku3.from_key(keys[i])
-        print(f"{cloud.account().email}")
-        temp = []
-        apps = cloud.apps()
-        for j in range(len(apps)):
-            enable = "ON"
-            if not apps[j].process_formation():
-                dyn_type = "database"
-            elif "web" in apps[j].process_formation():
-                dyn_type = "web"
-            elif "worker" in apps[j].process_formation():
-                dyn_type = "bot"
-            if len(apps[j].dynos()) == 0:
-                enable = "OFF"
-            temp.append({"name": apps[j].name, "type": dyn_type, "enable": enable, "args": f"{i}, {j}"})
-        result.append({"email": cloud.account().email, "apps": temp})
+        try:
+            cloud = heroku3.from_key(keys[i])
+            print(f"{cloud.account().email}")
+            temp = []
+            apps = cloud.apps()
+            for j in range(len(apps)):
+                enable = "ON"
+                if not apps[j].process_formation():
+                    dyn_type = "database"
+                elif "web" in apps[j].process_formation():
+                    dyn_type = "web"
+                elif "worker" in apps[j].process_formation():
+                    dyn_type = "bot"
+                if len(apps[j].dynos()) == 0:
+                    enable = "OFF"
+                temp.append({"name": apps[j].name, "type": dyn_type, "enable": enable, "args": f"{i}, {j}"})
+            result.append({"email": cloud.account().email, "apps": temp})
+        except Exception as e:
+            print(keys[i])
     return result
 
 
